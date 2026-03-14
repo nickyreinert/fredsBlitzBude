@@ -1,0 +1,1039 @@
+/* ================================================================
+   Freds Gemüse-Laden – Stylesheet
+   Optimiert für Kinder: bunt, groß, einfach
+   Mobile-first, Touch-freundlich
+   ================================================================ */
+
+/* ── Reset & Box-Sizing ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Kein Scrollen – Vollbild-Spiel */
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  background: #4CAF50;
+  color: #333;
+  touch-action: manipulation; /* Doppeltipp-Zoom deaktivieren */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; /* Kein Text markieren während Spiel */
+}
+
+/* ── Canvas: Vollbild-Hintergrund ───────────────────────────── */
+#game-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── UI-Layer: über dem Canvas ──────────────────────────────── */
+#ui {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Klicks durch wenn kein interaktives Element */
+}
+
+/* ── Screens: Ein/Ausblenden ────────────────────────────────── */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+}
+
+.screen.active {
+  display: block;
+  pointer-events: all;
+}
+
+/* ── Hilfsklassen ───────────────────────────────────────────── */
+.hidden {
+  display: none !important;
+}
+
+/* ================================================================
+   SCREEN 1: STARTBILDSCHIRM
+   ================================================================ */
+#screen-start {
+  background: linear-gradient(160deg, #56ab2f 0%, #a8e063 100%);
+  align-items: center;
+  justify-content: center;
+}
+
+#screen-start.active {
+  display: flex;
+}
+
+/* Einstellungen-Button oben rechts */
+#btn-settings {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  z-index: 500;
+  height: 56px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: background 0.15s, transform 0.15s;
+  pointer-events: all;
+}
+#btn-settings:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+
+/* ================================================================
+   SCREEN 5: EINSTELLUNGEN
+   ================================================================ */
+#screen-settings {
+  background: linear-gradient(160deg, #56ab2f 0%, #a8e063 100%);
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+}
+
+#screen-settings.active {
+  display: flex;
+}
+
+.settings-box {
+  background: #fffde7;
+  border-radius: 24px;
+  padding: 1.5rem 1.2rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border: 4px solid #f9a825;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: auto; /* zentrieren wenn Scroll nicht nötig */
+}
+
+.settings-title {
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
+  font-weight: 900;
+  color: #e65100;
+  text-align: center;
+  margin: 0;
+}
+
+.settings-divider {
+  border: none;
+  border-top: 2px dashed #ffe082;
+  margin: 0.2rem 0;
+}
+
+/* Toggle-Zeile */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.4rem 0;
+}
+
+.settings-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.settings-row-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.settings-row-desc {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+/* Toggle-Switch */
+.toggle-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  display: block;
+  width: 56px;
+  height: 30px;
+  background: #ccc;
+  border-radius: 30px;
+  transition: background 0.2s;
+  position: relative;
+  cursor: pointer;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background: #4CAF50;
+}
+
+.toggle-input:checked + .toggle-slider::after {
+  transform: translateX(26px);
+}
+
+.settings-action-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.settings-warning {
+  font-size: 0.82rem;
+  color: #c62828;
+  text-align: center;
+  margin: -0.4rem 0 0;
+}
+
+/* Kurze Bestätigungs-Meldung */
+.settings-toast {
+  background: #1b5e20;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  animation: fadeInOut 2.5s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(6px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Haltbarkeit Sub-Row in Settings */
+.settings-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem 0.8rem;
+  flex-wrap: wrap;
+}
+.settings-sub-row .settings-row-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.verderb-tage-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.verderb-tage-btn {
+  min-width: 70px;
+}
+
+/* Tagesrhythmus- und Kundentypen-Controls in Settings */
+.settings-faktor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.settings-faktor-row:last-child {
+  border-bottom: none;
+}
+.settings-faktor-label {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.settings-faktor-label small {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: #777;
+}
+.settings-faktor-desc {
+  font-size: 0.78rem;
+  color: #666;
+  margin-top: -0.15rem;
+}
+.faktor-buttons {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+}
+.faktor-btn {
+  min-width: 52px;
+  font-size: 0.85rem;
+}
+
+/* Frische-Anzeige im Inventar-Panel */
+.inventory-item-freshness {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: -0.2rem;
+}
+
+/* ================================================================
+   PREIS-POPUP (beim Klick auf Preisschild)
+   ================================================================ */
+#preis-popup {
+  position: fixed;
+  z-index: 1000;
+  background: #fffde7;
+  border: 3px solid #f9a825;
+  border-radius: 20px;
+  padding: 1rem 1rem 0.9rem;
+  width: 240px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  pointer-events: all;
+  animation: popupIn 0.15s ease;
+}
+
+@keyframes popupIn {
+  from { opacity: 0; transform: scale(0.85) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.preis-popup-titel {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #e65100;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+/* Stepper: − Wert € + nebeneinander */
+.preis-popup-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4CAF50;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 0.8rem;
+}
+
+.preis-popup-minus,
+.preis-popup-plus {
+  width: 52px;
+  height: 52px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: #e8f5e9;
+  border: none;
+  border-radius: 0;
+  color: #2e7d32;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preis-popup-minus:active,
+.preis-popup-plus:active {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.preis-popup-wert {
+  flex: 1;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #1b5e20;
+}
+
+.preis-popup-euro {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #666;
+  padding-right: 6px;
+}
+
+.preis-popup-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preis-popup-btns .btn {
+  flex: 1;
+  min-height: 52px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.start-box {
+  text-align: center;
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+.start-logo {
+  font-size: 6rem;
+  margin-bottom: 0.5rem;
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-16px); }
+}
+
+.start-title {
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 3px 3px 0 #2d6a10, 0 0 20px rgba(0,0,0,0.2);
+  line-height: 1.1;
+  margin-bottom: 0.8rem;
+}
+
+.start-subtitle {
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  color: #e8f5e9;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ================================================================
+   SCREEN 2: INTRO
+   ================================================================ */
+#screen-intro {
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+#screen-intro.active {
+  display: flex;
+}
+
+.dialog-box {
+  background: #fffde7;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 420px;
+  width: calc(100% - 2rem);
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border: 4px solid #f9a825;
+}
+
+.dialog-character {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-text {
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin-bottom: 1.5rem;
+  min-height: 4em;
+}
+
+/* ================================================================
+   SCREEN 3: HAUPTSPIEL – STAND
+   ================================================================ */
+#screen-stand {
+  /* Transparent – Canvas ist der Hintergrund */
+  /* Klicks auf leere Fläche dürfen zum Canvas durchgehen */
+  pointer-events: none;
+}
+/* Nur direkte Kinder brauchen Klick-Events */
+#screen-stand > * {
+  pointer-events: all;
+}
+
+/* ── HUD (Kopfzeile) ─────────────────────────────────────────── */
+#hud {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 0 0 20px 20px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  gap: 0.5rem;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+/* Uhr-Item: Canvas + Label untereinander */
+.hud-clock-item {
+  min-width: 60px;
+}
+
+#hud-clock {
+  display: block;
+  /* Schatten damit die Uhr sich vom Hintergrund abhebt */
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+
+.hud-label {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hud-value {
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 900;
+  color: #2e7d32;
+}
+
+.hud-stars {
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
+  color: #f9a825;
+  letter-spacing: 0.05em;
+}
+
+.hud-stars-count {
+  font-size: 0.7rem;
+  color: #999;
+  text-align: center;
+}
+
+/* ── Inventar Panel ─────────────────────────────────────────── */
+#panel-inventory {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px 24px 0 0;
+  padding: 1.2rem 1.2rem 1.5rem;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+#panel-inventory h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #2e7d32;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+#inventory-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.inventory-item {
+  background: #f1f8e9;
+  border: 3px solid #aed581;
+  border-radius: 16px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 120px;
+}
+
+.inventory-item-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #33691e;
+}
+
+.inventory-item-count {
+  font-size: 0.9rem;
+  color: #558b2f;
+}
+
+.inventory-item-price {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.preis-stepper {
+  display: flex;
+  align-items: center;
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.preis-stepper .preis-minus,
+.preis-stepper .preis-plus {
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: #e8f5e9;
+  border: none;
+  border-radius: 0;
+  color: #2e7d32;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preis-stepper .preis-minus:active,
+.preis-stepper .preis-plus:active {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.preis-stepper .preis-wert {
+  min-width: 52px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b5e20;
+  padding: 0 4px;
+}
+
+.inventory-item-price .price-label {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* ── Kunden-Panel ───────────────────────────────────────────── */
+#panel-customer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px 24px 0 0;
+  padding: 1.2rem 1.2rem 1.5rem;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.customer-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.customer-emoji {
+  font-size: 3.5rem;
+  flex-shrink: 0;
+}
+
+.speech-bubble {
+  background: #e3f2fd;
+  border-radius: 16px 16px 16px 4px;
+  padding: 0.8rem 1rem;
+  flex: 1;
+  text-align: left;
+  border: 2px solid #90caf9;
+}
+
+.speech-bubble p {
+  font-size: clamp(1rem, 3.5vw, 1.15rem);
+  line-height: 1.5;
+  color: #1a237e;
+  font-weight: 600;
+}
+
+#customer-payment-info {
+  background: #f9fbe7;
+  border-radius: 16px;
+  padding: 0.8rem;
+  border: 2px solid #dce775;
+  margin-bottom: 1rem;
+}
+
+#customer-payment-info p {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #555;
+}
+
+#customer-payment-info strong {
+  color: #2e7d32;
+  font-size: 1.1rem;
+}
+
+/* ── Nacht-Overlay ──────────────────────────────────────────── */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 20, 60, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-content {
+  background: #1a237e;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 380px;
+  width: calc(100% - 2rem);
+  text-align: center;
+  border: 3px solid #5c6bc0;
+  box-shadow: 0 0 40px rgba(92,107,192,0.5);
+}
+
+.overlay-emoji {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content h2 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  color: #e8eaf6;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  color: #c5cae9;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+#night-stats {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-bottom: 1.2rem;
+  color: #e8eaf6;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+/* ================================================================
+   MODAL: WECHSELGELD (liegt über screen-stand, nicht eigenständiger Screen)
+   ================================================================ */
+
+/* Overlay-Hintergrund: leicht abgedunkelt, Stand noch sichtbar */
+.change-modal-overlay {
+  background: rgba(0, 0, 0, 0.55) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+}
+
+#screen-change {
+  overflow-y: auto;
+}
+
+#screen-change.active {
+  display: flex;
+}
+
+#change-container {
+  width: 100%;
+  max-width: 420px;
+  /* Modal-Box: weißer Hintergrund, abgerundete Ecken, Schatten */
+  background: linear-gradient(160deg, #fff9c4 0%, #fff176 100%);
+  border-radius: 24px;
+  border: 3px solid #f9a825;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  padding: 1.2rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.change-title {
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  font-weight: 900;
+  color: #e65100;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
+  margin: 0;
+}
+
+#change-info {
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 2px solid #ffe082;
+}
+
+.change-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  color: #555;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.change-info-row:last-child {
+  border-bottom: none;
+}
+
+.change-info-row strong {
+  font-size: clamp(1.1rem, 4vw, 1.35rem);
+  color: #1b5e20;
+}
+
+/* Große Eingabe-Anzeige wie ein Taschenrechner-Display */
+#change-display {
+  background: #1b5e20;
+  border-radius: 18px;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.35);
+  border: 3px solid #2e7d32;
+}
+
+#change-input-display {
+  font-size: clamp(2.5rem, 10vw, 3.5rem);
+  font-weight: 900;
+  color: #b9f6ca;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  min-width: 3ch;
+  text-align: right;
+}
+
+.change-euro-sign {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 700;
+  color: #69f0ae;
+}
+
+/* Numpad: 3×4 Raster großer Tasten */
+#numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.numpad-btn {
+  background: linear-gradient(180deg, #fff, #f5f5f5);
+  border: 3px solid #e0e0e0;
+  border-radius: 16px;
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-weight: 800;
+  color: #333;
+  padding: 0.6rem 0;
+  min-height: 70px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #bdbdbd;
+  transition: transform 0.08s, box-shadow 0.08s;
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+.numpad-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #bdbdbd;
+}
+
+/* Komma-Taste */
+.numpad-comma {
+  background: linear-gradient(180deg, #fff9e6, #fff3cd);
+  border-color: #ffe082;
+  color: #e65100;
+}
+
+/* Löschen-Taste */
+.numpad-del {
+  background: linear-gradient(180deg, #ffebee, #ffcdd2);
+  border-color: #ef9a9a;
+  color: #c62828;
+}
+
+.selected-coin-tag:active {
+  transform: scale(0.95);
+}
+
+/* ── Feedback ───────────────────────────────────────────────── */
+#change-feedback {
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+#change-feedback.feedback-correct {
+  background: #c8e6c9;
+  color: #1b5e20;
+  border: 3px solid #4CAF50;
+}
+
+#change-feedback.feedback-wrong {
+  background: #ffcdd2;
+  color: #b71c1c;
+  border: 3px solid #f44336;
+}
+
+/* Bestätigen-Button zentriert */
+#btn-change-confirm {
+  width: 100%;
+}
+
+/* ================================================================
+   BUTTONS – Global
+   ================================================================ */
+
+/* Basis-Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: inherit;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+  /* Touch-Ziel mindestens 48px */
+  min-height: 48px;
+  touch-action: manipulation;
+  pointer-events: all;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Größen */
+.btn-sm  { padding: 0.4rem 0.9rem;  font-size: 0.85rem; min-height: 36px; border-radius: 10px; }
+.btn-lg  { padding: 0.85rem 1.8rem; font-size: 1.1rem; min-height: 54px; }
+.btn-xl  { padding: 1rem 2.5rem;    font-size: 1.3rem; min-height: 60px; border-radius: 18px; }
+
+/* Farben */
+.btn-primary {
+  background: linear-gradient(180deg, #42a5f5, #1976d2);
+  color: #fff;
+  box-shadow: 0 4px 0 #0d47a1;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+
+.btn-success {
+  background: linear-gradient(180deg, #66bb6a, #388e3c);
+  color: #fff;
+  box-shadow: 0 4px 0 #1b5e20;
+}
+.btn-success:hover { filter: brightness(1.1); }
+
+.btn-warning {
+  background: linear-gradient(180deg, #ffa726, #f57c00);
+  color: #fff;
+  box-shadow: 0 4px 0 #e65100;
+}
+.btn-warning:hover { filter: brightness(1.1); }
+
+.btn-danger {
+  background: linear-gradient(180deg, #ef5350, #c62828);
+  color: #fff;
+  box-shadow: 0 4px 0 #b71c1c;
+}
+
+/* ================================================================
+   RESPONSIVE ANPASSUNGEN
+   ================================================================ */
+
+/* Kleine Phones (< 360px) */
+@media (max-width: 359px) {
+  body { font-size: 16px; }
+  .numpad-btn { min-height: 58px; font-size: 1.4rem; }
+  #hud { padding: 0.4rem 0.5rem; }
+}
+
+/* Tablets / Desktop */
+@media (min-width: 768px) {
+  #panel-inventory,
+  #panel-customer {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 600px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .numpad-btn { min-height: 80px; font-size: 2.4rem; }
+}
+
+/* Landscape auf kleinen Geräten */
+@media (max-height: 500px) and (orientation: landscape) {
+  .start-logo { font-size: 3.5rem; }
+  .start-title { font-size: 2rem; }
+  #panel-inventory { max-height: 70vh; }
+  .numpad-btn { min-height: 52px; font-size: 1.4rem; }
+  #change-input-display { font-size: 2rem; }
+}

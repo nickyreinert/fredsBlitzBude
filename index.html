@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Viewport für Mobile optimiert -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4CAF50" />
+
+  <!-- PWA Meta-Tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Freds Laden" />
+  <meta name="description" content="Freds Gemüse-Laden – Ein Lernspiel für Kinder" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <title>Freds Gemüse-Laden</title>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       CANVAS: Spielgrafik (Hintergrund, Stand, Figuren)
+       ============================================================ -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- ============================================================
+       UI-LAYER: Alle Bildschirme als überlagerte Divs
+       ============================================================ -->
+  <div id="ui">
+
+    <!-- Einstellungen-Button: immer sichtbar, oben rechts -->
+    <button id="btn-settings" class="btn-icon" title="Einstellungen">⚙️</button>
+
+    <!-- ── SCREEN 1: Startbildschirm ─────────────────────────── -->
+    <div id="screen-start" class="screen active">
+      <div class="start-box">
+        <div class="start-logo">🥦</div>
+        <h1 class="start-title">Freds<br/>Gemüse-Laden</h1>
+        <p class="start-subtitle">Verkaufe Gemüse und lerne rechnen!</p>
+        <button id="btn-start" class="btn btn-primary btn-xl">
+          ▶ Spiel starten
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 5: Einstellungen ────────────────────────────── -->
+    <div id="screen-settings" class="screen">
+      <div class="settings-box">
+        <h2 class="settings-title">⚙️ Einstellungen</h2>
+
+        <!-- Option: Keine Komma-Zahlen -->
+        <label class="settings-row">
+          <div class="settings-row-text">
+            <span class="settings-row-label">Einfaches Rechnen</span>
+            <span class="settings-row-desc">Nur ganze Euro-Beträge (kein Cent)</span>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" id="toggle-nocomma" class="toggle-input" />
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Haltbarkeit -->
+        <label class="settings-row">
+          <div class="settings-row-text">
+            <span class="settings-row-label">🥦 Ware verdirbt</span>
+            <span class="settings-row-desc">Obst & Gemüse hält nur begrenzt lange</span>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" id="toggle-verderb" class="toggle-input" />
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+        <!-- Haltbarkeit in Tagen (nur wenn Verderb aktiv) -->
+        <div id="verderb-tage-row" class="settings-sub-row hidden">
+          <span class="settings-row-label">Haltbarkeit:</span>
+          <div class="verderb-tage-buttons">
+            <button class="btn btn-sm verderb-tage-btn" data-tage="2">2 Tage</button>
+            <button class="btn btn-sm verderb-tage-btn" data-tage="3">3 Tage</button>
+            <button class="btn btn-sm verderb-tage-btn" data-tage="5">5 Tage</button>
+            <button class="btn btn-sm verderb-tage-btn" data-tage="7">7 Tage</button>
+          </div>
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Tagesrhythmus -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">🕐 Tagesrhythmus</span>
+          <span class="settings-row-desc">Wie viele Kunden kommen zu welcher Tageszeit</span>
+        </div>
+        <div id="tagesrhythmus-controls" class="settings-sub-row">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Kundentypen -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">👥 Kundentypen</span>
+          <span class="settings-row-desc">Häufigkeit der verschiedenen Kunden (0 = nie)</span>
+        </div>
+        <div id="kundentypen-controls" class="settings-sub-row">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Bewertungs-Stärke -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">⭐ Bewertungs-Einfluss</span>
+          <span class="settings-row-desc">Wie stark wirken sich Kundenbewertungen auf den Zulauf aus</span>
+        </div>
+        <div id="bewertung-staerke-controls" class="settings-sub-row">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Intro wieder anzeigen -->
+        <button id="btn-reset-intro" class="btn btn-warning btn-lg settings-action-btn">
+          👵 Willkommens-Dialog wieder anzeigen
+        </button>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Alle Daten zurücksetzen -->
+        <button id="btn-reset-all" class="btn btn-danger btn-lg settings-action-btn">
+          🗑️ Alle Daten zurücksetzen
+        </button>
+        <p class="settings-warning">Achtung: Spielstand wird gelöscht!</p>
+
+        <!-- Zurück -->
+        <button id="btn-settings-back" class="btn btn-primary btn-lg settings-action-btn">
+          ← Zurück
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: Intro / Oma-Szene ───────────────────────── -->
+    <div id="screen-intro" class="screen">
+      <div class="dialog-box">
+        <div class="dialog-character">👵</div>
+        <div id="intro-text" class="dialog-text"></div>
+        <button id="btn-intro-next" class="btn btn-primary">
+          Weiter ➜
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: Hauptspiel – Stand ──────────────────────── -->
+    <div id="screen-stand" class="screen">
+
+      <!-- Info-Leiste oben -->
+      <div id="hud">
+        <!-- Uhr: dreht sich, zeigt wie viel vom Tag noch übrig ist -->
+        <div class="hud-item hud-clock-item">
+          <canvas id="hud-clock" width="52" height="52"></canvas>
+          <span class="hud-label">Tag <span id="hud-day">1</span></span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">💰 Geld</span>
+          <span id="hud-money" class="hud-value">0,50 €</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">🛒 Kunden</span>
+          <span id="hud-customers" class="hud-value">0/0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">⭐ Bewertung</span>
+          <span id="hud-stars" class="hud-value hud-stars">–</span>
+          <span id="hud-total-customers" class="hud-stars-count"></span>
+        </div>
+        <div class="hud-item">
+          <button id="btn-feierabend" class="btn btn-warning btn-sm hidden">
+            🌙 Feierabend
+          </button>
+        </div>
+      </div>
+
+      <!-- Inventar & Preise Panel -->
+      <div id="panel-inventory">
+        <h3>Dein Stand</h3>
+        <div id="inventory-list">
+          <!-- Wird per JS befüllt -->
+        </div>
+        <button id="btn-open-stand" class="btn btn-success btn-lg">
+          🏪 Stand öffnen!
+        </button>
+      </div>
+
+      <!-- Kunden-Dialog (erscheint wenn Kunde kommt) -->
+      <div id="panel-customer" class="hidden">
+        <div class="customer-bubble">
+          <span id="customer-emoji" class="customer-emoji">🧑</span>
+          <div class="speech-bubble">
+            <p id="customer-speech"></p>
+          </div>
+        </div>
+        <div id="customer-payment-info" class="hidden">
+          <p>Kunde gibt dir: <strong id="customer-gives"></strong></p>
+          <p>Preis: <strong id="customer-price"></strong></p>
+          <button id="btn-give-change" class="btn btn-primary btn-lg">
+            💶 Wechselgeld rausgeben
+          </button>
+          <button id="btn-ablehnen" class="btn btn-danger btn-lg hidden">
+            ❌ Kauf ablehnen – zu wenig Geld!
+          </button>
+        </div>
+      </div>
+
+      <!-- Nacht-Overlay -->
+      <div id="overlay-night" class="overlay hidden">
+        <div class="overlay-content">
+          <div class="overlay-emoji">🌙</div>
+          <h2 id="night-title">Gute Nacht!</h2>
+          <p id="night-text"></p>
+          <div id="night-stats"></div>
+          <button id="btn-next-day" class="btn btn-primary btn-xl">
+            ☀️ Neuer Tag
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /screen-stand -->
+
+    <!-- ── MODAL: Wechselgeld-Minispiel (überlagert screen-stand) ── -->
+    <div id="screen-change" class="screen change-modal-overlay">
+      <div id="change-container">
+
+        <h2 class="change-title">💶 Wechselgeld rausgeben</h2>
+
+        <!-- Infos: Kunde zahlt & Preis — KEIN Wechselgeld angezeigt! -->
+        <div id="change-info">
+          <div class="change-info-row">
+            <span>Kunde zahlt:</span>
+            <strong id="change-paid"></strong>
+          </div>
+          <div class="change-info-row">
+            <span>Preis:</span>
+            <strong id="change-price"></strong>
+          </div>
+        </div>
+
+        <!-- Große Anzeige: was der Spieler eingetippt hat -->
+        <div id="change-display">
+          <span id="change-input-display">0,00</span>
+          <span class="change-euro-sign">€</span>
+        </div>
+
+        <!-- Feedback-Bereich -->
+        <div id="change-feedback" class="hidden"></div>
+
+        <!-- Numpad: große Tasten -->
+        <div id="numpad">
+          <button class="numpad-btn" data-val="1">1</button>
+          <button class="numpad-btn" data-val="2">2</button>
+          <button class="numpad-btn" data-val="3">3</button>
+          <button class="numpad-btn" data-val="4">4</button>
+          <button class="numpad-btn" data-val="5">5</button>
+          <button class="numpad-btn" data-val="6">6</button>
+          <button class="numpad-btn" data-val="7">7</button>
+          <button class="numpad-btn" data-val="8">8</button>
+          <button class="numpad-btn" data-val="9">9</button>
+          <button class="numpad-btn numpad-comma" data-val=",">,</button>
+          <button class="numpad-btn" data-val="0">0</button>
+          <button class="numpad-btn numpad-del" data-val="del">⌫</button>
+        </div>
+
+        <!-- Bestätigen -->
+        <button id="btn-change-confirm" class="btn btn-success btn-xl">
+          ✅ Bestätigen
+        </button>
+
+      </div>
+    </div><!-- /screen-change -->
+
+  </div><!-- /ui -->
+
+  <!-- Service Worker Registrierung -->
+  <script>
+    // Service Worker nur registrieren wenn unterstützt
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('Service Worker registriert:', reg.scope))
+          .catch(err => console.warn('Service Worker Fehler:', err));
+      });
+    }
+  </script>
+
+  <!-- Spiellogik -->
+  <script src="game.js"></script>
+
+</body>
+</html>
