@@ -1,13 +1,13 @@
 /* ================================================================
-   Freds Gemüse-Laden – Service Worker
+   Freds Blitz-Bude – Service Worker
    Strategie: Cache-First für alle lokalen Assets
-   Cache-Name: freds-laden-v2
+   Cache-Name: freds-blitz-bude-v2
    ================================================================ */
 
 'use strict';
 
 // Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-laden-v2';
+const CACHE_NAME = 'freds-blitz-bude-v2';
 
 // Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
 const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');

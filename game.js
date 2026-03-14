@@ -1,5 +1,5 @@
 /* ================================================================
-   Freds Gemüse-Laden – Spiellogik (Phase 1: Straßenstand)
+   Freds Blitz-Bude – Spiellogik (Phase 1: Straßenstand)
    Vanilla JavaScript, kein Framework
    Kommentare auf Deutsch
    ================================================================ */

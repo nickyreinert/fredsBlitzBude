@@ -1,6 +1,6 @@
 {
-  "name": "Freds Gemüse-Laden",
-  "short_name": "FredsLaden",
+  "name": "Freds Blitz-Bude",
+  "short_name": "FredsBlitzBude",
   "description": "Ein Lernspiel für Kinder: Gemüse verkaufen und Wechselgeld zählen",
   "start_url": "./",
   "scope": "./",
