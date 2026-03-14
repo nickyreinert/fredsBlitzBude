@@ -47,6 +47,8 @@ const gameState = {
   bewertungSumme: 0,    // Summe aller Bewertungen (jede Bewertung = 1–5 Sterne)
   bewertungAnzahl: 0,   // Anzahl der abgegebenen Bewertungen
   gesamtKunden: 0,      // Alle jemals bedienten Kunden (über alle Tage)
+  // Großmarkt
+  grossmarktGenutzt: false, // Hat der Spieler den Großmarkt je benutzt?
 };
 
 /* ================================================================
@@ -523,7 +525,7 @@ function zeichneStand(w, h) {
   ctx.closePath();
   ctx.fill();
 
-  // Schild "Freds Laden"
+  // Schild "Freds Blitz-Bude"
   const schildBreite = standBreite * 0.55;
   const schildX = (w - schildBreite) / 2;
   const schildY = standY + (standHoehe - theke) * 0.15;
@@ -541,7 +543,7 @@ function zeichneStand(w, h) {
   ctx.font = `bold ${Math.max(12, schildH * 0.55)}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🥦 Freds Laden', w / 2, schildY + schildH / 2);
+  ctx.fillText('🥦 Freds Blitz-Bude', w / 2, schildY + schildH / 2);
 
   // Speichere Stand-Koordinaten für Produkte
   gameState._stand = { x: standX, y: standY, b: standBreite, h: standHoehe, theke };
@@ -1645,9 +1647,10 @@ function speichereSpielstand() {
     customersServed:  gameState.customersServed,
     dailyEarnings:    gameState.dailyEarnings,
     customers:        gameState.customers,
-    bewertungSumme:   gameState.bewertungSumme,
-    bewertungAnzahl:  gameState.bewertungAnzahl,
-    gesamtKunden:     gameState.gesamtKunden,
+    bewertungSumme:     gameState.bewertungSumme,
+    bewertungAnzahl:    gameState.bewertungAnzahl,
+    gesamtKunden:       gameState.gesamtKunden,
+    grossmarktGenutzt:  gameState.grossmarktGenutzt,
   };
   localStorage.setItem('spielstand', JSON.stringify(stand));
 }
@@ -1672,9 +1675,10 @@ function ladeSpielstand() {
     gameState.customersServed  = stand.customersServed   ?? 0;
     gameState.dailyEarnings    = stand.dailyEarnings     ?? 0;
     gameState.customers        = stand.customers         ?? [];
-    gameState.bewertungSumme   = stand.bewertungSumme    ?? 0;
-    gameState.bewertungAnzahl  = stand.bewertungAnzahl   ?? 0;
-    gameState.gesamtKunden     = stand.gesamtKunden      ?? 0;
+    gameState.bewertungSumme    = stand.bewertungSumme    ?? 0;
+    gameState.bewertungAnzahl   = stand.bewertungAnzahl   ?? 0;
+    gameState.gesamtKunden      = stand.gesamtKunden      ?? 0;
+    gameState.grossmarktGenutzt = stand.grossmarktGenutzt ?? false;
     return true;
   } catch {
     return false;
@@ -2222,6 +2226,109 @@ function bestaetigeWechselgeld() {
 }
 
 /* ================================================================
+   GROSSMARKT
+   ================================================================ */
+
+// Warenkorb und Sortiment (nur während Großmarkt-Screen aktiv)
+let grossmarktWarenkorb = {};
+let grossmarktSortiment = {};
+
+// Mindest-Geld für Großmarkt-Zugang (aus localStorage, Standard 20€)
+function grossmarktMinGeld() {
+  const wert = parseInt(localStorage.getItem('grossmarktMinGeld') ?? '20', 10);
+  return isNaN(wert) ? 20 : wert;
+}
+
+// Zufälliges saisonales Sortiment generieren (3–5 Produkte, zufällige Verfügbarkeit)
+function erstelleGrossmarktSortiment() {
+  const saisonProdukte = Object.entries(PRODUKTE)
+    .filter(([, p]) => p.saisons.includes(gameState.jahreszeit) && p.kaufPreis > 0);
+
+  // Zufällig mischen, 3–5 auswählen
+  const gemischt = saisonProdukte.sort(() => Math.random() - 0.5);
+  const auswahl  = gemischt.slice(0, zufall(3, Math.min(5, gemischt.length)));
+
+  const sortiment = {};
+  auswahl.forEach(([key]) => {
+    sortiment[key] = { verfuegbar: zufall(2, 8) };
+  });
+  return sortiment;
+}
+
+// Gesamtkosten des Warenkorbs berechnen und Kaufen-Button aktualisieren
+function aktualisiereGrossmarktGesamt() {
+  let gesamt = 0;
+  for (const [key, anzahl] of Object.entries(grossmarktWarenkorb)) {
+    gesamt += anzahl * (PRODUKTE[key]?.kaufPreis ?? 0);
+  }
+  document.getElementById('grossmarkt-gesamt-preis').textContent = formatEuro(gesamt);
+  document.getElementById('grossmarkt-money').textContent = formatEuro(gameState.money);
+
+  const btn = document.getElementById('btn-grossmarkt-kaufen');
+  btn.disabled = gesamt <= 0 || gesamt > gameState.money;
+
+  // Budget-Farbe: rot wenn zu teuer
+  document.getElementById('grossmarkt-money').style.color =
+    gesamt > gameState.money ? '#c62828' : '#fff';
+}
+
+// Großmarkt-Screen aufbauen und anzeigen (Animation pausiert)
+function zeigeGrossmarkt() {
+  stoppeAnimation();
+
+  grossmarktSortiment = erstelleGrossmarktSortiment();
+  grossmarktWarenkorb = {};
+
+  // Sortiment-Kacheln aufbauen
+  const container = document.getElementById('grossmarkt-sortiment');
+  container.innerHTML = '';
+
+  for (const [key, info] of Object.entries(grossmarktSortiment)) {
+    const prod   = PRODUKTE[key];
+    const kachel = document.createElement('div');
+    kachel.className  = 'grossmarkt-kachel';
+    kachel.dataset.key = key;
+    kachel.innerHTML = `
+      <div class="grossmarkt-emoji">${prod.emoji}</div>
+      <div class="grossmarkt-name">${prod.name}</div>
+      <div class="grossmarkt-preis">${formatEuro(prod.kaufPreis)} / Stück</div>
+      <div class="grossmarkt-verfuegbar">Noch ${info.verfuegbar}x da</div>
+      <div class="grossmarkt-stepper">
+        <button class="btn btn-sm gm-minus" data-key="${key}">−</button>
+        <span class="gm-menge" id="gm-menge-${key}">0</span>
+        <button class="btn btn-sm gm-plus" data-key="${key}">+</button>
+      </div>
+    `;
+    container.appendChild(kachel);
+  }
+
+  aktualisiereGrossmarktGesamt();
+
+  // Nacht-Overlay verstecken, Großmarkt-Screen zeigen
+  document.getElementById('overlay-night').classList.add('hidden');
+  zeigeScreen('screen-grossmarkt');
+}
+
+// Einkauf abschließen
+function grossmarktKaufen() {
+  let gesamt = 0;
+  for (const [key, anzahl] of Object.entries(grossmarktWarenkorb)) {
+    if (anzahl > 0) {
+      lagerEin(key, anzahl);
+      if (!gameState.prices[key]) gameState.prices[key] = 0;
+      gesamt += anzahl * PRODUKTE[key].kaufPreis;
+    }
+  }
+  gameState.money -= gesamt;
+  gameState.grossmarktGenutzt = true;
+  speichereSpielstand();
+
+  // Direkt neuen Tag starten
+  starteAnimation();
+  naechsterTag();
+}
+
+/* ================================================================
    TAGESENDE
    ================================================================ */
 
@@ -2262,6 +2369,14 @@ function tagesEnde() {
     🏦 Gesamt-Geld: <strong>${formatEuro(gameState.money)}</strong>
     ${verderb_html}${oma_html}
   `;
+
+  // Großmarkt-Button: nur wenn genug Geld vorhanden
+  const btnGrossmarkt = document.getElementById('btn-grossmarkt');
+  if (gameState.money >= grossmarktMinGeld()) {
+    btnGrossmarkt.classList.remove('hidden');
+  } else {
+    btnGrossmarkt.classList.add('hidden');
+  }
 
   nachtOverlay.classList.remove('hidden');
 
@@ -2369,12 +2484,16 @@ function aktualisiereZeit() {
 }
 
 // Saisonale Oma-Lieferung: nur was gerade Saison hat
+// Wenn der Spieler den Großmarkt schon nutzt, kommt Oma seltener
 function omaLieferung() {
+  // Großmarkt genutzt: 60% Chance dass Oma nichts liefert
+  if (gameState.grossmarktGenutzt && Math.random() < 0.6) return [];
+
   const verfuegbar = Object.entries(PRODUKTE)
     .filter(([, p]) => p.saisons.includes(gameState.jahreszeit));
 
-  // 1–2 verschiedene Produkte liefern
-  const anzahlProdukte = zufall(1, 2);
+  // 1–2 verschiedene Produkte liefern (wenn Großmarkt genutzt: nur 1)
+  const anzahlProdukte = gameState.grossmarktGenutzt ? 1 : zufall(1, 2);
   const nachricht = [];
 
   for (let i = 0; i < anzahlProdukte; i++) {
@@ -2624,6 +2743,50 @@ document.querySelectorAll('.verderb-tage-btn').forEach(btn => {
     container.appendChild(btn);
   });
 })();
+
+// Großmarkt-Mindestgeld-Settings aufbauen
+(function initGrossmarktSettings() {
+  const aktuell = grossmarktMinGeld();
+  document.querySelectorAll('.grossmarkt-min-btn').forEach(btn => {
+    btn.classList.toggle('btn-primary', parseInt(btn.dataset.wert) === aktuell);
+    btn.addEventListener('click', () => {
+      const wert = parseInt(btn.dataset.wert);
+      localStorage.setItem('grossmarktMinGeld', wert);
+      document.querySelectorAll('.grossmarkt-min-btn').forEach(b =>
+        b.classList.toggle('btn-primary', b === btn));
+      zeigeMeldung(`✅ Großmarkt ab ${wert} €`);
+    });
+  });
+})();
+
+// Großmarkt öffnen (vom Nacht-Overlay)
+document.getElementById('btn-grossmarkt').addEventListener('click', zeigeGrossmarkt);
+
+// Großmarkt: Zurück ohne Kauf
+document.getElementById('btn-grossmarkt-zurueck').addEventListener('click', () => {
+  starteAnimation();
+  zeigeScreen('screen-stand');
+  document.getElementById('overlay-night').classList.remove('hidden');
+});
+
+// Großmarkt: Kaufen
+document.getElementById('btn-grossmarkt-kaufen').addEventListener('click', grossmarktKaufen);
+
+// Großmarkt: Stepper-Buttons (delegiert)
+document.getElementById('grossmarkt-sortiment').addEventListener('click', (e) => {
+  const btn = e.target.closest('.gm-minus, .gm-plus');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  if (!key || !grossmarktSortiment[key]) return;
+  const max = grossmarktSortiment[key].verfuegbar;
+  if (btn.classList.contains('gm-plus')) {
+    grossmarktWarenkorb[key] = Math.min((grossmarktWarenkorb[key] || 0) + 1, max);
+  } else {
+    grossmarktWarenkorb[key] = Math.max((grossmarktWarenkorb[key] || 0) - 1, 0);
+  }
+  document.getElementById(`gm-menge-${key}`).textContent = grossmarktWarenkorb[key] || 0;
+  aktualisiereGrossmarktGesamt();
+});
 
 // Intro zurücksetzen
 document.getElementById('btn-reset-intro').addEventListener('click', () => {

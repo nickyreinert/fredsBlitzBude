@@ -1,21 +1,26 @@
 /* ================================================================
    Freds Gemüse-Laden – Service Worker
    Strategie: Cache-First für alle lokalen Assets
-   Cache-Name: freds-laden-v1
+   Cache-Name: freds-laden-v2
    ================================================================ */
 
 'use strict';
 
 // Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-laden-v1';
+const CACHE_NAME = 'freds-laden-v2';
+
+// Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
+const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');
 
 // Alle Dateien die beim Install gecacht werden sollen
 const ASSETS_ZU_CACHEN = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/game.js',
-  '/manifest.json',
+  `${APP_PREFIX}`,
+  `${APP_PREFIX}index.html`,
+  `${APP_PREFIX}style.css`,
+  `${APP_PREFIX}game.js`,
+  `${APP_PREFIX}manifest.json`,
+  `${APP_PREFIX}icon-192.png`,
+  `${APP_PREFIX}icon-512.png`,
 ];
 
 /* ── Install-Event: Assets vorab cachen ─────────────────────── */
@@ -102,7 +107,12 @@ self.addEventListener('fetch', event => {
           .catch(() => {
             // Offline-Fallback: index.html zurückgeben wenn vorhanden
             console.warn('[ServiceWorker] Offline – Fallback auf index.html');
-            return caches.match('/index.html');
+
+            if (event.request.mode === 'navigate') {
+              return caches.match(`${APP_PREFIX}index.html`);
+            }
+
+            return caches.match(event.request);
           });
       })
   );

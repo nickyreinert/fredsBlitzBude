@@ -10,13 +10,14 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Freds Laden" />
-  <meta name="description" content="Freds Gemüse-Laden – Ein Lernspiel für Kinder" />
+  <meta name="apple-mobile-web-app-title" content="Freds Blitz-Bude" />
+  <meta name="description" content="Freds Blitz-Bude – Ein Lernspiel für Kinder" />
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
 
-  <title>Freds Gemüse-Laden</title>
+  <title>Freds Blitz-Bude</title>
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css" />
@@ -109,6 +110,20 @@
         </div>
         <div id="kundentypen-controls" class="settings-sub-row">
           <!-- Wird per JS befüllt -->
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- Option: Großmarkt-Mindestgeld -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">🏪 Großmarkt freischalten ab</span>
+          <span class="settings-row-desc">Mindestguthaben um den Großmarkt zu besuchen</span>
+        </div>
+        <div class="settings-sub-row">
+          <button class="btn btn-sm grossmarkt-min-btn" data-wert="10">10 €</button>
+          <button class="btn btn-sm grossmarkt-min-btn" data-wert="20">20 €</button>
+          <button class="btn btn-sm grossmarkt-min-btn" data-wert="50">50 €</button>
+          <button class="btn btn-sm grossmarkt-min-btn" data-wert="100">100 €</button>
         </div>
 
         <hr class="settings-divider" />
@@ -223,6 +238,9 @@
           <h2 id="night-title">Gute Nacht!</h2>
           <p id="night-text"></p>
           <div id="night-stats"></div>
+          <button id="btn-grossmarkt" class="btn btn-success btn-xl hidden">
+            🏪 Zum Großmarkt!
+          </button>
           <button id="btn-next-day" class="btn btn-primary btn-xl">
             ☀️ Neuer Tag
           </button>
@@ -282,6 +300,37 @@
       </div>
     </div><!-- /screen-change -->
 
+    <!-- ── SCREEN 6: Großmarkt ────────────────────────────────── -->
+    <div id="screen-grossmarkt" class="screen">
+      <div id="grossmarkt-container">
+
+        <!-- Kopfzeile: Titel, Budget, Zurück -->
+        <div id="grossmarkt-header">
+          <button id="btn-grossmarkt-zurueck" class="btn btn-warning btn-sm">← Zurück</button>
+          <h2 class="grossmarkt-titel">🏪 Großmarkt</h2>
+          <div id="grossmarkt-budget">
+            💰 <span id="grossmarkt-money">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- Produkt-Kacheln (scrollbar) -->
+        <div id="grossmarkt-sortiment">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <!-- Warenkorb-Leiste unten -->
+        <div id="grossmarkt-warenkorb">
+          <div id="grossmarkt-gesamt">
+            Gesamt: <strong id="grossmarkt-gesamt-preis">0,00 €</strong>
+          </div>
+          <button id="btn-grossmarkt-kaufen" class="btn btn-success btn-xl" disabled>
+            🛒 Alles kaufen!
+          </button>
+        </div>
+
+      </div>
+    </div><!-- /screen-grossmarkt -->
+
   </div><!-- /ui -->
 
   <!-- Service Worker Registrierung -->
@@ -289,7 +338,7 @@
     // Service Worker nur registrieren wenn unterstützt
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js')
           .then(reg => console.log('Service Worker registriert:', reg.scope))
           .catch(err => console.warn('Service Worker Fehler:', err));
       });
