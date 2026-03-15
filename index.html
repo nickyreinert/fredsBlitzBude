@@ -68,6 +68,25 @@
 
         <hr class="settings-divider" />
 
+        <!-- Option: Einkaufs-Schwierigkeit -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">🛒 Einkaufsstufe</span>
+          <span class="settings-row-desc">Wie viel Rechnen beim Wechselgeld</span>
+        </div>
+        <div class="settings-sub-row einkaufsstufe-buttons">
+          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="1">
+            ⭐ Einfach<br><small>1 Produkt</small>
+          </button>
+          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="2">
+            ⭐⭐ Mittel<br><small>1 Sorte, viele Stück</small>
+          </button>
+          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="3">
+            ⭐⭐⭐ Schwer<br><small>Viele Produkte</small>
+          </button>
+        </div>
+
+        <hr class="settings-divider" />
+
         <!-- Option: Haltbarkeit -->
         <label class="settings-row">
           <div class="settings-row-text">
@@ -92,10 +111,30 @@
 
         <hr class="settings-divider" />
 
+        <!-- Option: Globale Kundenmenge -->
+        <div class="settings-row-text">
+          <span class="settings-row-label">👥 Kunden pro Tag</span>
+          <span class="settings-row-desc">Absolute Gesamtzahl an Passanten – Tagesrhythmus verteilt diese relativ</span>
+        </div>
+        <div class="settings-sub-row">
+          <div id="global-kunden-slider-row">
+            <span id="global-kunden-wert" class="settings-slider-value">30</span>
+            <span class="settings-slider-unit"> / Tag</span>
+          </div>
+          <input type="range" id="global-kunden-slider" min="1" max="1000" step="1" value="30" class="settings-range-input" />
+          <div class="settings-range-labels">
+            <span>1 (ruhig)</span>
+            <span>500</span>
+            <span>1000 🤯</span>
+          </div>
+        </div>
+
+        <hr class="settings-divider" />
+
         <!-- Option: Tagesrhythmus -->
         <div class="settings-row-text">
           <span class="settings-row-label">🕐 Tagesrhythmus</span>
-          <span class="settings-row-desc">Wie viele Kunden kommen zu welcher Tageszeit</span>
+          <span class="settings-row-desc">Relativer Anteil pro Tageszeit – 100% = globaler Wert</span>
         </div>
         <div id="tagesrhythmus-controls" class="settings-sub-row">
           <!-- Wird per JS befüllt -->
@@ -139,6 +178,56 @@
 
         <hr class="settings-divider" />
 
+        <!-- Option: Trinkgeld (ausklappbar) -->
+        <details class="settings-details">
+          <summary class="settings-details-summary">
+            🎁 Trinkgeld-Einstellungen <span class="settings-details-hint">▾ erweitert</span>
+          </summary>
+
+          <div class="settings-details-body">
+            <label class="settings-row">
+              <div class="settings-row-text">
+                <span class="settings-row-label">Trinkgeld aktivieren</span>
+                <span class="settings-row-desc">Kunden geben manchmal extra Geld</span>
+              </div>
+              <div class="toggle-wrap">
+                <input type="checkbox" id="toggle-trinkgeld" class="toggle-input" />
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+
+            <div id="trinkgeld-detail-controls" class="hidden">
+              <hr class="settings-divider" />
+              <div class="settings-row-text">
+                <span class="settings-row-label">Basis-Häufigkeit</span>
+                <span class="settings-row-desc">Wie oft Kunden Trinkgeld geben (bei 3★)</span>
+              </div>
+              <div class="trinkgeld-slider-wrap">
+                <span class="slider-emoji-links">🙁</span>
+                <input type="range" id="slider-trinkgeld-chance"
+                       min="0" max="4" step="1" value="2" class="rhythmus-slider">
+                <span class="slider-emoji-rechts">😍</span>
+              </div>
+              <div class="rhythmus-slider-label" id="label-trinkgeld-chance">normal</div>
+
+              <hr class="settings-divider" />
+              <div class="settings-row-text">
+                <span class="settings-row-label">Maximaler Betrag</span>
+                <span class="settings-row-desc">Wie viel Trinkgeld maximal möglich ist</span>
+              </div>
+              <div class="trinkgeld-slider-wrap">
+                <span class="slider-emoji-links">🪙</span>
+                <input type="range" id="slider-trinkgeld-max"
+                       min="0" max="4" step="1" value="2" class="rhythmus-slider">
+                <span class="slider-emoji-rechts">💰</span>
+              </div>
+              <div class="rhythmus-slider-label" id="label-trinkgeld-max">bis 1 €</div>
+            </div>
+          </div>
+        </details>
+
+        <hr class="settings-divider" />
+
         <!-- Option: Intro wieder anzeigen -->
         <button id="btn-reset-intro" class="btn btn-warning btn-lg settings-action-btn">
           👵 Willkommens-Dialog wieder anzeigen
@@ -178,7 +267,10 @@
         <!-- Uhr: dreht sich, zeigt wie viel vom Tag noch übrig ist -->
         <div class="hud-item hud-clock-item">
           <canvas id="hud-clock" width="52" height="52"></canvas>
-          <span class="hud-label">Tag <span id="hud-day">1</span></span>
+          <div class="hud-clock-text">
+            <span id="hud-uhrzeit" class="hud-uhrzeit">08:00</span>
+            <span class="hud-label">Tag <span id="hud-day">1</span></span>
+          </div>
         </div>
         <div class="hud-item">
           <span class="hud-label">💰 Geld</span>
@@ -192,6 +284,14 @@
           <span class="hud-label">⭐ Bewertung</span>
           <span id="hud-stars" class="hud-value hud-stars">–</span>
           <span id="hud-total-customers" class="hud-stars-count"></span>
+        </div>
+        <!-- Level-Badge: erst ab Level 2 sichtbar -->
+        <div class="hud-item hidden" id="hud-level-item">
+          <span class="hud-label"><span id="hud-level-symbol">⭐</span> Level</span>
+          <span id="hud-level-badge" class="hud-level-badge">2</span>
+          <div class="hud-xp-bar">
+            <div id="hud-xp-fill" class="hud-xp-fill" style="width:0%"></div>
+          </div>
         </div>
         <div class="hud-item">
           <button id="btn-feierabend" class="btn btn-warning btn-sm hidden">
@@ -220,8 +320,11 @@
           </div>
         </div>
         <div id="customer-payment-info" class="hidden">
-          <p>Kunde gibt dir: <strong id="customer-gives"></strong></p>
-          <p>Preis: <strong id="customer-price"></strong></p>
+          <!-- Einkaufsliste bei Stufe 2+3 -->
+          <div id="customer-einkaufsliste" class="hidden"></div>
+          <p id="customer-price-row">Preis: <strong id="customer-price"></strong></p>
+          <p>Kunde gibt: <strong id="customer-gives"></strong></p>
+          <p id="customer-trinkgeld-row" class="hidden">Davon Trinkgeld: <strong id="customer-trinkgeld" class="trinkgeld-betrag"></strong> 🎁</p>
           <button id="btn-give-change" class="btn btn-primary btn-lg">
             💶 Wechselgeld rausgeben
           </button>
@@ -255,19 +358,33 @@
 
         <h2 class="change-title">💶 Wechselgeld rausgeben</h2>
 
-        <!-- Infos: Kunde zahlt & Preis — KEIN Wechselgeld angezeigt! -->
+        <!-- Einkaufsliste (Stufe 2+3: mehrere Posten) -->
+        <div id="change-einkaufsliste" class="hidden">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <!-- Stufe 2+3: Teilergebnis-Eingaben (Menge × Preis pro Posten) -->
+        <div id="change-teilrechnung" class="hidden">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+        <!-- Infos: Preis / Kunde gibt / Trinkgeld -->
         <div id="change-info">
-          <div class="change-info-row">
-            <span>Kunde zahlt:</span>
-            <strong id="change-paid"></strong>
+          <div class="change-info-row change-info-gesamt">
+            <span id="change-gesamt-label">Preis:</span>
+            <strong id="change-price"></strong>
           </div>
           <div class="change-info-row">
-            <span>Preis:</span>
-            <strong id="change-price"></strong>
+            <span>Kunde gibt:</span>
+            <strong id="change-paid"></strong>
+          </div>
+          <div class="change-info-row change-trinkgeld-row hidden" id="change-trinkgeld-row">
+            <span>Davon Trinkgeld:</span>
+            <strong id="change-trinkgeld" class="trinkgeld-betrag">0 €</strong>
           </div>
         </div>
 
-        <!-- Große Anzeige: was der Spieler eingetippt hat -->
+        <!-- Große Anzeige: Wechselgeld-Eingabe -->
         <div id="change-display">
           <span id="change-input-display">0,00</span>
           <span class="change-euro-sign">€</span>
@@ -345,6 +462,8 @@
     }
   </script>
 
+  <!-- Erfahrungssystem (muss vor game.js geladen werden) -->
+  <script src="erfahrung.js"></script>
   <!-- Spiellogik -->
   <script src="game.js"></script>
 

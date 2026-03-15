@@ -49,6 +49,9 @@ const gameState = {
   gesamtKunden: 0,      // Alle jemals bedienten Kunden (über alle Tage)
   // Großmarkt
   grossmarktGenutzt: false, // Hat der Spieler den Großmarkt je benutzt?
+  // Erfahrungssystem
+  gesamtXP: 0,   // Kumulative XP über alle Tage
+  level: 1,      // Aktuelles Level (1–10)
 };
 
 /* ================================================================
@@ -59,13 +62,13 @@ const gameState = {
 // saisons: Array der Jahreszeiten in denen das Produkt verfügbar ist
 const PRODUKTE = {
   gurke:    { name: 'Gurke',     emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
-  apfel:    { name: 'Apfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    kaufPreis: 0.30, saisons: ['herbst', 'winter'] },
-  banane:   { name: 'Banane',    emoji: '🍌', farbe: '#FFC107', form: 'banane',   kaufPreis: 0.20, saisons: ['sommer', 'herbst'] },
-  tomate:   { name: 'Tomate',    emoji: '🍅', farbe: '#e53935', form: 'tomate',   kaufPreis: 0.40, saisons: ['sommer'] },
-  karotte:  { name: 'Karotte',   emoji: '🥕', farbe: '#FF7043', form: 'karotte',  kaufPreis: 0.25, saisons: ['herbst', 'winter'] },
-  erdbeere: { name: 'Erdbeere',  emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', kaufPreis: 0.35, saisons: ['fruehling', 'sommer'] },
-  kuerbis:  { name: 'Kürbis',    emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  kaufPreis: 0.60, saisons: ['herbst'] },
-  zitrone:  { name: 'Zitrone',   emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  kaufPreis: 0.30, saisons: ['winter', 'fruehling'] },
+  apfel:    { name: 'Apfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
+  banane:   { name: 'Banane',    emoji: '🍌', farbe: '#FFC107', form: 'banane',   kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
+  tomate:   { name: 'Tomate',    emoji: '🍅', farbe: '#e53935', form: 'tomate',   kaufPreis: 1.20, saisons: ['sommer'] },
+  karotte:  { name: 'Karotte',   emoji: '🥕', farbe: '#FF7043', form: 'karotte',  kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
+  erdbeere: { name: 'Erdbeere',  emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
+  kuerbis:  { name: 'Kürbis',    emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  kaufPreis: 2.00, saisons: ['herbst'] },
+  zitrone:  { name: 'Zitrone',   emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
 };
 
 /* ================================================================
@@ -183,6 +186,22 @@ const TAGESRHYTHMUS = {
 function tagesrhythmusFaktor(slot) {
   const gespeichert = parseFloat(localStorage.getItem(`rhythmus_${slot}`));
   return isNaN(gespeichert) ? TAGESRHYTHMUS[slot].defaultFaktor : gespeichert;
+}
+
+// Globale Kundenmenge pro Tag (1–1000, Standard 30)
+// Bestimmt das Basis-Intervall zwischen Passanten
+function globalKundenProTag() {
+  const wert = parseInt(localStorage.getItem('globalKundenProTag') ?? '30', 10);
+  return isNaN(wert) ? 30 : Math.max(1, Math.min(1000, wert));
+}
+
+// Basis-Intervall in ms bei globalem Faktor 1.0
+// Spieltag = 10 Minuten (600000ms) für alle 3 Slots zusammen
+// Gleichmäßige Verteilung: Intervall = Tageszeit / Kunden
+function basisPassantenIntervall() {
+  const kundenProTag = globalKundenProTag();
+  const tagDauerMs = 600000; // 10 Minuten Spieltag
+  return tagDauerMs / kundenProTag;
 }
 
 // Häufigkeitsfaktor eines Kundentyps aus localStorage lesen
@@ -314,6 +333,52 @@ function zeichneSpielwelt() {
 
   // Passanten auf der Straße (inkl. stehendem Kaufkunden)
   zeichnePassanten(w, h);
+
+  // Tageszeit-Stimmungsoverlay: morgens warm-orange, mittags neutral, abends bläulich
+  if (gameState.standOpen) {
+    zeichneTagesOverlay(w, h);
+  }
+}
+
+// Halbtransparentes Farb-Overlay für Tageszeit-Stimmung
+// tagesfortschritt 0.0 = Morgen (warm), 0.5 = Mittag (klar), 1.0 = Abend (blau)
+function zeichneTagesOverlay(w, h) {
+  const tf = gameState.tagesfortschritt;
+
+  // Farbstützpunkte: [fortschritt, r, g, b, alpha]
+  const STUFEN = [
+    { t: 0.00, r: 255, g: 140, b:  30, a: 0.28 }, // Morgen: warm orange
+    { t: 0.18, r: 255, g: 200, b:  80, a: 0.10 }, // Morgen-Mitte: heller
+    { t: 0.40, r:   0, g:   0, b:   0, a: 0.00 }, // Mittag: kein Overlay
+    { t: 0.65, r:   0, g:   0, b:   0, a: 0.00 }, // Nachmittag: noch klar
+    { t: 0.80, r:  40, g:  60, b: 130, a: 0.12 }, // Früher Abend: leicht blau
+    { t: 1.00, r:  20, g:  30, b: 100, a: 0.32 }, // Abend: deutlich dunkel-blau
+  ];
+
+  // Interpoliere zwischen den nächsten zwei Stützpunkten
+  let s0 = STUFEN[0];
+  let s1 = STUFEN[1];
+  for (let i = 0; i < STUFEN.length - 1; i++) {
+    if (tf >= STUFEN[i].t && tf <= STUFEN[i + 1].t) {
+      s0 = STUFEN[i];
+      s1 = STUFEN[i + 1];
+      break;
+    }
+  }
+  const span = s1.t - s0.t || 1;
+  const mix  = (tf - s0.t) / span;
+  const r = Math.round(s0.r + (s1.r - s0.r) * mix);
+  const g = Math.round(s0.g + (s1.g - s0.g) * mix);
+  const b = Math.round(s0.b + (s1.b - s0.b) * mix);
+  const a = s0.a + (s1.a - s0.a) * mix;
+
+  if (a <= 0.005) return; // Kein sichtbares Overlay nötig
+
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle   = `rgba(${r},${g},${b},${a})`;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
 }
 
 // Himmel (Farbverlauf – saisonal eingefärbt)
@@ -1097,12 +1162,16 @@ function aktualisierePassanten(delta) {
   // Neuen Passanten spawnen – Frequenz abhängig von Tageszeit
   gameState.passantenTimer -= delta;
   if (gameState.passantenTimer <= 0 && gameState.standOpen) {
-    gameState.passanten.push(neuerPassant());
-    // Basis-Intervall: 4 Sekunden; Tagesrhythmus-Faktor verändert die Frequenz
-    // Hoher Faktor = viele Kunden = kürzeres Intervall
     const faktor = tagesrhythmusFaktor(gameState.tagesZeitSlot);
-    const basisIntervall = 4000;
-    const intervall = basisIntervall / Math.max(0.1, faktor);
+    // Faktor 0 = dieser Zeitslot ist "geschlossen" – kein Passant, langes Warten
+    if (faktor > 0) {
+      gameState.passanten.push(neuerPassant());
+    }
+    // Intervall aus globalem Kunden-Regler + relativem Tagesrhythmus-Faktor
+    // Globaler Wert = absolute Kunden/Tag → Basis-ms pro Passant
+    // Tagesrhythmus-Faktor = relative Verteilung (1.0 = wie global, 2.0 = doppelt so viele)
+    const basisIntervall = basisPassantenIntervall();
+    const intervall = faktor > 0 ? basisIntervall / faktor : 60000;
     gameState.passantenTimer = intervall * (0.7 + Math.random() * 0.6);
     // Spielstand regelmäßig speichern (inkl. Tagesfortschritt)
     speichereSpielstand();
@@ -1381,6 +1450,11 @@ function animationsSchleife(zeitstempel) {
   // HUD-Uhr aktualisieren: Fortschritt = Tagesfortschritt (0–1)
   if (gameState.standOpen) {
     zeichneHudUhr(gameState.tagesfortschritt);
+    // Uhrzeit berechnen (8:00–18:00) und auf volle Stunden runden
+    const aktuelleStunden = 8 + gameState.tagesfortschritt * 10;
+    const stunde   = Math.floor(aktuelleStunden);
+    const uhrzeitEl = document.getElementById('hud-uhrzeit');
+    if (uhrzeitEl) uhrzeitEl.textContent = `${stunde}:00`;
     // Tageszeit-Slot-Emoji in der Tag-Anzeige
     const slot = gameState.tagesZeitSlot;
     const slotEmoji = TAGESRHYTHMUS[slot]?.emoji ?? '';
@@ -1451,8 +1525,10 @@ function aktualisiereHUD() {
 const clockCanvas = document.getElementById('hud-clock');
 const clockCtx    = clockCanvas.getContext('2d');
 
-// Zeichnet eine analoge Uhr die den Tagesfortschritt anzeigt.
-// fortschritt: 0.0 (Tagesbeginn) bis 1.0 (Tagesende)
+// Zeichnet eine analoge Uhr: Arbeitszeit 8:00–18:00 Uhr.
+// fortschritt 0.0 = 08:00, fortschritt 1.0 = 18:00
+// Stundenzeiger: 8→18 Uhr (10/12 Umdrehung)
+// Minutenzeiger: dreht sich 10× über den Tag (einmal pro Stunde)
 function zeichneHudUhr(fortschritt) {
   const w  = clockCanvas.width;
   const h  = clockCanvas.height;
@@ -1461,6 +1537,17 @@ function zeichneHudUhr(fortschritt) {
   const r  = w / 2 - 3;
 
   clockCtx.clearRect(0, 0, w, h);
+
+  // Aktuelle Uhrzeit: 08:00 + fortschritt × 10 Stunden
+  const startStunde     = 8;
+  const gesamtStunden   = 10;
+  const aktuelleStunden = startStunde + fortschritt * gesamtStunden;
+  const stunde12        = Math.floor(aktuelleStunden) % 12; // 12h-Format
+  const minute          = (aktuelleStunden % 1) * 60;
+
+  // Zeiger-Winkel (12 Uhr = -π/2)
+  const stundenWinkel = ((stunde12 + minute / 60) / 12) * Math.PI * 2 - Math.PI / 2;
+  const minutenWinkel = (minute / 60) * Math.PI * 2 - Math.PI / 2;
 
   // Zifferblatt-Hintergrund
   clockCtx.beginPath();
@@ -1471,45 +1558,55 @@ function zeichneHudUhr(fortschritt) {
   clockCtx.lineWidth = 3;
   clockCtx.stroke();
 
-  // Farbiger Fortschritts-Bogen (von 12 Uhr im Uhrzeigersinn)
-  const startWinkel = -Math.PI / 2; // 12 Uhr
-  const endWinkel   = startWinkel + fortschritt * Math.PI * 2;
-  clockCtx.beginPath();
-  clockCtx.moveTo(cx, cy);
-  clockCtx.arc(cx, cy, r - 4, startWinkel, endWinkel);
-  clockCtx.closePath();
-  // Farbe: grün am Anfang, wird orange/rot wenn Tag fast vorbei
+  // Dünner Fortschritts-Ring außen (statt rotem Kuchen)
+  const bogenStart = (startStunde / 12) * Math.PI * 2 - Math.PI / 2;
+  const bogenEnd   = bogenStart + fortschritt * (gesamtStunden / 12) * Math.PI * 2;
   const rot   = Math.round(76  + fortschritt * (229 - 76));
   const gruen = Math.round(175 + fortschritt * (57  - 175));
-  clockCtx.fillStyle = `rgb(${rot},${gruen},50)`;
-  clockCtx.fill();
+  clockCtx.beginPath();
+  clockCtx.arc(cx, cy, r - 2, bogenStart, bogenEnd);
+  clockCtx.strokeStyle = `rgb(${rot},${gruen},50)`;
+  clockCtx.lineWidth = 4;
+  clockCtx.lineCap = 'round';
+  clockCtx.stroke();
 
-  // Stunden-Markierungen (12 kleine Striche)
-  clockCtx.strokeStyle = '#bbb';
+  // Stunden-Markierungen (12 Striche, 3/6/9/12 länger)
   clockCtx.lineWidth = 1.5;
   for (let i = 0; i < 12; i++) {
-    const a  = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const a    = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const lang = (i % 3 === 0);
+    clockCtx.strokeStyle = lang ? '#999' : '#ccc';
     const x1 = cx + Math.cos(a) * (r - 3);
     const y1 = cy + Math.sin(a) * (r - 3);
-    const x2 = cx + Math.cos(a) * (r - 8);
-    const y2 = cy + Math.sin(a) * (r - 8);
+    const x2 = cx + Math.cos(a) * (r - (lang ? 9 : 6));
+    const y2 = cy + Math.sin(a) * (r - (lang ? 9 : 6));
     clockCtx.beginPath();
     clockCtx.moveTo(x1, y1);
     clockCtx.lineTo(x2, y2);
     clockCtx.stroke();
   }
 
-  // Zeiger: zeigt auf den aktuellen Fortschritt
-  const zeigerWinkel = startWinkel + fortschritt * Math.PI * 2;
-  const zeigerLaenge = r * 0.62;
-  clockCtx.strokeStyle = '#e53935';
-  clockCtx.lineWidth = 3;
   clockCtx.lineCap = 'round';
+
+  // Minutenzeiger (lang, dünn, dunkel)
+  clockCtx.strokeStyle = '#555';
+  clockCtx.lineWidth = 1.5;
   clockCtx.beginPath();
   clockCtx.moveTo(cx, cy);
   clockCtx.lineTo(
-    cx + Math.cos(zeigerWinkel) * zeigerLaenge,
-    cy + Math.sin(zeigerWinkel) * zeigerLaenge
+    cx + Math.cos(minutenWinkel) * (r * 0.72),
+    cy + Math.sin(minutenWinkel) * (r * 0.72)
+  );
+  clockCtx.stroke();
+
+  // Stundenzeiger (kurz, dick, rot)
+  clockCtx.strokeStyle = '#e53935';
+  clockCtx.lineWidth = 3;
+  clockCtx.beginPath();
+  clockCtx.moveTo(cx, cy);
+  clockCtx.lineTo(
+    cx + Math.cos(stundenWinkel) * (r * 0.48),
+    cy + Math.sin(stundenWinkel) * (r * 0.48)
   );
   clockCtx.stroke();
 
@@ -1651,6 +1748,8 @@ function speichereSpielstand() {
     bewertungAnzahl:    gameState.bewertungAnzahl,
     gesamtKunden:       gameState.gesamtKunden,
     grossmarktGenutzt:  gameState.grossmarktGenutzt,
+    gesamtXP:           gameState.gesamtXP,
+    level:              gameState.level,
   };
   localStorage.setItem('spielstand', JSON.stringify(stand));
 }
@@ -1679,6 +1778,8 @@ function ladeSpielstand() {
     gameState.bewertungAnzahl   = stand.bewertungAnzahl   ?? 0;
     gameState.gesamtKunden      = stand.gesamtKunden      ?? 0;
     gameState.grossmarktGenutzt = stand.grossmarktGenutzt ?? false;
+    gameState.gesamtXP          = stand.gesamtXP          ?? 0;
+    gameState.level             = stand.level             ?? 1;
     return true;
   } catch {
     return false;
@@ -1736,9 +1837,77 @@ function starteTag() {
   gameState.passanten      = [];
   gameState.passantenTimer = 2000;
 
+  // ── Sackgassen-Schutz: kein Inventar und kein Großmarkt-Zugang ──────────────
+  // Wenn der Spieler nichts verkaufen kann und auch nicht in den Großmarkt darf,
+  // bekommt er eine Notfall-Lieferung von Oma damit er weiterspielen kann.
+  const hatWare = Object.values(gameState.inventory).some(v => v > 0);
+  const kannGrossmarkt = gameState.money >= grossmarktMinGeld();
+  if (!standWarOffen && !hatWare && !kannGrossmarkt) {
+    // Notfall: Oma bringt eine Gurke (kostenlos, immer verfügbar)
+    lagerEin('gurke', 2);
+    if (!gameState.prices['gurke']) gameState.prices['gurke'] = 0;
+    zeigeMeldung('👵 Oma bringt Notfall-Gurken! Nicht aufgeben!');
+    bauInventarPanel();
+  }
+
   speichereSpielstand();
   zeigeScreen('screen-stand');
   starteAnimation();
+}
+
+/* ================================================================
+   TRINKGELD-SYSTEM
+   ================================================================ */
+
+// Trinkgeld-Einstellung aus localStorage lesen
+function trinkgeldAktiv() {
+  return localStorage.getItem('trinkgeldAktiv') === '1';
+}
+
+// Basis-Wahrscheinlichkeit für Trinkgeld (0.0–1.0) aus Settings
+function trinkgeldBasisChance() {
+  return parseFloat(localStorage.getItem('trinkgeldBasisChance') ?? '0.3');
+}
+
+// Maximaler Trinkgeld-Betrag in Cent (Basis, vor Skalierung)
+function trinkgeldMaxCent() {
+  return parseInt(localStorage.getItem('trinkgeldMaxCent') ?? '100', 10);
+}
+
+// Trinkgeld für einen Kunden berechnen.
+// Faktoren: Kundentyp-Großzügigkeit × Bewertungs-Bonus × Zufallsanteil
+function berechneKundenTrinkgeld(typKey) {
+  if (!trinkgeldAktiv()) return 0;
+
+  // Großzügigkeits-Faktor je Kundentyp
+  const grosszuegigkeit = {
+    kind:     0.2,  // Kinder geben selten und wenig
+    jugend:   0.3,
+    erwachsen:0.5,
+    rentner:  0.6,  // Rentner sind oft besonders nett
+    familie:  0.5,
+    reich:    1.5,  // Reiche geben deutlich mehr
+    star:     2.0,  // Stars geben am meisten
+  }[typKey] ?? 0.5;
+
+  // Bewertungs-Bonus: 1 Stern = 0.2, 3 Sterne = 1.0, 5 Sterne = 2.0
+  const avg = durchschnittsBewertung() ?? 3;
+  const bBonus = 0.2 + ((avg - 1) / 4) * 1.8;
+
+  // Gesamt-Chance: Basis × Großzügigkeit × Bewertungs-Bonus
+  const chance = trinkgeldBasisChance() * grosszuegigkeit * bBonus;
+  if (Math.random() > chance) return 0; // Kein Trinkgeld
+
+  // Trinkgeld-Betrag: zufällig bis maxCent, skaliert mit Großzügigkeit und Preis
+  const maxCent = trinkgeldMaxCent() * grosszuegigkeit * bBonus;
+  // Mindestens 10 Cent, höchstens maxCent; auf 5-Cent-Schritte gerundet
+  let betragCent = zufall(10, Math.max(10, Math.round(maxCent)));
+  betragCent = Math.round(betragCent / 5) * 5;
+
+  // Im Einfach-Modus: auf ganze Euro runden
+  if (keineKommazahlen) betragCent = Math.round(betragCent / 100) * 100;
+
+  return betragCent / 100; // in Euro
 }
 
 // Zufällige Kunden-Liste generieren
@@ -1755,11 +1924,52 @@ function generiereKunden(anzahl) {
     );
     if (verfuegbar.length === 0) break; // nichts mehr auf Lager
 
-    const [prodKey] = zufallsElement(verfuegbar);
-    simuliertesInventar[prodKey]--; // simuliert einen Verkauf
+    // Einkaufsliste aufbauen je nach Einkaufsstufe
+    // Stufe 1: 1 Produkt, 1 Stück
+    // Stufe 2: 1 Produkt, 2–4 Stück (wenn genug auf Lager)
+    // Stufe 3: 1–3 verschiedene Produkte, je 1–3 Stück
+    let einkaufsliste = []; // [{ prodKey, menge, preis }]
+
+    if (einkaufsStufe >= 3) {
+      // Stufe 3: mehrere Produkte
+      const maxPosten = Math.min(3, verfuegbar.length);
+      const anzahlPosten = zufall(1, maxPosten);
+      // verfuegbar mischen, ersten anzahlPosten nehmen
+      const gemischt = [...verfuegbar].sort(() => Math.random() - 0.5).slice(0, anzahlPosten);
+      for (const [pk] of gemischt) {
+        const maxMenge = Math.min(3, simuliertesInventar[pk]);
+        const menge = zufall(1, maxMenge);
+        let p = gameState.prices[pk];
+        if (keineKommazahlen) p = Math.max(1, Math.round(p));
+        einkaufsliste.push({ prodKey: pk, menge, preis: p });
+        simuliertesInventar[pk] -= menge;
+      }
+    } else if (einkaufsStufe === 2) {
+      // Stufe 2: ein Produkt, mehrere Stück
+      const [prodKey2] = zufallsElement(verfuegbar);
+      const maxMenge = Math.min(4, simuliertesInventar[prodKey2]);
+      const menge = zufall(1, maxMenge);
+      let p = gameState.prices[prodKey2];
+      if (keineKommazahlen) p = Math.max(1, Math.round(p));
+      einkaufsliste.push({ prodKey: prodKey2, menge, preis: p });
+      simuliertesInventar[prodKey2] -= menge;
+    } else {
+      // Stufe 1 (Standard): ein Produkt, ein Stück
+      const [pk] = zufallsElement(verfuegbar);
+      let p = gameState.prices[pk];
+      if (keineKommazahlen) p = Math.max(1, Math.round(p));
+      einkaufsliste.push({ prodKey: pk, menge: 1, preis: p });
+      simuliertesInventar[pk]--;
+    }
+
+    // Gesamtpreis aller Posten berechnen
+    const gesamtPreis = einkaufsliste.reduce((s, pos) => s + pos.preis * pos.menge, 0);
+
+    // Für Abwärtskompatibilität: prodKey und preis des ersten Postens als Hauptreferenz
+    const [prodKey] = [einkaufsliste[0].prodKey];
     // Bei "Einfaches Rechnen": Preis auf ganze Euro runden
-    let preis = gameState.prices[prodKey];
-    if (keineKommazahlen) preis = Math.max(1, Math.round(preis));
+    let preis = gesamtPreis;
+    if (keineKommazahlen) preis = Math.round(preis);
 
     // Kundentyp bestimmen – muss sich den Preis leisten können
     // Maximal 3 Versuche, sonst Fallback auf Erwachsene
@@ -1802,20 +2012,28 @@ function generiereKunden(anzahl) {
     const kannUnfreundlich = typKey === 'reich' || typKey === 'star';
     const istUnfreundlich  = kannUnfreundlich && Math.random() < 0.5;
 
+    // Trinkgeld berechnen – nur wenn Einstellung aktiv
+    const trinkgeld = berechneKundenTrinkgeld(typKey);
+
     liste.push({
       haut:          kd.haut,
       haar:          kd.haar,
       frisur:        kd.frisur,
       name:          kd.name,
-      typKey,                      // Kundentyp-Key (z.B. 'kind', 'reich')
-      typLabel:      typ.label,    // Anzeigename
-      typEmoji:      typ.emoji,    // Emoji für diesen Typ
+      typKey,                        // Kundentyp-Key (z.B. 'kind', 'reich')
+      typLabel:      typ.label,      // Anzeigename
+      typEmoji:      typ.emoji,      // Emoji für diesen Typ
       unfreundlich:  istUnfreundlich,
-      produkt:       prodKey,
-      preis:         preis,        // in Euro
-      zahlt:         zahlt / 100,  // in Euro
+      produkt:       prodKey,        // Hauptprodukt (erstes in der Liste)
+      einkaufsliste,                 // Alle Posten [{ prodKey, menge, preis }]
+      preis:         preis,          // Gesamtpreis in Euro (ohne Trinkgeld)
+      trinkgeld,                     // Trinkgeld in Euro (0 wenn keines)
+      zahlt:         zahlt / 100,    // Zahlt Preis + Trinkgeld (wird unten angepasst)
       wechsel:       zahlt / 100 - preis,
     });
+
+    // Zahlt-Betrag um Trinkgeld erhöhen (Trinkgeld kommt extra obendrauf)
+    liste[liste.length - 1].zahlt = zahlt / 100 + trinkgeld;
   }
   return liste;
 }
@@ -1877,18 +2095,17 @@ function berechneKundenAnzahl() {
 
   const durchschnitt = preise.reduce((a, b) => a + b, 0) / preise.length;
 
-  // Referenzpreis: 1,50€ → ~5 Kunden (Basis)
-  // Teurer (+1€) → ~1 Kunden weniger; günstiger (-1€) → ~2 mehr
-  // Bereich: min 1, max 8
-  const basis = 5;
-  const abweichung = durchschnitt - 1.50;
-  const rohAnzahl = basis - abweichung * 1.5;
-  const anzahlPreis = Math.round(Math.min(8, Math.max(1, rohAnzahl)));
+  // Globale Basis: Kunden pro Tag geteilt durch ~10 Wellen am Tag
+  const globalBasis = Math.max(1, Math.round(globalKundenProTag() / 10));
+
+  // Preismodifikator: Referenzpreis 1,50€ = neutral; teurer = weniger, billiger = mehr
+  const abweichung   = durchschnitt - 1.50;
+  const preisfaktor  = Math.max(0.2, 1 - abweichung * 0.3);
 
   // Bewertungs-Faktor anwenden
-  const anzahl = Math.round(anzahlPreis * bewertungsFaktor());
+  const anzahl = Math.round(globalBasis * preisfaktor * bewertungsFaktor());
 
-  // Kleines Zufallsrauschen ±1
+  // Kleines Zufallsrauschen ±1, mind. 1
   return Math.max(1, anzahl + zufall(-1, 1));
 }
 
@@ -1940,19 +2157,24 @@ function oeffneStand() {
    ================================================================ */
 
 function naechsterKunde() {
+  // Queue leer → sofort neue Kunden generieren solange Ware vorhanden
   if (gameState.customers.length === 0) {
-    // Queue leer – aber noch Passanten unterwegs die kaufen könnten?
-    // Warten bis alle stehenden Passanten abgefertigt sind, dann Tag beenden
-    const nochKaufer = gameState.passanten.some(p => p.steht || p.bleibtStehen);
-    if (!nochKaufer) {
-      // Kurze Pause dann Tag-Ende (damit letzter Kauf noch sichtbar ist)
+    const hatWare = Object.entries(gameState.inventory).some(
+      ([k, v]) => v > 0 && (gameState.prices[k] || 0) > 0
+    );
+    if (hatWare) {
+      const neueKunden = generiereKunden(berechneKundenAnzahl());
+      gameState.customers.push(...neueKunden);
+      aktualisiereHUD();
+    }
+    // Keine Ware mehr → Tag beenden
+    if (gameState.customers.length === 0) {
       setTimeout(() => {
         if (gameState.customers.length === 0 && !gameState.currentCustomer) {
           tagesEnde();
         }
       }, 3000);
     }
-    // Sonst warten – passerWirdKunde() läuft noch
   }
 }
 
@@ -1962,7 +2184,14 @@ function zeigeKundenDialog() {
   if (!kunde) return;
 
   const prod = PRODUKTE[kunde.produkt];
-  const prodName = prod ? prod.name : 'etwas';
+  // Bei mehreren Produkten eine natürliche Aufzählung erzeugen
+  let prodName;
+  if (kunde.einkaufsliste && kunde.einkaufsliste.length > 1) {
+    const namen = kunde.einkaufsliste.map(pos => PRODUKTE[pos.prodKey]?.name ?? 'etwas');
+    prodName = namen.slice(0, -1).join(', ') + ' und ' + namen[namen.length - 1];
+  } else {
+    prodName = prod ? prod.name : 'etwas';
+  }
 
   // Sprechtext je nach Kundentyp – freundlich oder unfreundlich
   const typSaetze = {
@@ -2011,13 +2240,53 @@ function zeigeKundenDialog() {
     const k = gameState.currentCustomer;
     const fmt = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
 
-    // Aktuellen Preis aus gameState.prices lesen (nicht den eingefrorenen Wert)
-    let aktuellerPreis = gameState.prices[k.produkt] ?? k.preis;
-    if (keineKommazahlen) aktuellerPreis = Math.max(1, Math.round(aktuellerPreis));
-    k.preis = aktuellerPreis; // Kunden-Objekt aktualisieren für Wechselgeld-Berechnung
+    // Preise in der Einkaufsliste aktualisieren (falls Preis seit Generierung geändert)
+    let gesamtPreis = 0;
+    for (const pos of k.einkaufsliste) {
+      let p = gameState.prices[pos.prodKey] ?? pos.preis;
+      if (keineKommazahlen) p = Math.max(1, Math.round(p));
+      pos.preis = p;
+      gesamtPreis += p * pos.menge;
+    }
+    if (keineKommazahlen) gesamtPreis = Math.round(gesamtPreis);
+    k.preis = gesamtPreis;
+
+    // Einkaufsliste im Kundendialog anzeigen (ab Stufe 2)
+    const listeEl = document.getElementById('customer-einkaufsliste');
+    if (einkaufsStufe >= 2 && k.einkaufsliste.length > 0) {
+      listeEl.innerHTML = '';
+      k.einkaufsliste.forEach(pos => {
+        const prod = PRODUKTE[pos.prodKey];
+        const zeile = document.createElement('div');
+        zeile.className = 'customer-einkaufsliste-zeile';
+        if (einkaufsStufe === 2) {
+          // Stufe 2: Menge × Produktname (Preis nicht verraten)
+          zeile.textContent = `${prod.emoji} ${pos.menge}× ${prod.name}`;
+        } else {
+          // Stufe 3: Menge × Produktname, Einzelpreis sichtbar
+          zeile.textContent = `${prod.emoji} ${pos.menge}× ${prod.name} (${fmt(pos.preis)} je)`;
+        }
+        listeEl.appendChild(zeile);
+      });
+      listeEl.classList.remove('hidden');
+    } else {
+      listeEl.classList.add('hidden');
+    }
+
+    // Preiszeile nur bei Stufe 1 anzeigen (sonst muss Spieler selber rechnen)
+    document.getElementById('customer-price-row').classList.toggle('hidden', einkaufsStufe > 1);
 
     document.getElementById('customer-gives').textContent = fmt(k.zahlt);
     document.getElementById('customer-price').textContent = fmt(k.preis);
+
+    // Trinkgeld-Zeile anzeigen wenn vorhanden
+    const trinkgeldRow = document.getElementById('customer-trinkgeld-row');
+    if (k.trinkgeld > 0) {
+      document.getElementById('customer-trinkgeld').textContent = fmt(k.trinkgeld);
+      trinkgeldRow.classList.remove('hidden');
+    } else {
+      trinkgeldRow.classList.add('hidden');
+    }
 
     // "Kauf ablehnen"-Button zeigen wenn Kunde nicht genug Geld hat ODER unfreundlich ist
     const zuWenig       = k.zahlt < k.preis;
@@ -2042,19 +2311,92 @@ function zeigeKundenDialog() {
 // Eingabe-Puffer: Ziffernfolge als String, z.B. "202" = 2,02 €
 let numpadEingabe = '';
 
+// Welcher Teilrechnungs-Schritt ist gerade aktiv (bei Stufe 3)
+// 0..n-1 = Produktposten, n = Gesamtsumme
+let teilrechnungSchritt = 0;
+// Eingegebene Teilbeträge (in Cent, pro Posten)
+let teilrechnungWerte = [];
+
 function oeffneWechselgeldScreen() {
   const kunde = gameState.currentCustomer;
   if (!kunde) return;
 
   // Eingabe zurücksetzen
   numpadEingabe = '';
+  teilrechnungSchritt = 0;
+  teilrechnungWerte = [];
 
   // Infos setzen – im Einfach-Modus ohne Cent
   const fmt = keineKommazahlen
     ? (n) => `${Math.round(n)} €`
     : formatEuro;
-  document.getElementById('change-paid').textContent  = fmt(kunde.zahlt);
-  document.getElementById('change-price').textContent = fmt(kunde.preis);
+  document.getElementById('change-paid').textContent = fmt(kunde.zahlt);
+
+  // Trinkgeld-Zeile im Change-Modal
+  const changeTrinkgeldRow = document.getElementById('change-trinkgeld-row');
+  if (kunde.trinkgeld > 0) {
+    document.getElementById('change-trinkgeld').textContent = fmt(kunde.trinkgeld);
+    changeTrinkgeldRow.classList.remove('hidden');
+  } else {
+    changeTrinkgeldRow.classList.add('hidden');
+  }
+
+  // Einkaufsliste im Change-Modal zeigen (Stufe 2+3)
+  const listeEl = document.getElementById('change-einkaufsliste');
+  const teilEl  = document.getElementById('change-teilrechnung');
+
+  if (einkaufsStufe >= 2 && kunde.einkaufsliste.length > 0) {
+    // Einkaufsliste aufbauen
+    listeEl.innerHTML = '<div class="change-liste-title">🛒 Einkauf:</div>';
+    kunde.einkaufsliste.forEach((pos, idx) => {
+      const prod = PRODUKTE[pos.prodKey];
+      const zeile = document.createElement('div');
+      zeile.className = 'change-liste-zeile';
+      zeile.id = `change-liste-zeile-${idx}`;
+      if (einkaufsStufe === 2) {
+        // Stufe 2: Menge × Produktname – Einzelpreis sichtbar
+        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name} à ${fmt(pos.preis)}</span>`;
+      } else {
+        // Stufe 3: Menge × Produktname à Einzelpreis, Teilergebnis wird per Numpad eingegeben
+        const teilBetrag = document.createElement('span');
+        teilBetrag.className = 'change-teilbetrag';
+        teilBetrag.id = `teilbetrag-${idx}`;
+        teilBetrag.textContent = '?';
+        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name} à ${fmt(pos.preis)} =</span>`;
+        zeile.appendChild(teilBetrag);
+      }
+      listeEl.appendChild(zeile);
+    });
+
+    if (einkaufsStufe === 3) {
+      // Gesamtsummen-Zeile
+      const gesamt = document.createElement('div');
+      gesamt.className = 'change-liste-gesamt';
+      gesamt.id = 'change-liste-gesamt-zeile';
+      gesamt.innerHTML = `<span>📦 Gesamt =</span><span class="change-teilbetrag" id="teilbetrag-gesamt">?</span>`;
+      listeEl.appendChild(gesamt);
+    }
+
+    listeEl.classList.remove('hidden');
+
+    if (einkaufsStufe === 3) {
+      // Stufe 3: Schritt-für-Schritt – erst Posten, dann Gesamt
+      teilEl.classList.remove('hidden');
+      zeigeNaechstenTeilrechnungSchritt();
+    } else {
+      // Stufe 2: Nur Gesamtpreis eingeben
+      teilEl.classList.add('hidden');
+      // Gesamtpreis-Label anpassen
+      document.getElementById('change-gesamt-label').textContent = 'Gesamt:';
+      document.getElementById('change-price').textContent = '?'; // Spieler soll rechnen!
+    }
+  } else {
+    // Stufe 1: alles wie gehabt
+    listeEl.classList.add('hidden');
+    teilEl.classList.add('hidden');
+    document.getElementById('change-gesamt-label').textContent = 'Preis:';
+    document.getElementById('change-price').textContent = fmt(kunde.preis);
+  }
 
   // Komma-Taste im Einfach-Modus ausblenden
   document.querySelector('.numpad-comma').style.visibility =
@@ -2073,6 +2415,57 @@ function oeffneWechselgeldScreen() {
 
   // Modal über dem Stand einblenden (nicht als eigener Screen)
   document.getElementById('screen-change').classList.add('active');
+}
+
+// Nächsten Teilrechnungs-Schritt in Stufe 3 anzeigen
+function zeigeNaechstenTeilrechnungSchritt() {
+  const kunde = gameState.currentCustomer;
+  if (!kunde) return;
+  const fmt = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+  const teilEl = document.getElementById('change-teilrechnung');
+  const n = kunde.einkaufsliste.length;
+
+  // Eingabe zurücksetzen für neuen Schritt
+  numpadEingabe = '';
+  aktualisiereNumpadAnzeige();
+
+  // Alle Zeilen abdimmen, aktive hervorheben
+  for (let j = 0; j < n; j++) {
+    const z = document.getElementById(`change-liste-zeile-${j}`);
+    if (z) z.classList.toggle('change-zeile-aktiv', j === teilrechnungSchritt);
+    z?.classList.toggle('change-zeile-fertig', j < teilrechnungSchritt);
+  }
+  const gesamtZ = document.getElementById('change-liste-gesamt-zeile');
+  if (gesamtZ) gesamtZ.classList.toggle('change-zeile-aktiv', teilrechnungSchritt === n);
+
+  if (teilrechnungSchritt < n) {
+    // Posten-Schritt: Menge × Einzelpreis = ?
+    const pos = kunde.einkaufsliste[teilrechnungSchritt];
+    const prod = PRODUKTE[pos.prodKey];
+    teilEl.innerHTML = `<div class="teilrechnung-aufgabe">${prod.emoji} ${pos.menge} × ${fmt(pos.preis)} = ?</div>`;
+    document.getElementById('change-gesamt-label').textContent = 'Preis:';
+    document.getElementById('change-price').textContent = '?';
+  } else {
+    // Gesamt-Schritt: alle Posten addieren
+    const aufgabe = kunde.einkaufsliste
+      .map(pos => fmt(pos.preis * pos.menge))
+      .join(' + ');
+    teilEl.innerHTML = `<div class="teilrechnung-aufgabe">📦 ${aufgabe} = ?</div>`;
+    document.getElementById('change-gesamt-label').textContent = 'Gesamt:';
+    document.getElementById('change-price').textContent = '?';
+  }
+
+  // Bestätigen-Button für Teilschritt umschalten
+  const btnConfirm = document.getElementById('btn-change-confirm');
+  const istLetzterSchritt = teilrechnungSchritt === n; // Gesamt = letzter Schritt vor Wechselgeld
+  if (!istLetzterSchritt) {
+    btnConfirm.textContent = '✅ Weiter';
+  } else {
+    btnConfirm.textContent = '✅ Bestätigen';
+  }
+  btnConfirm.className       = 'btn btn-success btn-xl';
+  btnConfirm.dataset.trotzdem = '';
+  btnConfirm.dataset.teilSchritt = 'ja'; // Markierung für Bestätigen-Logik
 }
 
 // Numpad-Taste gedrückt
@@ -2136,14 +2529,22 @@ function schliesseTransaktion(diffCent) {
   const kunde = gameState.currentCustomer;
   if (!kunde) return;
 
-  // Geld kassieren
-  gameState.money         += kunde.preis;
-  gameState.dailyEarnings += kunde.preis;
-  lagerAus(kunde.produkt, 1);
+  // Geld kassieren (Preis + Trinkgeld – Trinkgeld gehört dem Spieler)
+  const einnahme = kunde.preis + (kunde.trinkgeld ?? 0);
+  gameState.money         += einnahme;
+  gameState.dailyEarnings += einnahme;
+  // Alle gekauften Posten aus dem Lager abbuchen
+  for (const pos of kunde.einkaufsliste) {
+    lagerAus(pos.prodKey, pos.menge);
+  }
   gameState.customersServed++;
 
   // Bewertung vergeben
   const sterne = vergebeKundenBewertung(diffCent);
+
+  // XP vergeben (Umsatz + 1 Kunde + Bewertung)
+  const xp = xpFuerTransaktion(einnahme / 100, sterne);
+  addiereXP(xp);
 
   // Sterne-Feedback kurz zeigen
   const feedback = document.getElementById('change-feedback');
@@ -2184,11 +2585,143 @@ function bestaetigeWechselgeld() {
   const kunde = gameState.currentCustomer;
   if (!kunde) return;
 
+  const fmt       = keineKommazahlen ? (n) => `${Math.round(n / 100)} €` : (n) => formatGeld(n);
+  const feedback  = document.getElementById('change-feedback');
+  const btnConfirm = document.getElementById('btn-change-confirm');
+  const n = kunde.einkaufsliste.length;
+
+  // ── STUFE 3: Teilrechnungs-Schritte ──────────────────────────────────────────
+  if (einkaufsStufe === 3 && btnConfirm.dataset.teilSchritt === 'ja') {
+    const eingabe = numpadBetragInCent();
+
+    if (teilrechnungSchritt < n) {
+      // Posten-Schritt: Menge × Einzelpreis prüfen
+      const pos = kunde.einkaufsliste[teilrechnungSchritt];
+      const richtig = Math.round(pos.menge * pos.preis * 100);
+      const teilDiff = eingabe - richtig;
+
+      feedback.classList.remove('hidden');
+      if (teilDiff === 0) {
+        feedback.className   = 'feedback-correct';
+        feedback.textContent = '✅ Richtig!';
+        // Teilergebnis in Liste eintragen
+        const el = document.getElementById(`teilbetrag-${teilrechnungSchritt}`);
+        if (el) el.textContent = fmt(richtig);
+        teilrechnungWerte.push(richtig);
+        teilrechnungSchritt++;
+        setTimeout(() => {
+          feedback.className = 'hidden';
+          zeigeNaechstenTeilrechnungSchritt();
+        }, 700);
+      } else {
+        feedback.className   = 'feedback-wrong';
+        feedback.textContent = teilDiff > 0 ? `⬆️ ${fmt(teilDiff)} zu viel!` : `⬇️ ${fmt(-teilDiff)} zu wenig!`;
+        if (btnConfirm.dataset.trotzdem === 'ja') {
+          // Trotzdem weiter
+          const el = document.getElementById(`teilbetrag-${teilrechnungSchritt}`);
+          if (el) el.textContent = fmt(eingabe);
+          teilrechnungWerte.push(eingabe); // falschen Wert speichern
+          teilrechnungSchritt++;
+          btnConfirm.dataset.trotzdem = '';
+          setTimeout(() => {
+            feedback.className = 'hidden';
+            zeigeNaechstenTeilrechnungSchritt();
+          }, 700);
+        } else {
+          btnConfirm.textContent      = '⚠️ Trotzdem weiter!';
+          btnConfirm.className        = 'btn btn-danger btn-xl';
+          btnConfirm.dataset.trotzdem = 'ja';
+        }
+      }
+      return;
+    }
+
+    // Gesamt-Schritt: Summe aller Posten prüfen
+    const richtigGesamt = Math.round(kunde.preis * 100);
+    const gesamtDiff = eingabe - richtigGesamt;
+    feedback.classList.remove('hidden');
+
+    if (gesamtDiff === 0) {
+      feedback.className   = 'feedback-correct';
+      feedback.textContent = '✅ Gesamt richtig!';
+      const el = document.getElementById('teilbetrag-gesamt');
+      if (el) el.textContent = fmt(richtigGesamt);
+      // Preis in change-info zeigen
+      document.getElementById('change-price').textContent =
+        keineKommazahlen ? `${Math.round(kunde.preis)} €` : formatEuro(kunde.preis);
+      // Jetzt Wechselgeld-Schritt – Teilschritt-Modus beenden
+      btnConfirm.dataset.teilSchritt = '';
+      btnConfirm.textContent = '✅ Bestätigen';
+      btnConfirm.className   = 'btn btn-success btn-xl';
+      numpadEingabe = '';
+      aktualisiereNumpadAnzeige();
+    } else {
+      feedback.className   = 'feedback-wrong';
+      feedback.textContent = gesamtDiff > 0 ? `⬆️ ${fmt(gesamtDiff)} zu viel!` : `⬇️ ${fmt(-gesamtDiff)} zu wenig!`;
+      if (btnConfirm.dataset.trotzdem === 'ja') {
+        // Falschen Gesamtbetrag akzeptieren – Preis korrigieren für Wechselgeld
+        const el = document.getElementById('teilbetrag-gesamt');
+        if (el) el.textContent = fmt(eingabe);
+        kunde.preis = eingabe / 100; // Preis auf falschen Wert setzen (beeinträchtigt Wechselgeld-Berechnung)
+        document.getElementById('change-price').textContent =
+          keineKommazahlen ? `${Math.round(kunde.preis)} €` : formatEuro(kunde.preis);
+        btnConfirm.dataset.teilSchritt = '';
+        btnConfirm.dataset.trotzdem    = '';
+        btnConfirm.textContent = '✅ Bestätigen';
+        btnConfirm.className   = 'btn btn-success btn-xl';
+        numpadEingabe = '';
+        aktualisiereNumpadAnzeige();
+      } else {
+        btnConfirm.textContent      = '⚠️ Trotzdem weiter!';
+        btnConfirm.className        = 'btn btn-danger btn-xl';
+        btnConfirm.dataset.trotzdem = 'ja';
+      }
+    }
+    return;
+  }
+
+  // ── STUFE 2: Gesamtpreis-Schritt ─────────────────────────────────────────────
+  if (einkaufsStufe === 2 && document.getElementById('change-price').textContent === '?') {
+    // Spieler gibt Gesamtpreis ein (Menge × Einzelpreis)
+    const eingabe = numpadBetragInCent();
+    const richtig = Math.round(kunde.preis * 100);
+    const preisDiv = eingabe - richtig;
+
+    feedback.classList.remove('hidden');
+    if (preisDiv === 0) {
+      feedback.className   = 'feedback-correct';
+      feedback.textContent = '✅ Richtig gerechnet!';
+      const fmtE = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+      document.getElementById('change-price').textContent = fmtE(kunde.preis);
+      document.getElementById('change-gesamt-label').textContent = 'Gesamt:';
+      numpadEingabe = '';
+      aktualisiereNumpadAnzeige();
+      setTimeout(() => { feedback.className = 'hidden'; }, 800);
+    } else {
+      feedback.className   = 'feedback-wrong';
+      feedback.textContent = preisDiv > 0 ? `⬆️ ${fmt(preisDiv)} zu viel!` : `⬇️ ${fmt(-preisDiv)} zu wenig!`;
+      if (btnConfirm.dataset.trotzdem === 'ja') {
+        // Falschen Gesamtbetrag übernehmen
+        kunde.preis = eingabe / 100;
+        const fmtE = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+        document.getElementById('change-price').textContent = fmtE(kunde.preis);
+        btnConfirm.dataset.trotzdem = '';
+        numpadEingabe = '';
+        aktualisiereNumpadAnzeige();
+        feedback.className = 'hidden';
+      } else {
+        btnConfirm.textContent      = '⚠️ Trotzdem weiter!';
+        btnConfirm.className        = 'btn btn-danger btn-xl';
+        btnConfirm.dataset.trotzdem = 'ja';
+      }
+    }
+    return;
+  }
+
+  // ── STANDARD: Wechselgeld-Eingabe (alle Stufen) ───────────────────────────────
   const summe     = numpadBetragInCent();
   const benoetigt = Math.round((kunde.zahlt - kunde.preis) * 100);
   const diff      = summe - benoetigt; // positiv = zu viel, negativ = zu wenig, 0 = richtig
-  const feedback  = document.getElementById('change-feedback');
-  const btnConfirm = document.getElementById('btn-change-confirm');
 
   feedback.classList.remove('hidden');
 
@@ -2201,7 +2734,6 @@ function bestaetigeWechselgeld() {
 
   } else {
     // Falsch – Button rot färben, "Trotzdem!"-Modus aktivieren
-    const fmt = keineKommazahlen ? (n) => `${Math.round(n / 100)} €` : (n) => formatGeld(n);
     if (diff > 0) {
       feedback.className   = 'feedback-wrong';
       feedback.textContent = `⬆️ ${fmt(diff)} zu viel!`;
@@ -2239,18 +2771,18 @@ function grossmarktMinGeld() {
   return isNaN(wert) ? 20 : wert;
 }
 
-// Zufälliges saisonales Sortiment generieren (3–5 Produkte, zufällige Verfügbarkeit)
+// Saisonales Sortiment generieren – alle verfügbaren Saisonprodukte, größere Mengen
 function erstelleGrossmarktSortiment() {
   const saisonProdukte = Object.entries(PRODUKTE)
     .filter(([, p]) => p.saisons.includes(gameState.jahreszeit) && p.kaufPreis > 0);
 
-  // Zufällig mischen, 3–5 auswählen
+  // Alle Saisonprodukte anbieten (zufällig gemischt für Abwechslung)
   const gemischt = saisonProdukte.sort(() => Math.random() - 0.5);
-  const auswahl  = gemischt.slice(0, zufall(3, Math.min(5, gemischt.length)));
 
   const sortiment = {};
-  auswahl.forEach(([key]) => {
-    sortiment[key] = { verfuegbar: zufall(2, 8) };
+  gemischt.forEach(([key]) => {
+    // Größere Mengen: 5–20 Stück je Produkt (realistischerer Großmarkt)
+    sortiment[key] = { verfuegbar: zufall(5, 20) };
   });
   return sortiment;
 }
@@ -2261,8 +2793,10 @@ function aktualisiereGrossmarktGesamt() {
   for (const [key, anzahl] of Object.entries(grossmarktWarenkorb)) {
     gesamt += anzahl * (PRODUKTE[key]?.kaufPreis ?? 0);
   }
-  document.getElementById('grossmarkt-gesamt-preis').textContent = formatEuro(gesamt);
-  document.getElementById('grossmarkt-money').textContent = formatEuro(gameState.money);
+  // Einfach-Modus: ganze Euro, sonst Cent-genau
+  const fmt = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+  document.getElementById('grossmarkt-gesamt-preis').textContent = fmt(gesamt);
+  document.getElementById('grossmarkt-money').textContent = fmt(gameState.money);
 
   const btn = document.getElementById('btn-grossmarkt-kaufen');
   btn.disabled = gesamt <= 0 || gesamt > gameState.money;
@@ -2288,10 +2822,11 @@ function zeigeGrossmarkt() {
     const kachel = document.createElement('div');
     kachel.className  = 'grossmarkt-kachel';
     kachel.dataset.key = key;
+    const fmtGM = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
     kachel.innerHTML = `
       <div class="grossmarkt-emoji">${prod.emoji}</div>
       <div class="grossmarkt-name">${prod.name}</div>
-      <div class="grossmarkt-preis">${formatEuro(prod.kaufPreis)} / Stück</div>
+      <div class="grossmarkt-preis">${fmtGM(prod.kaufPreis)} / Stück</div>
       <div class="grossmarkt-verfuegbar">Noch ${info.verfuegbar}x da</div>
       <div class="grossmarkt-stepper">
         <button class="btn btn-sm gm-minus" data-key="${key}">−</button>
@@ -2582,6 +3117,31 @@ canvas.addEventListener('touchend', (e) => {
 let keineKommazahlen = localStorage.getItem('keineKommazahlen') === '1';
 document.getElementById('toggle-nocomma').checked = keineKommazahlen;
 
+// Einstellung: Einkaufsstufe (1 = einfach, 2 = eine Sorte viele Stück, 3 = mehrere Produkte)
+let einkaufsStufe = parseInt(localStorage.getItem('einkaufsStufe') ?? '1', 10);
+
+// Stufe-Buttons initial hervorheben
+(function initEinkaufsstufe() {
+  document.querySelectorAll('.einkaufsstufe-btn').forEach(btn => {
+    const aktiv = parseInt(btn.dataset.stufe, 10) === einkaufsStufe;
+    btn.classList.toggle('btn-primary', aktiv);
+    btn.classList.toggle('btn-outline', !aktiv);
+  });
+})();
+
+// Klick auf Einkaufsstufe-Button
+document.querySelectorAll('.einkaufsstufe-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    einkaufsStufe = parseInt(btn.dataset.stufe, 10);
+    localStorage.setItem('einkaufsStufe', einkaufsStufe);
+    document.querySelectorAll('.einkaufsstufe-btn').forEach(b => {
+      const aktiv = parseInt(b.dataset.stufe, 10) === einkaufsStufe;
+      b.classList.toggle('btn-primary', aktiv);
+      b.classList.toggle('btn-outline', !aktiv);
+    });
+  });
+});
+
 // Vorheriger Screen – um nach Einstellungen zurückzukehren
 let screenVorEinstellungen = 'screen-start';
 
@@ -2638,38 +3198,81 @@ document.querySelectorAll('.verderb-tage-btn').forEach(btn => {
   });
 });
 
+// Globaler Kunden-Slider aufbauen
+(function initGlobalKundenSettings() {
+  const slider = document.getElementById('global-kunden-slider');
+  const wertEl = document.getElementById('global-kunden-wert');
+  if (!slider || !wertEl) return;
+
+  // Gespeicherten Wert laden
+  const aktuell = globalKundenProTag();
+  slider.value = aktuell;
+  wertEl.textContent = aktuell;
+
+  slider.addEventListener('input', () => {
+    const wert = parseInt(slider.value);
+    wertEl.textContent = wert;
+    localStorage.setItem('globalKundenProTag', wert);
+  });
+})();
+
 // Tagesrhythmus-Controls aufbauen
 (function initTagesrhythmusSettings() {
   const container = document.getElementById('tagesrhythmus-controls');
   if (!container) return;
 
+  // Stufen: Wert → Emoji + Text-Label
+  const STUFEN = [
+    { val: 0.0, emoji: '😴', label: 'Geschlossen' },
+    { val: 0.5, emoji: '🌅', label: 'Wenig'       },
+    { val: 1.0, emoji: '😊', label: 'Normal'       },
+    { val: 1.5, emoji: '🏃', label: 'Viel'         },
+    { val: 2.0, emoji: '🎉', label: 'Ansturm'      },
+  ];
+
+  // Nächste Stufe zum gespeicherten Wert finden (Index 0–4)
+  function wertzuIndex(wert) {
+    let best = 0;
+    let bestDiff = Infinity;
+    STUFEN.forEach((s, i) => {
+      const d = Math.abs(s.val - wert);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    });
+    return best;
+  }
+
   Object.entries(TAGESRHYTHMUS).forEach(([slot, info]) => {
     const aktuell = tagesrhythmusFaktor(slot);
+    const startIdx = wertzuIndex(aktuell);
 
     const row = document.createElement('div');
     row.className = 'settings-faktor-row';
+
+    // Slider-HTML: Emoji-Endpunkte links/rechts, Slider in der Mitte, Label darunter
     row.innerHTML = `
-      <span class="settings-faktor-label">${info.emoji} ${info.label} <small>(${info.stunden})</small></span>
-      <div class="faktor-buttons" data-slot="${slot}">
-        <button class="btn btn-sm faktor-btn" data-val="0.3">😴</button>
-        <button class="btn btn-sm faktor-btn" data-val="0.6">🌅</button>
-        <button class="btn btn-sm faktor-btn" data-val="1.0">😊</button>
-        <button class="btn btn-sm faktor-btn" data-val="1.4">🏃</button>
-        <button class="btn btn-sm faktor-btn" data-val="2.0">🎉</button>
+      <div class="rhythmus-slider-header">
+        <span class="settings-faktor-label">${info.emoji} <strong>${info.label}</strong> <small>(${info.stunden})</small></span>
+      </div>
+      <div class="rhythmus-slider-wrap">
+        <span class="slider-emoji-links">😴</span>
+        <input type="range" class="rhythmus-slider" data-slot="${slot}"
+               min="0" max="4" step="1" value="${startIdx}">
+        <span class="slider-emoji-rechts">🎉</span>
+      </div>
+      <div class="rhythmus-slider-label" id="rhythmus-label-${slot}">
+        ${STUFEN[startIdx].emoji} ${STUFEN[startIdx].label}
       </div>
     `;
     container.appendChild(row);
 
-    // Aktiven Button hervorheben
-    row.querySelectorAll('.faktor-btn').forEach(btn => {
-      const val = parseFloat(btn.dataset.val);
-      btn.classList.toggle('btn-primary', Math.abs(val - aktuell) < 0.01);
-      btn.addEventListener('click', () => {
-        localStorage.setItem(`rhythmus_${slot}`, val);
-        row.querySelectorAll('.faktor-btn').forEach(b =>
-          b.classList.toggle('btn-primary', b === btn));
-        zeigeMeldung(`✅ ${info.label}: Faktor ${val}`);
-      });
+    // Slider-Änderung speichern + Label aktualisieren
+    const slider = row.querySelector('.rhythmus-slider');
+    slider.addEventListener('input', () => {
+      const idx = parseInt(slider.value, 10);
+      const stufe = STUFEN[idx];
+      localStorage.setItem(`rhythmus_${slot}`, stufe.val);
+      document.getElementById(`rhythmus-label-${slot}`).textContent =
+        `${stufe.emoji} ${stufe.label}`;
     });
   });
 })();
@@ -2744,6 +3347,69 @@ document.querySelectorAll('.verderb-tage-btn').forEach(btn => {
   });
 })();
 
+// Trinkgeld-Settings initialisieren
+(function initTrinkgeldSettings() {
+  // Stufen für Chance und Max-Betrag
+  const CHANCE_STUFEN = [
+    { val: 0.05, label: 'sehr selten' },
+    { val: 0.15, label: 'selten'      },
+    { val: 0.30, label: 'normal'      },
+    { val: 0.50, label: 'oft'         },
+    { val: 0.80, label: 'sehr oft'    },
+  ];
+  const MAX_STUFEN = [
+    { val: 20,  label: 'bis 20 Ct' },
+    { val: 50,  label: 'bis 50 Ct' },
+    { val: 100, label: 'bis 1 €'   },
+    { val: 200, label: 'bis 2 €'   },
+    { val: 500, label: 'bis 5 €'   },
+  ];
+
+  function wertzuIndex(wert, stufen) {
+    let best = 0, bestDiff = Infinity;
+    stufen.forEach((s, i) => {
+      const d = Math.abs(s.val - wert);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    });
+    return best;
+  }
+
+  // Toggle
+  const toggle = document.getElementById('toggle-trinkgeld');
+  toggle.checked = trinkgeldAktiv();
+  const detailControls = document.getElementById('trinkgeld-detail-controls');
+  detailControls.classList.toggle('hidden', !trinkgeldAktiv());
+
+  toggle.addEventListener('change', () => {
+    localStorage.setItem('trinkgeldAktiv', toggle.checked ? '1' : '0');
+    detailControls.classList.toggle('hidden', !toggle.checked);
+  });
+
+  // Chance-Slider
+  const chanceSlider = document.getElementById('slider-trinkgeld-chance');
+  const chanceLabel  = document.getElementById('label-trinkgeld-chance');
+  const startChanceIdx = wertzuIndex(trinkgeldBasisChance(), CHANCE_STUFEN);
+  chanceSlider.value = startChanceIdx;
+  chanceLabel.textContent = CHANCE_STUFEN[startChanceIdx].label;
+  chanceSlider.addEventListener('input', () => {
+    const idx = parseInt(chanceSlider.value, 10);
+    localStorage.setItem('trinkgeldBasisChance', CHANCE_STUFEN[idx].val);
+    chanceLabel.textContent = CHANCE_STUFEN[idx].label;
+  });
+
+  // Max-Betrag-Slider
+  const maxSlider = document.getElementById('slider-trinkgeld-max');
+  const maxLabel  = document.getElementById('label-trinkgeld-max');
+  const startMaxIdx = wertzuIndex(trinkgeldMaxCent(), MAX_STUFEN);
+  maxSlider.value = startMaxIdx;
+  maxLabel.textContent = MAX_STUFEN[startMaxIdx].label;
+  maxSlider.addEventListener('input', () => {
+    const idx = parseInt(maxSlider.value, 10);
+    localStorage.setItem('trinkgeldMaxCent', MAX_STUFEN[idx].val);
+    maxLabel.textContent = MAX_STUFEN[idx].label;
+  });
+})();
+
 // Großmarkt-Mindestgeld-Settings aufbauen
 (function initGrossmarktSettings() {
   const aktuell = grossmarktMinGeld();
@@ -2800,10 +3466,21 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     localStorage.clear();
     keineKommazahlen = false;
     document.getElementById('toggle-nocomma').checked = false;
-    // Bewertungen im Spielzustand zurücksetzen
+    document.getElementById('toggle-trinkgeld').checked = false;
+    document.getElementById('trinkgeld-detail-controls').classList.add('hidden');
+    einkaufsStufe = 1;
+    document.querySelectorAll('.einkaufsstufe-btn').forEach(b => {
+      const aktiv = parseInt(b.dataset.stufe, 10) === 1;
+      b.classList.toggle('btn-primary', aktiv);
+      b.classList.toggle('btn-outline', !aktiv);
+    });
+    // Bewertungen und Erfahrung zurücksetzen
     gameState.bewertungSumme  = 0;
     gameState.bewertungAnzahl = 0;
     gameState.gesamtKunden    = 0;
+    gameState.gesamtXP        = 0;
+    gameState.level           = 1;
+    aktualisiereXpHud();
     zeigeMeldung('🗑️ Alles zurückgesetzt!');
     setTimeout(() => zeigeScreen('screen-start'), 1500);
   }

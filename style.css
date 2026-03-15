@@ -261,6 +261,64 @@ body {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Globaler Kunden-Slider */
+.settings-global-kunden {
+  flex-direction: column;
+  align-items: stretch;
+}
+#global-kunden-slider-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+.settings-slider-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #1b5e20;
+}
+.settings-slider-unit {
+  font-size: 1rem;
+  color: #555;
+}
+.settings-range-input {
+  width: 100%;
+  height: 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, #81c784, #1b5e20);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  margin: 0.5rem 0;
+}
+.settings-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #388e3c;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.settings-range-input::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #388e3c;
+  cursor: pointer;
+}
+.settings-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #888;
+  padding: 0 2px;
+}
+
 .verderb-tage-buttons {
   display: flex;
   gap: 0.4rem;
@@ -304,6 +362,68 @@ body {
 .faktor-btn {
   min-width: 52px;
   font-size: 0.85rem;
+}
+
+/* ── Tagesrhythmus-Slider ─────────────────────────────────── */
+.rhythmus-slider-header {
+  margin-bottom: 0.1rem;
+}
+
+/* Zeile mit Emoji-Endpunkten + Slider */
+.rhythmus-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slider-emoji-links,
+.slider-emoji-rechts {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+/* Slider selbst */
+.rhythmus-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #b3e5fc, #0288d1);
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.rhythmus-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0288d1;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+.rhythmus-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0288d1;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+/* Aktueller Wert-Text unter dem Slider */
+.rhythmus-slider-label {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0277bd;
+  margin-top: 0.15rem;
 }
 
 /* Frische-Anzeige im Inventar-Panel */
@@ -624,9 +744,22 @@ body {
   min-width: 80px;
 }
 
-/* Uhr-Item: Canvas + Label untereinander */
+/* Uhr-Item: Canvas + Uhrzeit/Label nebeneinander */
 .hud-clock-item {
-  min-width: 60px;
+  flex-direction: row;
+  gap: 0.4rem;
+  min-width: unset;
+}
+.hud-clock-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hud-uhrzeit {
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  font-weight: 900;
+  color: #1b5e20;
+  line-height: 1;
 }
 
 #hud-clock {
@@ -659,6 +792,52 @@ body {
   font-size: 0.7rem;
   color: #999;
   text-align: center;
+}
+
+/* ── Level-Badge im HUD ─────────────────────────────────────── */
+.hud-level-badge {
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  font-weight: 900;
+  color: #f9a825;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.hud-xp-bar {
+  width: 48px;
+  height: 5px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+.hud-xp-fill {
+  height: 100%;
+  background: linear-gradient(to right, #66bb6a, #f9a825);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Level-Up Toast */
+.level-up-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f9a825, #ff6f00);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 900;
+  padding: 0.7rem 2rem;
+  border-radius: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  z-index: 9999;
+  pointer-events: none;
+  animation: levelUpPop 2.8s ease forwards;
+}
+@keyframes levelUpPop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  15%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  75%  { opacity: 1; transform: translateX(-50%) scale(1.0); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.0); }
 }
 
 /* ── Inventar Panel ─────────────────────────────────────────── */
@@ -1153,4 +1332,212 @@ body {
   #panel-inventory { max-height: 70vh; }
   .numpad-btn { min-height: 52px; font-size: 1.4rem; }
   #change-input-display { font-size: 2rem; }
+}
+
+/* ================================================================
+   AUSKLAPPBARE SETTINGS-SECTION (<details>)
+   ================================================================ */
+
+.settings-details {
+  border: 2px solid #ffe082;
+  border-radius: 14px;
+  background: #fffde7;
+  overflow: hidden;
+}
+
+.settings-details-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  color: #e65100;
+}
+
+/* Standardmäßiges Dreieck entfernen */
+.settings-details-summary::-webkit-details-marker { display: none; }
+
+.settings-details-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #999;
+}
+
+.settings-details[open] .settings-details-hint {
+  color: #f57c00;
+}
+
+.settings-details-body {
+  padding: 0.5rem 0.8rem 0.8rem;
+  border-top: 1px solid #ffe082;
+}
+
+.trinkgeld-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+/* ================================================================
+   TRINKGELD-ANZEIGE
+   ================================================================ */
+
+/* Trinkgeld-Betrag: goldfarben und auffällig */
+.trinkgeld-betrag {
+  color: #f57f17 !important;
+  font-size: 1.1em;
+}
+
+/* Trinkgeld-Zeile im Change-Modal leicht hervorgehoben */
+#change-trinkgeld-row {
+  background: #fff8e1;
+  border-radius: 8px;
+  padding: 0.2rem 0.4rem;
+  margin: 0 -0.4rem;
+}
+
+/* ================================================================
+   EINKAUFSSTUFE (Settings)
+   ================================================================ */
+
+/* Stufe-Buttons in den Einstellungen */
+.einkaufsstufe-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.einkaufsstufe-btn {
+  flex: 1;
+  min-width: 90px;
+  text-align: center;
+  line-height: 1.3;
+  padding: 0.5rem 0.4rem;
+}
+
+.einkaufsstufe-btn small {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+/* Aktiver Stufe-Button */
+.btn-outline {
+  background: #fff;
+  color: #555;
+  border: 2px solid #aaa;
+  box-shadow: none;
+}
+
+/* ================================================================
+   EINKAUFSLISTE IM KUNDEN-DIALOG
+   ================================================================ */
+
+/* Einkaufsliste beim Kunden */
+#customer-einkaufsliste {
+  background: #fff9e7;
+  border: 2px solid #ffe082;
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+.customer-einkaufsliste-zeile {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.customer-einkaufsliste-zeile:last-child {
+  border-bottom: none;
+}
+
+/* ================================================================
+   EINKAUFSLISTE IM CHANGE-MODAL
+   ================================================================ */
+
+/* Einkaufsliste-Container */
+#change-einkaufsliste {
+  background: #fff;
+  border: 2px solid #ffe082;
+  border-radius: 14px;
+  padding: 0.6rem 0.8rem;
+  font-size: clamp(0.9rem, 3.2vw, 1.05rem);
+}
+
+/* Titel der Liste */
+.change-liste-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+}
+
+/* Einzelne Zeile in der Einkaufsliste */
+.change-liste-zeile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 0.4rem;
+  transition: background 0.2s;
+}
+
+.change-liste-zeile:last-of-type {
+  border-bottom: none;
+}
+
+/* Aktive Zeile (wird gerade berechnet) */
+.change-zeile-aktiv {
+  background: #fff9c4;
+  border-radius: 8px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* Fertig berechnete Zeile */
+.change-zeile-fertig {
+  opacity: 0.55;
+}
+
+/* Gesamt-Zeile */
+.change-liste-gesamt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0 0.1rem;
+  font-weight: 700;
+  border-top: 2px solid #ffe082;
+  margin-top: 0.3rem;
+}
+
+/* Teilergebnis-Feld (Fragezeichen bis eingegeben) */
+.change-teilbetrag {
+  font-weight: 700;
+  color: #1b5e20;
+  min-width: 3ch;
+  text-align: right;
+}
+
+/* Teilrechnungs-Aufgabe über dem Numpad */
+#change-teilrechnung {
+  background: #e8f5e9;
+  border: 2px solid #a5d6a7;
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+}
+
+.teilrechnung-aufgabe {
+  font-size: clamp(1.1rem, 4vw, 1.4rem);
+  font-weight: 700;
+  color: #2e7d32;
+  letter-spacing: 0.02em;
 }
