@@ -47,6 +47,24 @@ document.getElementById('btn-settings').addEventListener('click', () => {
   zeigeScreen('screen-settings');
 });
 
+// Zubehör-Shop öffnen
+document.getElementById('btn-zubehoer').addEventListener('click', () => {
+  zeigeZubehoerShop();
+});
+
+// Zubehör-Shop: Zurück zum Stand
+document.getElementById('btn-zubehoer-zurueck').addEventListener('click', () => {
+  zeigeScreen('screen-stand');
+  starteAnimation();
+});
+
+// Zubehör kaufen (delegiert auf Artikel-Liste)
+document.getElementById('zubehoer-artikel-liste').addEventListener('click', (e) => {
+  const btn = e.target.closest('.zubehoer-kaufen-btn');
+  if (!btn || btn.disabled) return;
+  zubehoerKaufen(btn.dataset.key);
+});
+
 // Toggle: Keine Komma-Zahlen
 document.getElementById('toggle-nocomma').addEventListener('change', (e) => {
   keineKommazahlen = e.target.checked;

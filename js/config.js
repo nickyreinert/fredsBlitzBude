@@ -259,3 +259,22 @@ const BEWERTUNG_STAERKE_STUFEN = [
 
 // ── Kundentyp-Häufigkeits-Stufen (für Einstellungen) ────────────
 const KUNDENTYP_HAEUFIGKEIT_STUFEN = [0, 0.3, 1.0, 2.0, 3.5];
+
+// ── Zubehör-Shop ─────────────────────────────────────────────────
+
+// Verfügbare Zubehör-Artikel
+const ZUBEHOER_ARTIKEL = {
+  hund: {
+    name:         'Hund',
+    emoji:        '🐕',
+    beschreibung: 'Ein treuer Begleiter! Kunden mögen Hunde und geben mehr Trinkgeld.',
+    preis:        15.00,
+    maxAnzahl:    1,
+  },
+};
+
+// Bonus-Stärke: logarithmische Dämpfung damit viel Zubehör nicht überpowered ist.
+// Formel: bonus = staerke * log2(gesamtAnzahl + 1)
+// Beispiel bei staerke=0.20: 1 Artikel → +20%, 3 → +32%, 7 → +46%
+const ZUBEHOER_BONUS_STAERKE_TRINKGELD = 0.20; // Zusatz-Multiplikator auf Trinkgeld-Chance
+const ZUBEHOER_BONUS_STAERKE_KUNDEN    = 0.15; // Zusatz-Multiplikator auf Kundenanzahl

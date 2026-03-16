@@ -23,6 +23,9 @@ function zeichneSpielwelt() {
     zeichneProdukte(w, h);
   }
 
+  // Hund neben dem Stand (wenn gekauft)
+  zeichneHund(w, h);
+
   // Passanten auf der Straße
   zeichnePassanten(w, h);
 

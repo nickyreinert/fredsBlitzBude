@@ -37,6 +37,9 @@
     <!-- Einstellungen-Button: immer sichtbar, oben rechts -->
     <button id="btn-settings" class="btn-icon" title="Einstellungen">⚙️</button>
 
+    <!-- Zubehör-Shop-Button: oben links, nur im Spielstand sichtbar -->
+    <button id="btn-zubehoer" class="btn-icon btn-icon-left hidden" title="Zubehör-Shop">🛍️</button>
+
     <!-- ── SCREEN 1: Startbildschirm ─────────────────────────── -->
     <div id="screen-start" class="screen active">
       <div class="start-box">
@@ -470,6 +473,27 @@
       </div>
     </div><!-- /screen-grossmarkt -->
 
+    <!-- ── SCREEN 7: Zubehör-Shop ────────────────────────────── -->
+    <div id="screen-zubehoer" class="screen">
+      <div id="zubehoer-container">
+
+        <!-- Kopfzeile -->
+        <div id="zubehoer-header">
+          <button id="btn-zubehoer-zurueck" class="btn btn-warning btn-sm">← Zurück</button>
+          <h2 class="zubehoer-titel">🛍️ Zubehör-Shop</h2>
+          <div id="zubehoer-budget">
+            💰 <span id="zubehoer-money">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- Artikel-Liste -->
+        <div id="zubehoer-artikel-liste">
+          <!-- Wird per JS befüllt -->
+        </div>
+
+      </div>
+    </div><!-- /screen-zubehoer -->
+
   </div><!-- /ui -->
 
   <!-- Service Worker Registrierung -->
@@ -527,6 +551,7 @@
   <!-- Animation und Einstellungen -->
   <script src="js/animation.js"></script>
   <script src="js/ui/einstellungen.js"></script>
+  <script src="js/ui/zubehoer.js"></script>
 
   <!-- Initialisierung (Event-Listener + Startup – muss zuletzt) -->
   <script src="js/init.js"></script>

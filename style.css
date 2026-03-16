@@ -1613,3 +1613,141 @@ body {
   color: #2e7d32;
   letter-spacing: 0.02em;
 }
+
+/* ================================================================
+   ZUBEHÖR-SHOP BUTTON (oben links im Stand)
+   ================================================================ */
+#btn-zubehoer {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  font-size: 1.8rem;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  z-index: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: background 0.15s, transform 0.15s;
+  pointer-events: all;
+}
+#btn-zubehoer:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+#btn-zubehoer.hidden { display: none !important; }
+
+/* ================================================================
+   SCREEN 7: ZUBEHÖR-SHOP
+   ================================================================ */
+#screen-zubehoer {
+  background: linear-gradient(160deg, #1a237e 0%, #3949ab 60%, #7986cb 100%);
+  flex-direction: column;
+  overflow: hidden;
+}
+#screen-zubehoer.active { display: flex; }
+
+#zubehoer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Kopfzeile */
+#zubehoer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.35);
+  padding: 0.7rem 1rem;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.zubehoer-titel {
+  color: #fff;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 900;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+#zubehoer-budget {
+  color: #e8eaf6;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+}
+#zubehoer-money {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+  display: block;
+}
+
+/* Artikel-Liste */
+#zubehoer-artikel-liste {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Artikel-Karte */
+.zubehoer-karte {
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}
+.zubehoer-karte--gekauft {
+  background: rgba(102,187,106,0.25);
+  border-color: #66bb6a;
+}
+.zubehoer-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.zubehoer-info {
+  flex: 1;
+  min-width: 0;
+}
+.zubehoer-name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin-bottom: 0.2rem;
+}
+.zubehoer-beschreibung {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+.zubehoer-rechts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.zubehoer-preis {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff9c4;
+}
+.zubehoer-status {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #a5d6a7;
+}

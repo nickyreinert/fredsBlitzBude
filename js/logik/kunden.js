@@ -4,6 +4,13 @@
    KUNDEN – Generierung, Kundenanzahl, Dialog
    ================================================================ */
 
+// Zubehör-Bonus (logarithmisch gedämpft) auf Kundenanzahl
+function zubehoerKundenBonus() {
+  const anzahl = Object.values(gameState.zubehoer).reduce((s, n) => s + n, 0);
+  if (anzahl === 0) return 1.0;
+  return 1 + ZUBEHOER_BONUS_STAERKE_KUNDEN * Math.log2(anzahl + 1);
+}
+
 // Berechnet wie viele Kunden kommen
 function berechneKundenAnzahl() {
   const preise = Object.entries(gameState.prices)
@@ -16,7 +23,9 @@ function berechneKundenAnzahl() {
   const globalBasis = Math.max(1, Math.round(globalKundenProTag() / 10));
   const abweichung   = durchschnitt - REFERENZ_PREIS;
   const preisfaktor  = Math.max(0.2, 1 - abweichung * 0.3);
-  const anzahl = Math.round(globalBasis * preisfaktor * bewertungsFaktor());
+  // Zubehör-Bonus: Hund lockt mehr Kunden an den Stand
+  const zBonus = zubehoerKundenBonus();
+  const anzahl = Math.round(globalBasis * preisfaktor * bewertungsFaktor() * zBonus);
 
   return Math.max(1, anzahl + zufall(-1, 1));
 }
