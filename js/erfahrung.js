@@ -1,58 +1,9 @@
 'use strict';
 
 /* ================================================================
-   ERFAHRUNGSSYSTEM – Konfiguration und Berechnungsfunktionen
-   Diese Datei kann unabhängig von game.js angepasst werden.
+   ERFAHRUNGSSYSTEM – Berechnungsfunktionen
+   Konstanten (XP_STUFEN, XP_QUELLEN, LEVEL_SYMBOLE) kommen aus config.js
    ================================================================ */
-
-// Levelstufen: xpBis = kumulative XP die man INSGESAMT braucht um
-// dieses Level zu verlassen (nicht-linear: Schwellen steigen exponentiell)
-const XP_STUFEN = [
-  { level: 1,  xpBis: 100    },
-  { level: 2,  xpBis: 280    },
-  { level: 3,  xpBis: 600    },
-  { level: 4,  xpBis: 1200   },
-  { level: 5,  xpBis: 2500   },
-  { level: 6,  xpBis: 5000   },
-  { level: 7,  xpBis: 9000   },
-  { level: 8,  xpBis: 15000  },
-  { level: 9,  xpBis: 25000  },
-  { level: 10, xpBis: Infinity }, // Max-Level
-];
-
-// XP-Quellen – Koeffizienten hier anpassen
-const XP_QUELLEN = {
-  umsatz: {
-    xpProEuro: 2,   // 2 XP pro verdientem Euro
-  },
-  kunde: {
-    xpProKunde: 10, // 10 XP pro bedientem Kunden
-  },
-  bewertung: {
-    // XP je nach Sternezahl (Index = Sterne: 0–5)
-    // 5★ = 20 XP, 4★ = 12 XP, 3★ = 5 XP, 2★ = 1 XP, 1★ = 0 XP
-    xpTabelle: [0, 0, 1, 5, 12, 20],
-  },
-};
-
-// Level-Symbole (erscheinen im HUD-Badge)
-const LEVEL_SYMBOLE = [
-  '',      // Level 0 (nicht genutzt)
-  '🌱',   // Level 1
-  '🌿',   // Level 2 – ab hier sichtbar im HUD
-  '⭐',   // Level 3
-  '🌟',   // Level 4
-  '💫',   // Level 5
-  '🏆',   // Level 6
-  '👑',   // Level 7
-  '🚀',   // Level 8
-  '💎',   // Level 9
-  '🔥',   // Level 10 (Max)
-];
-
-/* ----------------------------------------------------------------
-   Berechnungsfunktionen
-   ---------------------------------------------------------------- */
 
 // Aktuelles Level für gegebene kumulative XP bestimmen
 function levelFuerXP(gesamtXP) {
@@ -80,7 +31,7 @@ function xpFortschritt(gesamtXP) {
   }
 
   // XP-Start des aktuellen Levels (= xpBis des vorherigen)
-  const stufeIdx   = level - 1; // Index in XP_STUFEN
+  const stufeIdx   = level - 1;
   const xpStart    = stufeIdx > 0 ? XP_STUFEN[stufeIdx - 1].xpBis : 0;
   const xpZiel     = XP_STUFEN[stufeIdx].xpBis;
   const xpAktuell  = gesamtXP - xpStart;

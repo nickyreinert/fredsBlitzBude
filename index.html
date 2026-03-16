@@ -54,194 +54,201 @@
       <div class="settings-box">
         <h2 class="settings-title">⚙️ Einstellungen</h2>
 
-        <!-- Option: Keine Komma-Zahlen -->
-        <label class="settings-row">
+        <!-- Tab-Navigation -->
+        <div class="settings-tabs">
+          <button class="settings-tab active" data-tab="spiel">🎮 Spiel</button>
+          <button class="settings-tab" data-tab="kunden">👥 Kunden</button>
+          <button class="settings-tab" data-tab="sonstiges">🔧 Sonstiges</button>
+        </div>
+
+        <!-- ── TAB: Spiel ──────────────────────────────────────── -->
+        <div id="settings-tab-spiel" class="settings-tab-panel active">
+
+          <!-- Einfaches Rechnen -->
+          <label class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-label">🧮 Einfaches Rechnen</span>
+              <span class="settings-row-desc">Nur ganze Euro-Beträge (kein Cent)</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="toggle-nocomma" class="toggle-input" />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+
+          <hr class="settings-divider" />
+
+          <!-- Einkaufsstufe -->
           <div class="settings-row-text">
-            <span class="settings-row-label">Einfaches Rechnen</span>
-            <span class="settings-row-desc">Nur ganze Euro-Beträge (kein Cent)</span>
+            <span class="settings-row-label">🛒 Einkaufsstufe</span>
+            <span class="settings-row-desc">Wie viel Rechnen beim Wechselgeld</span>
           </div>
-          <div class="toggle-wrap">
-            <input type="checkbox" id="toggle-nocomma" class="toggle-input" />
-            <span class="toggle-slider"></span>
+          <div class="settings-sub-row einkaufsstufe-buttons">
+            <button class="btn btn-sm einkaufsstufe-btn" data-stufe="1">
+              ⭐ Einfach<br><small>1 Produkt</small>
+            </button>
+            <button class="btn btn-sm einkaufsstufe-btn" data-stufe="2">
+              ⭐⭐ Mittel<br><small>1 Sorte, viele Stück</small>
+            </button>
+            <button class="btn btn-sm einkaufsstufe-btn" data-stufe="3">
+              ⭐⭐⭐ Schwer<br><small>Viele Produkte</small>
+            </button>
           </div>
-        </label>
 
-        <hr class="settings-divider" />
+          <hr class="settings-divider" />
 
-        <!-- Option: Einkaufs-Schwierigkeit -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">🛒 Einkaufsstufe</span>
-          <span class="settings-row-desc">Wie viel Rechnen beim Wechselgeld</span>
-        </div>
-        <div class="settings-sub-row einkaufsstufe-buttons">
-          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="1">
-            ⭐ Einfach<br><small>1 Produkt</small>
-          </button>
-          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="2">
-            ⭐⭐ Mittel<br><small>1 Sorte, viele Stück</small>
-          </button>
-          <button class="btn btn-sm einkaufsstufe-btn" data-stufe="3">
-            ⭐⭐⭐ Schwer<br><small>Viele Produkte</small>
-          </button>
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Haltbarkeit -->
-        <label class="settings-row">
-          <div class="settings-row-text">
-            <span class="settings-row-label">🥦 Ware verdirbt</span>
-            <span class="settings-row-desc">Obst & Gemüse hält nur begrenzt lange</span>
-          </div>
-          <div class="toggle-wrap">
-            <input type="checkbox" id="toggle-verderb" class="toggle-input" />
-            <span class="toggle-slider"></span>
-          </div>
-        </label>
-        <!-- Haltbarkeit in Tagen (nur wenn Verderb aktiv) -->
-        <div id="verderb-tage-row" class="settings-sub-row hidden">
-          <span class="settings-row-label">Haltbarkeit:</span>
-          <div class="verderb-tage-buttons">
-            <button class="btn btn-sm verderb-tage-btn" data-tage="2">2 Tage</button>
-            <button class="btn btn-sm verderb-tage-btn" data-tage="3">3 Tage</button>
-            <button class="btn btn-sm verderb-tage-btn" data-tage="5">5 Tage</button>
-            <button class="btn btn-sm verderb-tage-btn" data-tage="7">7 Tage</button>
-          </div>
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Globale Kundenmenge -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">👥 Kunden pro Tag</span>
-          <span class="settings-row-desc">Absolute Gesamtzahl an Passanten – Tagesrhythmus verteilt diese relativ</span>
-        </div>
-        <div class="settings-sub-row">
-          <div id="global-kunden-slider-row">
-            <span id="global-kunden-wert" class="settings-slider-value">30</span>
-            <span class="settings-slider-unit"> / Tag</span>
-          </div>
-          <input type="range" id="global-kunden-slider" min="1" max="1000" step="1" value="30" class="settings-range-input" />
-          <div class="settings-range-labels">
-            <span>1 (ruhig)</span>
-            <span>500</span>
-            <span>1000 🤯</span>
-          </div>
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Tagesrhythmus -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">🕐 Tagesrhythmus</span>
-          <span class="settings-row-desc">Relativer Anteil pro Tageszeit – 100% = globaler Wert</span>
-        </div>
-        <div id="tagesrhythmus-controls" class="settings-sub-row">
-          <!-- Wird per JS befüllt -->
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Kundentypen -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">👥 Kundentypen</span>
-          <span class="settings-row-desc">Häufigkeit der verschiedenen Kunden (0 = nie)</span>
-        </div>
-        <div id="kundentypen-controls" class="settings-sub-row">
-          <!-- Wird per JS befüllt -->
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Großmarkt-Mindestgeld -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">🏪 Großmarkt freischalten ab</span>
-          <span class="settings-row-desc">Mindestguthaben um den Großmarkt zu besuchen</span>
-        </div>
-        <div class="settings-sub-row">
-          <button class="btn btn-sm grossmarkt-min-btn" data-wert="10">10 €</button>
-          <button class="btn btn-sm grossmarkt-min-btn" data-wert="20">20 €</button>
-          <button class="btn btn-sm grossmarkt-min-btn" data-wert="50">50 €</button>
-          <button class="btn btn-sm grossmarkt-min-btn" data-wert="100">100 €</button>
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Bewertungs-Stärke -->
-        <div class="settings-row-text">
-          <span class="settings-row-label">⭐ Bewertungs-Einfluss</span>
-          <span class="settings-row-desc">Wie stark wirken sich Kundenbewertungen auf den Zulauf aus</span>
-        </div>
-        <div id="bewertung-staerke-controls" class="settings-sub-row">
-          <!-- Wird per JS befüllt -->
-        </div>
-
-        <hr class="settings-divider" />
-
-        <!-- Option: Trinkgeld (ausklappbar) -->
-        <details class="settings-details">
-          <summary class="settings-details-summary">
-            🎁 Trinkgeld-Einstellungen <span class="settings-details-hint">▾ erweitert</span>
-          </summary>
-
-          <div class="settings-details-body">
-            <label class="settings-row">
-              <div class="settings-row-text">
-                <span class="settings-row-label">Trinkgeld aktivieren</span>
-                <span class="settings-row-desc">Kunden geben manchmal extra Geld</span>
-              </div>
-              <div class="toggle-wrap">
-                <input type="checkbox" id="toggle-trinkgeld" class="toggle-input" />
-                <span class="toggle-slider"></span>
-              </div>
-            </label>
-
-            <div id="trinkgeld-detail-controls" class="hidden">
-              <hr class="settings-divider" />
-              <div class="settings-row-text">
-                <span class="settings-row-label">Basis-Häufigkeit</span>
-                <span class="settings-row-desc">Wie oft Kunden Trinkgeld geben (bei 3★)</span>
-              </div>
-              <div class="trinkgeld-slider-wrap">
-                <span class="slider-emoji-links">🙁</span>
-                <input type="range" id="slider-trinkgeld-chance"
-                       min="0" max="4" step="1" value="2" class="rhythmus-slider">
-                <span class="slider-emoji-rechts">😍</span>
-              </div>
-              <div class="rhythmus-slider-label" id="label-trinkgeld-chance">normal</div>
-
-              <hr class="settings-divider" />
-              <div class="settings-row-text">
-                <span class="settings-row-label">Maximaler Betrag</span>
-                <span class="settings-row-desc">Wie viel Trinkgeld maximal möglich ist</span>
-              </div>
-              <div class="trinkgeld-slider-wrap">
-                <span class="slider-emoji-links">🪙</span>
-                <input type="range" id="slider-trinkgeld-max"
-                       min="0" max="4" step="1" value="2" class="rhythmus-slider">
-                <span class="slider-emoji-rechts">💰</span>
-              </div>
-              <div class="rhythmus-slider-label" id="label-trinkgeld-max">bis 1 €</div>
+          <!-- Ware verdirbt -->
+          <label class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-label">🥦 Ware verdirbt</span>
+              <span class="settings-row-desc">Obst & Gemüse hält nur begrenzt lange</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="toggle-verderb" class="toggle-input" />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+          <div id="verderb-tage-row" class="settings-sub-row hidden">
+            <span class="settings-row-label">Haltbarkeit:</span>
+            <div class="verderb-tage-buttons">
+              <button class="btn btn-sm verderb-tage-btn" data-tage="2">2 Tage</button>
+              <button class="btn btn-sm verderb-tage-btn" data-tage="3">3 Tage</button>
+              <button class="btn btn-sm verderb-tage-btn" data-tage="5">5 Tage</button>
+              <button class="btn btn-sm verderb-tage-btn" data-tage="7">7 Tage</button>
             </div>
           </div>
-        </details>
 
-        <hr class="settings-divider" />
+          <hr class="settings-divider" />
 
-        <!-- Option: Intro wieder anzeigen -->
-        <button id="btn-reset-intro" class="btn btn-warning btn-lg settings-action-btn">
-          👵 Willkommens-Dialog wieder anzeigen
-        </button>
+          <!-- Großmarkt -->
+          <div class="settings-row-text">
+            <span class="settings-row-label">🏪 Großmarkt freischalten ab</span>
+            <span class="settings-row-desc">Mindestguthaben um den Großmarkt zu besuchen</span>
+          </div>
+          <div class="settings-sub-row">
+            <button class="btn btn-sm grossmarkt-min-btn" data-wert="10">10 €</button>
+            <button class="btn btn-sm grossmarkt-min-btn" data-wert="20">20 €</button>
+            <button class="btn btn-sm grossmarkt-min-btn" data-wert="50">50 €</button>
+            <button class="btn btn-sm grossmarkt-min-btn" data-wert="100">100 €</button>
+          </div>
 
-        <hr class="settings-divider" />
+        </div><!-- /tab-spiel -->
 
-        <!-- Option: Alle Daten zurücksetzen -->
-        <button id="btn-reset-all" class="btn btn-danger btn-lg settings-action-btn">
-          🗑️ Alle Daten zurücksetzen
-        </button>
-        <p class="settings-warning">Achtung: Spielstand wird gelöscht!</p>
+        <!-- ── TAB: Kunden ─────────────────────────────────────── -->
+        <div id="settings-tab-kunden" class="settings-tab-panel hidden">
 
-        <!-- Zurück -->
+          <!-- Kunden pro Tag -->
+          <div class="settings-row-text">
+            <span class="settings-row-label">👥 Kunden pro Tag</span>
+            <span class="settings-row-desc">Wie viele Passanten insgesamt vorbeilaufen</span>
+          </div>
+          <div class="settings-sub-row">
+            <div id="global-kunden-slider-row">
+              <span id="global-kunden-wert" class="settings-slider-value">30</span>
+              <span class="settings-slider-unit"> / Tag</span>
+            </div>
+            <input type="range" id="global-kunden-slider" min="1" max="1000" step="1" value="30" class="settings-range-input" />
+            <div class="settings-range-labels">
+              <span>1 (ruhig)</span>
+              <span>500</span>
+              <span>1000 🤯</span>
+            </div>
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Tagesrhythmus -->
+          <div class="settings-row-text">
+            <span class="settings-row-label">🕐 Tagesrhythmus</span>
+            <span class="settings-row-desc">Zu welcher Tageszeit kommen die meisten Kunden</span>
+          </div>
+          <div id="tagesrhythmus-controls" class="settings-sub-row">
+            <!-- Wird per JS befüllt -->
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Kundentypen -->
+          <div class="settings-row-text">
+            <span class="settings-row-label">🧑 Kundentypen</span>
+            <span class="settings-row-desc">Häufigkeit der verschiedenen Kunden (0 = nie)</span>
+          </div>
+          <div id="kundentypen-controls" class="settings-sub-row">
+            <!-- Wird per JS befüllt -->
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Trinkgeld -->
+          <label class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-label">🎁 Trinkgeld</span>
+              <span class="settings-row-desc">Kunden geben manchmal extra Geld</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="toggle-trinkgeld" class="toggle-input" />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+          <div id="trinkgeld-detail-controls" class="hidden">
+            <div class="settings-row-text">
+              <span class="settings-row-label">Häufigkeit</span>
+              <span class="settings-row-desc">Wie oft Kunden Trinkgeld geben (bei 3★)</span>
+            </div>
+            <div class="trinkgeld-slider-wrap">
+              <span class="slider-emoji-links">🙁</span>
+              <input type="range" id="slider-trinkgeld-chance"
+                     min="0" max="4" step="1" value="2" class="rhythmus-slider">
+              <span class="slider-emoji-rechts">😍</span>
+            </div>
+            <div class="rhythmus-slider-label" id="label-trinkgeld-chance">normal</div>
+
+            <hr class="settings-divider" />
+            <div class="settings-row-text">
+              <span class="settings-row-label">Maximaler Betrag</span>
+              <span class="settings-row-desc">Wie viel Trinkgeld maximal möglich ist</span>
+            </div>
+            <div class="trinkgeld-slider-wrap">
+              <span class="slider-emoji-links">🪙</span>
+              <input type="range" id="slider-trinkgeld-max"
+                     min="0" max="4" step="1" value="2" class="rhythmus-slider">
+              <span class="slider-emoji-rechts">💰</span>
+            </div>
+            <div class="rhythmus-slider-label" id="label-trinkgeld-max">bis 1 €</div>
+          </div>
+
+        </div><!-- /tab-kunden -->
+
+        <!-- ── TAB: Sonstiges ──────────────────────────────────── -->
+        <div id="settings-tab-sonstiges" class="settings-tab-panel hidden">
+
+          <!-- Bewertungs-Einfluss -->
+          <div class="settings-row-text">
+            <span class="settings-row-label">⭐ Bewertungs-Einfluss</span>
+            <span class="settings-row-desc">Wie stark wirken sich Kundenbewertungen auf den Zulauf aus</span>
+          </div>
+          <div id="bewertung-staerke-controls" class="settings-sub-row">
+            <!-- Wird per JS befüllt -->
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Intro -->
+          <button id="btn-reset-intro" class="btn btn-warning btn-lg settings-action-btn">
+            👵 Willkommens-Dialog wieder anzeigen
+          </button>
+
+          <hr class="settings-divider" />
+
+          <!-- Reset -->
+          <button id="btn-reset-all" class="btn btn-danger btn-lg settings-action-btn">
+            🗑️ Alle Daten zurücksetzen
+          </button>
+          <p class="settings-warning">Achtung: Spielstand wird gelöscht!</p>
+
+        </div><!-- /tab-sonstiges -->
+
+        <!-- Zurück (immer sichtbar) -->
         <button id="btn-settings-back" class="btn btn-primary btn-lg settings-action-btn">
           ← Zurück
         </button>
@@ -320,17 +327,17 @@
           </div>
         </div>
         <div id="customer-payment-info" class="hidden">
-          <!-- Einkaufsliste bei Stufe 2+3 -->
+          <!-- Einkaufsliste bei Stufe 2+3 (nur Produkte, keine Preise hier) -->
           <div id="customer-einkaufsliste" class="hidden"></div>
-          <p id="customer-price-row">Preis: <strong id="customer-price"></strong></p>
-          <p>Kunde gibt: <strong id="customer-gives"></strong></p>
-          <p id="customer-trinkgeld-row" class="hidden">Davon Trinkgeld: <strong id="customer-trinkgeld" class="trinkgeld-betrag"></strong> 🎁</p>
-          <button id="btn-give-change" class="btn btn-primary btn-lg">
-            💶 Wechselgeld rausgeben
-          </button>
-          <button id="btn-ablehnen" class="btn btn-danger btn-lg hidden">
-            ❌ Kauf ablehnen – zu wenig Geld!
-          </button>
+          <!-- Aktions-Buttons: immer beide sichtbar wenn Entscheidung nötig -->
+          <div id="customer-action-buttons">
+            <button id="btn-give-change" class="btn btn-primary btn-lg">
+              💶 Bedienen
+            </button>
+            <button id="btn-ablehnen" class="btn btn-danger btn-lg hidden">
+              🚫 Ablehnen
+            </button>
+          </div>
         </div>
       </div>
 
@@ -358,61 +365,76 @@
 
         <h2 class="change-title">💶 Wechselgeld rausgeben</h2>
 
-        <!-- Einkaufsliste (Stufe 2+3: mehrere Posten) -->
-        <div id="change-einkaufsliste" class="hidden">
-          <!-- Wird per JS befüllt -->
-        </div>
+        <!-- Zweispalten-Layout: links Infos, rechts Eingabe -->
+        <div id="change-columns">
 
-        <!-- Stufe 2+3: Teilergebnis-Eingaben (Menge × Preis pro Posten) -->
-        <div id="change-teilrechnung" class="hidden">
-          <!-- Wird per JS befüllt -->
-        </div>
+          <!-- LINKE SPALTE: Preisinfo + Einkaufsliste + Feedback -->
+          <div id="change-col-left">
 
-        <!-- Infos: Preis / Kunde gibt / Trinkgeld -->
-        <div id="change-info">
-          <div class="change-info-row change-info-gesamt">
-            <span id="change-gesamt-label">Preis:</span>
-            <strong id="change-price"></strong>
-          </div>
-          <div class="change-info-row">
-            <span>Kunde gibt:</span>
-            <strong id="change-paid"></strong>
-          </div>
-          <div class="change-info-row change-trinkgeld-row hidden" id="change-trinkgeld-row">
-            <span>Davon Trinkgeld:</span>
-            <strong id="change-trinkgeld" class="trinkgeld-betrag">0 €</strong>
-          </div>
-        </div>
+            <!-- Einkaufsliste (Stufe 2+3: mehrere Posten) -->
+            <div id="change-einkaufsliste" class="hidden">
+              <!-- Wird per JS befüllt -->
+            </div>
 
-        <!-- Große Anzeige: Wechselgeld-Eingabe -->
-        <div id="change-display">
-          <span id="change-input-display">0,00</span>
-          <span class="change-euro-sign">€</span>
-        </div>
+            <!-- Stufe 2+3: Teilergebnis-Eingaben (Menge × Preis pro Posten) -->
+            <div id="change-teilrechnung" class="hidden">
+              <!-- Wird per JS befüllt -->
+            </div>
 
-        <!-- Feedback-Bereich -->
-        <div id="change-feedback" class="hidden"></div>
+            <!-- Infos: Preis / Kunde gibt / Trinkgeld -->
+            <div id="change-info">
+              <div class="change-info-row change-info-gesamt">
+                <span id="change-gesamt-label">Preis:</span>
+                <strong id="change-price"></strong>
+              </div>
+              <div class="change-info-row">
+                <span>Kunde gibt:</span>
+                <strong id="change-paid"></strong>
+              </div>
+              <div class="change-info-row change-trinkgeld-row hidden" id="change-trinkgeld-row">
+                <span>Davon Trinkgeld:</span>
+                <strong id="change-trinkgeld" class="trinkgeld-betrag">0 €</strong>
+              </div>
+            </div>
 
-        <!-- Numpad: große Tasten -->
-        <div id="numpad">
-          <button class="numpad-btn" data-val="1">1</button>
-          <button class="numpad-btn" data-val="2">2</button>
-          <button class="numpad-btn" data-val="3">3</button>
-          <button class="numpad-btn" data-val="4">4</button>
-          <button class="numpad-btn" data-val="5">5</button>
-          <button class="numpad-btn" data-val="6">6</button>
-          <button class="numpad-btn" data-val="7">7</button>
-          <button class="numpad-btn" data-val="8">8</button>
-          <button class="numpad-btn" data-val="9">9</button>
-          <button class="numpad-btn numpad-comma" data-val=",">,</button>
-          <button class="numpad-btn" data-val="0">0</button>
-          <button class="numpad-btn numpad-del" data-val="del">⌫</button>
-        </div>
+            <!-- Feedback-Bereich (links, unterhalb der Infos) -->
+            <div id="change-feedback" class="hidden"></div>
 
-        <!-- Bestätigen -->
-        <button id="btn-change-confirm" class="btn btn-success btn-xl">
-          ✅ Bestätigen
-        </button>
+          </div><!-- /change-col-left -->
+
+          <!-- RECHTE SPALTE: Display + Numpad + Button -->
+          <div id="change-col-right">
+
+            <!-- Große Anzeige: Wechselgeld-Eingabe -->
+            <div id="change-display">
+              <span id="change-input-display">0,00</span>
+              <span class="change-euro-sign">€</span>
+            </div>
+
+            <!-- Numpad: große Tasten -->
+            <div id="numpad">
+              <button class="numpad-btn" data-val="1">1</button>
+              <button class="numpad-btn" data-val="2">2</button>
+              <button class="numpad-btn" data-val="3">3</button>
+              <button class="numpad-btn" data-val="4">4</button>
+              <button class="numpad-btn" data-val="5">5</button>
+              <button class="numpad-btn" data-val="6">6</button>
+              <button class="numpad-btn" data-val="7">7</button>
+              <button class="numpad-btn" data-val="8">8</button>
+              <button class="numpad-btn" data-val="9">9</button>
+              <button class="numpad-btn numpad-comma" data-val=",">,</button>
+              <button class="numpad-btn" data-val="0">0</button>
+              <button class="numpad-btn numpad-del" data-val="del">⌫</button>
+            </div>
+
+            <!-- Bestätigen -->
+            <button id="btn-change-confirm" class="btn btn-success btn-xl">
+              ✅ Bestätigen
+            </button>
+
+          </div><!-- /change-col-right -->
+
+        </div><!-- /change-columns -->
 
       </div>
     </div><!-- /screen-change -->
@@ -462,10 +484,52 @@
     }
   </script>
 
-  <!-- Erfahrungssystem (muss vor game.js geladen werden) -->
-  <script src="erfahrung.js"></script>
+  <!-- Konfiguration und Grundlagen -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+
+  <!-- Canvas: Setup und Zeichenfunktionen -->
+  <script src="js/canvas/setup.js"></script>
+  <script src="js/canvas/himmel.js"></script>
+  <script src="js/canvas/boden.js"></script>
+  <script src="js/canvas/stand.js"></script>
+  <script src="js/canvas/produkte.js"></script>
+  <script src="js/canvas/figuren.js"></script>
+  <script src="js/canvas/spielwelt.js"></script>
+  <script src="js/canvas/uhr.js"></script>
+
+  <!-- UI-Bausteine -->
+  <script src="js/ui/screens.js"></script>
+  <script src="js/ui/meldung.js"></script>
+  <script src="js/ui/hud.js"></script>
+  <script src="js/ui/inventar.js"></script>
+  <script src="js/ui/intro.js"></script>
+  <script src="js/ui/preispopup.js"></script>
+
   <!-- Spiellogik -->
-  <script src="game.js"></script>
+  <script src="js/logik/bewertung.js"></script>
+  <script src="js/logik/trinkgeld.js"></script>
+  <script src="js/logik/verderb.js"></script>
+  <script src="js/logik/zeit.js"></script>
+  <script src="js/logik/speichern.js"></script>
+
+  <!-- Erfahrungssystem -->
+  <script src="js/erfahrung.js"></script>
+
+  <!-- Kunden und Wechselgeld (brauchen Erfahrung + Logik) -->
+  <script src="js/logik/kunden.js"></script>
+  <script src="js/ui/wechselgeld.js"></script>
+  <script src="js/ui/grossmarkt.js"></script>
+  <script src="js/logik/passanten.js"></script>
+  <script src="js/logik/tag.js"></script>
+
+  <!-- Animation und Einstellungen -->
+  <script src="js/animation.js"></script>
+  <script src="js/ui/einstellungen.js"></script>
+
+  <!-- Initialisierung (Event-Listener + Startup – muss zuletzt) -->
+  <script src="js/init.js"></script>
 
 </body>
 </html>

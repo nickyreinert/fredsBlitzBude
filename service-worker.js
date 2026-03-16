@@ -7,7 +7,7 @@
 'use strict';
 
 // Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-blitz-bude-v2';
+const CACHE_NAME = 'freds-blitz-bude-v3';
 
 // Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
 const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');
@@ -17,10 +17,45 @@ const ASSETS_ZU_CACHEN = [
   `${APP_PREFIX}`,
   `${APP_PREFIX}index.html`,
   `${APP_PREFIX}style.css`,
-  `${APP_PREFIX}game.js`,
   `${APP_PREFIX}manifest.json`,
   `${APP_PREFIX}icon-192.png`,
   `${APP_PREFIX}icon-512.png`,
+  // Konfiguration und Grundlagen
+  `${APP_PREFIX}js/config.js`,
+  `${APP_PREFIX}js/state.js`,
+  `${APP_PREFIX}js/utils.js`,
+  // Canvas
+  `${APP_PREFIX}js/canvas/setup.js`,
+  `${APP_PREFIX}js/canvas/himmel.js`,
+  `${APP_PREFIX}js/canvas/boden.js`,
+  `${APP_PREFIX}js/canvas/stand.js`,
+  `${APP_PREFIX}js/canvas/produkte.js`,
+  `${APP_PREFIX}js/canvas/figuren.js`,
+  `${APP_PREFIX}js/canvas/spielwelt.js`,
+  `${APP_PREFIX}js/canvas/uhr.js`,
+  // UI
+  `${APP_PREFIX}js/ui/screens.js`,
+  `${APP_PREFIX}js/ui/meldung.js`,
+  `${APP_PREFIX}js/ui/hud.js`,
+  `${APP_PREFIX}js/ui/inventar.js`,
+  `${APP_PREFIX}js/ui/intro.js`,
+  `${APP_PREFIX}js/ui/preispopup.js`,
+  `${APP_PREFIX}js/ui/wechselgeld.js`,
+  `${APP_PREFIX}js/ui/grossmarkt.js`,
+  `${APP_PREFIX}js/ui/einstellungen.js`,
+  // Logik
+  `${APP_PREFIX}js/logik/bewertung.js`,
+  `${APP_PREFIX}js/logik/trinkgeld.js`,
+  `${APP_PREFIX}js/logik/verderb.js`,
+  `${APP_PREFIX}js/logik/zeit.js`,
+  `${APP_PREFIX}js/logik/speichern.js`,
+  `${APP_PREFIX}js/logik/kunden.js`,
+  `${APP_PREFIX}js/logik/passanten.js`,
+  `${APP_PREFIX}js/logik/tag.js`,
+  // Erfahrung, Animation, Init
+  `${APP_PREFIX}js/erfahrung.js`,
+  `${APP_PREFIX}js/animation.js`,
+  `${APP_PREFIX}js/init.js`,
 ];
 
 /* ── Install-Event: Assets vorab cachen ─────────────────────── */
