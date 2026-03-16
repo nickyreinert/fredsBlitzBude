@@ -148,13 +148,14 @@ function tagesEnde() {
 function naechsterTag() {
   gameState.day++;
 
+  // Jahreszeit nach neuer Tages-basierter Logik prüfen
   const alteJahreszeit = gameState.jahreszeit;
-  const neuerMonatIndex = (START_MONAT_INDEX + Math.floor((gameState.day - 1) / 10)) % 12;
-  const neueJahreszeit = jahresZeitFuerMonat(neuerMonatIndex + 1);
+  const neueJahreszeit = jahresZeitFuerTag(gameState.day);
   const jahreszeitWechsel = neueJahreszeit !== alteJahreszeit;
 
   if (jahreszeitWechsel) {
-    const jz = JAHRESZEITEN[gameState.jahreszeit];
+    // Toast erst nach aktualisiereZeit() zeigen (neuer Wert)
+    const jz = JAHRESZEITEN[neueJahreszeit];
     setTimeout(() => {
       const toast = document.createElement('div');
       toast.style.cssText = `

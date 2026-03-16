@@ -18,8 +18,22 @@ function bewertungsFaktor() {
   return 1.0 + ((avg - 3) / 2) * staerke;
 }
 
-// Bewertung nach Transaktion vergeben
+// Bewertungs-Wahrscheinlichkeit aus Einstellungen (0 = niemand, 1 = jeder)
+function bewertungsChance() {
+  return parseFloat(localStorage.getItem('bewertungsChance') ?? String(DEFAULT_BEWERTUNGS_CHANCE));
+}
+
+// Bewertung nach Transaktion vergeben (nur mit konfigurierter Wahrscheinlichkeit)
 function vergebeKundenBewertung(diffCent) {
+  gameState.gesamtKunden += 1;
+
+  // Wahrscheinlichkeitsprüfung: gibt dieser Kunde eine Bewertung ab?
+  if (Math.random() > bewertungsChance()) {
+    aktualisiereHUD();
+    speichereSpielstand();
+    return null; // keine Bewertung
+  }
+
   let sterne;
   if (diffCent === 0) {
     sterne = 4;
@@ -33,7 +47,6 @@ function vergebeKundenBewertung(diffCent) {
   }
   gameState.bewertungSumme  += sterne;
   gameState.bewertungAnzahl += 1;
-  gameState.gesamtKunden    += 1;
   aktualisiereHUD();
   speichereSpielstand();
   return sterne;

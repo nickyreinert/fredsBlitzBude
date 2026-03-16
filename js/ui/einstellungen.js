@@ -197,6 +197,52 @@ document.querySelectorAll('.verderb-tage-btn').forEach(btn => {
   });
 })();
 
+// Jahreszeit-Dauer-Controls aufbauen
+(function initJahreszeitTageSettings() {
+  const container = document.getElementById('jahreszeit-tage-controls');
+  if (!container) return;
+
+  const aktuell = parseInt(localStorage.getItem('jahreszeitTage') ?? String(DEFAULT_JAHRESZEIT_TAGE), 10);
+
+  JAHRESZEIT_TAGE_STUFEN.forEach(({ val, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm faktor-btn';
+    btn.textContent = label;
+    btn.dataset.val = val;
+    btn.classList.toggle('btn-primary', val === aktuell);
+    btn.addEventListener('click', () => {
+      localStorage.setItem('jahreszeitTage', val);
+      container.querySelectorAll('.faktor-btn').forEach(b =>
+        b.classList.toggle('btn-primary', b === btn));
+      zeigeMeldung(`✅ Jahreszeit-Wechsel alle ${label}`);
+    });
+    container.appendChild(btn);
+  });
+})();
+
+// Bewertungs-Chance-Controls aufbauen
+(function initBewertungsChanceSettings() {
+  const container = document.getElementById('bewertung-chance-controls');
+  if (!container) return;
+
+  const aktuell = parseFloat(localStorage.getItem('bewertungsChance') ?? String(DEFAULT_BEWERTUNGS_CHANCE));
+
+  BEWERTUNG_CHANCE_STUFEN.forEach(({ val, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm faktor-btn';
+    btn.textContent = label;
+    btn.dataset.val = val;
+    btn.classList.toggle('btn-primary', Math.abs(val - aktuell) < 0.01);
+    btn.addEventListener('click', () => {
+      localStorage.setItem('bewertungsChance', val);
+      container.querySelectorAll('.faktor-btn').forEach(b =>
+        b.classList.toggle('btn-primary', b === btn));
+      zeigeMeldung(`✅ Bewertungs-Häufigkeit: ${label}`);
+    });
+    container.appendChild(btn);
+  });
+})();
+
 // Bewertungs-Stärke-Controls aufbauen
 (function initBewertungsStaerkeSettings() {
   const container = document.getElementById('bewertung-staerke-controls');

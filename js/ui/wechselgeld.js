@@ -234,25 +234,27 @@ function schliesseTransaktion(diffCent) {
   }
   gameState.customersServed++;
 
-  // Bewertung vergeben
+  // Bewertung vergeben (kann null sein wenn Kunde keine abgibt)
   const sterne = vergebeKundenBewertung(diffCent);
 
-  // XP vergeben (Umsatz + 1 Kunde + Bewertung)
-  const xp = xpFuerTransaktion(einnahme / 100, sterne);
+  // XP vergeben (Umsatz + 1 Kunde + ggf. Bewertung)
+  const xp = xpFuerTransaktion(einnahme / 100, sterne ?? 0);
   addiereXP(xp);
 
-  // Sterne-Feedback kurz zeigen
+  // Feedback kurz zeigen (Sterne nur wenn Bewertung abgegeben wurde)
   const feedback = document.getElementById('change-feedback');
-  const sterneStr = '★'.repeat(sterne) + '☆'.repeat(5 - sterne);
+  const sterneStr = sterne !== null
+    ? ' ' + '★'.repeat(sterne) + '☆'.repeat(5 - sterne)
+    : '';
   if (diffCent === 0) {
     feedback.className = 'feedback-correct';
-    feedback.textContent = `🎉 Genau richtig! ${sterneStr}`;
+    feedback.textContent = `🎉 Genau richtig!${sterneStr}`;
   } else if (diffCent > 0) {
     feedback.className = 'feedback-correct';
-    feedback.textContent = `😊 Großzügig! ${sterneStr}`;
+    feedback.textContent = `😊 Großzügig!${sterneStr}`;
   } else {
     feedback.className = 'feedback-wrong';
-    feedback.textContent = `😕 Zu wenig gegeben! ${sterneStr}`;
+    feedback.textContent = `😕 Zu wenig gegeben!${sterneStr}`;
   }
 
   // Neue Kunden nachlegen wenn Queue leer

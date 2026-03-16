@@ -8,10 +8,10 @@ function aktualisiereHUD() {
   document.getElementById('hud-money').textContent = keineKommazahlen
     ? `${Math.round(gameState.money)} €`
     : formatEuro(gameState.money);
-  // Tag + Monat + Jahreszeit-Emoji
+  // Tag + Jahreszeit (kein Monat mehr)
   const jz = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
   document.getElementById('hud-day').textContent =
-    `${gameState.day} – ${MONATSNAMEN[gameState.monat]} ${jz.emoji}`;
+    `${gameState.day} – ${jz.name} ${jz.emoji}`;
   // Kunden-Zähler: nur heute bediente Kunden anzeigen
   document.getElementById('hud-customers').textContent =
     `${gameState.customersServed}`;
@@ -30,7 +30,7 @@ function aktualisiereHUD() {
     sterneEl.textContent = '★'.repeat(voll) + (halb ? '½' : '') + '☆'.repeat(leer)
       + ` ${avg.toFixed(1)}`;
   }
-  gesamtEl.textContent = gameState.gesamtKunden > 0
-    ? `${gameState.gesamtKunden} Bewertungen`
+  gesamtEl.textContent = gameState.bewertungAnzahl > 0
+    ? `${gameState.bewertungAnzahl} Bew.`
     : '';
 }

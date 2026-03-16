@@ -153,8 +153,14 @@ const DEFAULT_GROSSMARKT_MIN_GELD = 20;
 // Standard Haltbarkeit in Tagen
 const DEFAULT_HALTBARKEIT_TAGE = 3;
 
-// Spielstart-Monat (März = Index 2, 0-basiert)
-const START_MONAT_INDEX = 2;
+// Jahreszeit-Dauer in Spieltagen (Standard: 90)
+const DEFAULT_JAHRESZEIT_TAGE = 90;
+
+// Reihenfolge der Jahreszeiten
+const JAHRESZEITEN_REIHENFOLGE = ['fruehling', 'sommer', 'herbst', 'winter'];
+
+// Standard-Wahrscheinlichkeit, dass ein Kunde eine Bewertung abgibt (0–1)
+const DEFAULT_BEWERTUNGS_CHANCE = 1.0;
 
 // Referenzpreis für Kunden-Berechnung
 const REFERENZ_PREIS = 1.50;
@@ -259,6 +265,24 @@ const BEWERTUNG_STAERKE_STUFEN = [
 
 // ── Kundentyp-Häufigkeits-Stufen (für Einstellungen) ────────────
 const KUNDENTYP_HAEUFIGKEIT_STUFEN = [0, 0.3, 1.0, 2.0, 3.5];
+
+// ── Jahreszeit-Dauer-Stufen (Tage pro Jahreszeit) ────────────────
+const JAHRESZEIT_TAGE_STUFEN = [
+  { val: 10,  label: '10 Tage'  },
+  { val: 30,  label: '30 Tage'  },
+  { val: 60,  label: '60 Tage'  },
+  { val: 90,  label: '90 Tage'  },
+  { val: 180, label: '180 Tage' },
+];
+
+// ── Bewertungs-Chance-Stufen (0 = niemand, 1 = jeder) ────────────
+const BEWERTUNG_CHANCE_STUFEN = [
+  { val: 0,    label: 'Niemand'   },
+  { val: 0.25, label: 'Selten'    },
+  { val: 0.5,  label: 'Die Hälfte' },
+  { val: 0.75, label: 'Meistens'  },
+  { val: 1.0,  label: 'Jeder'     },
+];
 
 // ── Zubehör-Shop ─────────────────────────────────────────────────
 

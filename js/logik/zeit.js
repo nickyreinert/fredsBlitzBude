@@ -1,26 +1,26 @@
 'use strict';
 
 /* ================================================================
-   ZEIT – Jahreszeiten, Monate, Oma-Lieferung
+   ZEIT – Jahreszeiten, Oma-Lieferung
    ================================================================ */
 
-// Monat → Jahreszeit
-function jahresZeitFuerMonat(monat) {
-  for (const [key, jz] of Object.entries(JAHRESZEITEN)) {
-    if (jz.monate.includes(monat)) return key;
-  }
-  return 'fruehling';
+// Jahreszeit-Dauer aus den Einstellungen lesen
+function jahreszeitTageProSaison() {
+  return parseInt(localStorage.getItem('jahreszeitTage') ?? String(DEFAULT_JAHRESZEIT_TAGE), 10);
 }
 
-// Monat und Jahreszeit aktualisieren (alle 10 Spieltage = 1 Monat)
-function aktualisiereZeit() {
-  const neuerMonatIndex = (START_MONAT_INDEX + Math.floor((gameState.day - 1) / 10)) % 12;
-  gameState.monat = neuerMonatIndex + 1;
+// Jahreszeit direkt aus Spieltag berechnen (unabhängig von Monaten)
+function jahresZeitFuerTag(tag) {
+  const dauer = jahreszeitTageProSaison();
+  const index = Math.floor((tag - 1) / dauer) % JAHRESZEITEN_REIHENFOLGE.length;
+  return JAHRESZEITEN_REIHENFOLGE[index];
+}
 
-  const neueJahreszeit = jahresZeitFuerMonat(gameState.monat);
+// Jahreszeit aktualisieren (wird jeden Tag aufgerufen)
+function aktualisiereZeit() {
+  const neueJahreszeit = jahresZeitFuerTag(gameState.day);
   const jahresZeitGewechselt = neueJahreszeit !== gameState.jahreszeit;
   gameState.jahreszeit = neueJahreszeit;
-
   return jahresZeitGewechselt;
 }
 
