@@ -95,10 +95,14 @@ function oeffneStand() {
   gameState.tagesZeitSlot     = 'morgen';
 
   document.getElementById('btn-feierabend').classList.remove('hidden');
+  // Spielstand sichern damit Kunden-Queue und offener Stand nach Browser-Schließen erhalten bleibt
+  speichereSpielstand();
 }
 
 // Tagesende
 function tagesEnde() {
+  // Guard: verhindert doppelten Aufruf (z.B. Feierabend-Button + Timeout gleichzeitig)
+  if (!gameState.standOpen) return;
   gameState.standOpen = false;
   gameState.customerVisible = false;
 
@@ -147,6 +151,8 @@ function tagesEnde() {
 // Neuen Tag starten
 function naechsterTag() {
   gameState.day++;
+  // Großmarkt-Flag zurücksetzen – Oma soll jeden Tag neu entscheiden
+  gameState.grossmarktGenutzt = false;
 
   // Jahreszeit nach neuer Tages-basierter Logik prüfen
   const alteJahreszeit = gameState.jahreszeit;

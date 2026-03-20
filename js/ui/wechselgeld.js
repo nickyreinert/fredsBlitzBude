@@ -226,8 +226,8 @@ function schliesseTransaktion(diffCent) {
 
   // Geld kassieren (Preis + Trinkgeld – Trinkgeld gehört dem Spieler)
   const einnahme = kunde.preis + (kunde.trinkgeld ?? 0);
-  gameState.money         += einnahme;
-  gameState.dailyEarnings += einnahme;
+  gameState.money         = Math.round((gameState.money + einnahme) * 100) / 100;
+  gameState.dailyEarnings = Math.round((gameState.dailyEarnings + einnahme) * 100) / 100;
   // Alle gekauften Posten aus dem Lager abbuchen
   for (const pos of kunde.einkaufsliste) {
     lagerAus(pos.prodKey, pos.menge);
@@ -238,7 +238,7 @@ function schliesseTransaktion(diffCent) {
   const sterne = vergebeKundenBewertung(diffCent);
 
   // XP vergeben (Umsatz + 1 Kunde + ggf. Bewertung)
-  const xp = xpFuerTransaktion(einnahme / 100, sterne ?? 0);
+  const xp = xpFuerTransaktion(einnahme, sterne ?? 0);
   addiereXP(xp);
 
   // Feedback kurz zeigen (Sterne nur wenn Bewertung abgegeben wurde)

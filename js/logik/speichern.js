@@ -10,7 +10,6 @@ function speichereSpielstand() {
     inventory:          gameState.inventory,
     inventarAlter:      gameState.inventarAlter,
     day:                gameState.day,
-    monat:              gameState.monat,
     jahreszeit:         gameState.jahreszeit,
     phase:              gameState.phase,
     prices:             gameState.prices,
@@ -41,7 +40,6 @@ function ladeSpielstand() {
     gameState.inventory        = stand.inventory        ?? { gurke: 1 };
     gameState.inventarAlter    = stand.inventarAlter    ?? { gurke: [0] };
     gameState.day              = stand.day              ?? 1;
-    gameState.monat            = stand.monat            ?? 3;
     gameState.jahreszeit       = stand.jahreszeit       ?? 'fruehling';
     gameState.phase            = stand.phase            ?? 1;
     gameState.prices           = stand.prices           ?? { gurke: 0 };

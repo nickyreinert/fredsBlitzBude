@@ -91,7 +91,7 @@ function grossmarktKaufen() {
       gesamt += anzahl * PRODUKTE[key].kaufPreis;
     }
   }
-  gameState.money -= gesamt;
+  gameState.money = Math.round((gameState.money - gesamt) * 100) / 100;
   gameState.grossmarktGenutzt = true;
   speichereSpielstand();
 

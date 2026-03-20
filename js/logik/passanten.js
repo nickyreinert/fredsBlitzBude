@@ -41,9 +41,15 @@ function aktualisierePassanten(delta) {
     gameState.tagesZeitSlot = tf < 0.33 ? 'morgen' : tf < 0.75 ? 'mittag' : 'abend';
   }
 
-  // Neuen Passanten spawnen
+  // Automatisches Tagesende wenn 18:00 Uhr erreicht (tagesfortschritt >= 1.0)
+  if (gameState.standOpen && gameState.tagesfortschritt >= 1.0 && !gameState.currentCustomer) {
+    tagesEnde();
+    return;
+  }
+
+  // Neuen Passanten spawnen (nur wenn Tag noch nicht vorbei)
   gameState.passantenTimer -= delta;
-  if (gameState.passantenTimer <= 0 && gameState.standOpen) {
+  if (gameState.passantenTimer <= 0 && gameState.standOpen && gameState.tagesfortschritt < 1.0) {
     const faktor = tagesrhythmusFaktor(gameState.tagesZeitSlot);
     if (faktor > 0) {
       gameState.passanten.push(neuerPassant());

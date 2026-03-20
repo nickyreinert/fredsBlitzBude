@@ -120,12 +120,31 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
       b.classList.toggle('btn-primary', aktiv);
       b.classList.toggle('btn-outline', !aktiv);
     });
-    // Bewertungen und Erfahrung zurücksetzen
-    gameState.bewertungSumme  = 0;
-    gameState.bewertungAnzahl = 0;
-    gameState.gesamtKunden    = 0;
-    gameState.gesamtXP        = 0;
-    gameState.level           = 1;
+    // Gesamten In-Memory-State zurücksetzen (sonst spielt man mit altem Stand weiter)
+    gameState.money             = 0;
+    gameState.inventory         = { gurke: 1 };
+    gameState.inventarAlter     = { gurke: [0] };
+    gameState.day               = 1;
+    gameState.jahreszeit        = 'fruehling';
+    gameState.phase             = 1;
+    gameState.prices            = { gurke: 0 };
+    gameState.customers         = [];
+    gameState.currentCustomer   = null;
+    gameState.standOpen         = false;
+    gameState.customersServed   = 0;
+    gameState.dailyEarnings     = 0;
+    gameState.totalCustomers    = 0;
+    gameState.tagesfortschritt  = 0;
+    gameState.tagesZeitSlot     = 'morgen';
+    gameState.passanten         = [];
+    gameState.passantenTimer    = 0;
+    gameState.bewertungSumme    = 0;
+    gameState.bewertungAnzahl   = 0;
+    gameState.gesamtKunden      = 0;
+    gameState.grossmarktGenutzt = false;
+    gameState.gesamtXP          = 0;
+    gameState.level             = 1;
+    gameState.zubehoer          = {};
     aktualisiereXpHud();
     zeigeMeldung('🗑️ Alles zurückgesetzt!');
     setTimeout(() => zeigeScreen('screen-start'), 1500);
@@ -196,9 +215,9 @@ document.getElementById('btn-ablehnen').addEventListener('click', () => {
     kunde.passantRef.steht = false;
     gameState.passanten = gameState.passanten.filter(p => p !== kunde.passantRef);
   }
-  // Bei zu wenig Geld: Kunde kommt später nochmal (zurück in Queue)
-  // Bei Unfreundlichkeit: Kunde wird weggeschickt, kommt nicht wieder
-  if (kunde && !kunde.unfreundlich) {
+  // Bei echter Unfreundlichkeit: Kunde wird weggeschickt, kommt nicht wieder
+  // Bei zu wenig Geld: Kunde kommt NICHT zurück – er hat schlicht nicht genug (Endlosschleife verhindern)
+  if (kunde && !kunde.unfreundlich && !(kunde.zahlt < kunde.preis)) {
     gameState.customers.push(kunde);
   }
   gameState.currentCustomer = null;

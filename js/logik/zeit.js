@@ -33,10 +33,15 @@ function omaLieferung() {
 
   const anzahlProdukte = gameState.grossmarktGenutzt ? 1 : zufall(1, 2);
   const nachricht = [];
+  // Kopie der verfügbaren Produkte damit kein Produkt doppelt geliefert werden kann
+  const verfuegbarKopie = [...verfuegbar];
 
   for (let i = 0; i < anzahlProdukte; i++) {
-    if (verfuegbar.length === 0) break;
-    const [key, prod] = zufallsElement(verfuegbar);
+    if (verfuegbarKopie.length === 0) break;
+    const idx = zufall(0, verfuegbarKopie.length - 1);
+    const [key, prod] = verfuegbarKopie[idx];
+    // Gewähltes Produkt entfernen damit es nicht doppelt ausgewählt werden kann
+    verfuegbarKopie.splice(idx, 1);
     const menge = zufall(1, 3);
     lagerEin(key, menge);
     if (!gameState.prices[key]) gameState.prices[key] = 0;

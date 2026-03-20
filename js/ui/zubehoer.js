@@ -61,7 +61,7 @@ function zubehoerKaufen(key) {
   }
 
   // Kaufen: Geld abziehen, Zubehör hinzufügen
-  gameState.money -= artikel.preis;
+  gameState.money = Math.round((gameState.money - artikel.preis) * 100) / 100;
   gameState.zubehoer[key] = (gameState.zubehoer[key] ?? 0) + 1;
   speichereSpielstand();
 

@@ -14,7 +14,6 @@ const gameState = {
     gurke: [0]          // Startgurke ist frisch (Tag 0 = heute erhalten)
   },
   day: 1,               // Aktueller Tag (absolut)
-  monat: 3,             // Aktueller Monat (1–12), Spielstart im März
   jahreszeit: 'fruehling',
   phase: 1,             // Spielphase (1 = Straßenstand)
   prices: {
