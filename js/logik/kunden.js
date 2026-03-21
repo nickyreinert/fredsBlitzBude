@@ -151,7 +151,7 @@ function zeigeKundenDialog() {
     const namen = kunde.einkaufsliste.map(pos => PRODUKTE[pos.prodKey]?.name ?? 'etwas');
     prodName = namen.slice(0, -1).join(', ') + ' und ' + namen[namen.length - 1];
   } else {
-    prodName = prod ? prod.name : 'etwas';
+    prodName = prod ? prod.name : TEXTE.customer.fallbackProduktName;
   }
 
   let sprache, anzeigeEmoji;
@@ -207,12 +207,12 @@ function zeigeKundenDialog() {
 
     if (zuWenig) {
       // Zu wenig Geld: nur Ablehnen möglich
-      btnAblehnen.textContent = '❌ Ablehnen – zu wenig Geld!';
+      btnAblehnen.textContent = TEXTE.customer.ablehnenZuWenigGeld;
       btnAblehnen.classList.remove('hidden');
       btnBedienen.classList.add('hidden');
     } else if (k.unfreundlich) {
       // Unfreundlich: beide Buttons zeigen – Kind entscheidet selbst
-      btnAblehnen.textContent = '🚫 Ablehnen';
+      btnAblehnen.textContent = TEXTE.customer.ablehnenStandard;
       btnAblehnen.classList.remove('hidden');
       btnBedienen.classList.remove('hidden');
     } else {
@@ -222,7 +222,7 @@ function zeigeKundenDialog() {
     }
 
     document.getElementById('customer-payment-info').classList.remove('hidden');
-  }, 1000);
+  }, 280);
 }
 
 // Nächsten Kunden in der Queue abarbeiten

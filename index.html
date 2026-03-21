@@ -301,31 +301,36 @@
           <canvas id="hud-clock" width="52" height="52"></canvas>
           <div class="hud-clock-text">
             <span id="hud-uhrzeit" class="hud-uhrzeit">08:00</span>
-            <span class="hud-label">Tag <span id="hud-day">1</span></span>
+            <div class="hud-day-info">
+              <span class="hud-label" id="hud-tag-label">Tag <span id="hud-day-num">1</span></span>
+              <span class="hud-season-badge" id="hud-season-badge">🌸</span>
+            </div>
           </div>
         </div>
         <div class="hud-item">
-          <span class="hud-label">💰 Geld</span>
+          <span class="hud-label" id="hud-label-geld">💰 Geld</span>
           <span id="hud-money" class="hud-value">0,50 €</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">🛒 Kunden</span>
-          <span id="hud-customers" class="hud-value">0/0</span>
+          <span class="hud-label" id="hud-label-kunden">🛒 Kunden</span>
+          <span id="hud-customers" class="hud-value">0</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">⭐ Bewertung</span>
+          <span class="hud-label" id="hud-label-bewertung">⭐ Bewertung</span>
           <span id="hud-stars" class="hud-value hud-stars">–</span>
           <span id="hud-total-customers" class="hud-stars-count"></span>
         </div>
+
         <!-- Level-Badge: erst ab Level 2 sichtbar -->
         <div class="hud-item hidden" id="hud-level-item">
-          <span class="hud-label"><span id="hud-level-symbol">⭐</span> Level</span>
+          <span class="hud-label"><span id="hud-level-symbol">⭐</span> <span id="hud-label-level">Level</span></span>
           <span id="hud-level-badge" class="hud-level-badge">2</span>
           <div class="hud-xp-bar">
             <div id="hud-xp-fill" class="hud-xp-fill" style="width:0%"></div>
           </div>
         </div>
-        <div class="hud-item">
+
+        <div class="hud-item hidden" id="hud-feierabend-item">
           <button id="btn-feierabend" class="btn btn-warning btn-sm hidden">
             🌙 Feierabend
           </button>

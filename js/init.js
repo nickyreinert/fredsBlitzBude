@@ -4,6 +4,39 @@
    INIT – Event-Listener und App-Startup
    ================================================================ */
 
+// Alle statischen HTML-Texte aus der TEXTE-Datenbank (config.js) setzen
+// → Texte ändern: nur noch in config.js unter TEXTE nötig
+function initialisiereTexte() {
+  // HUD-Labels
+  const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  setText('hud-label-geld',      TEXTE.hud.labelGeld);
+  setText('hud-label-kunden',    TEXTE.hud.labelKunden);
+  setText('hud-label-bewertung', TEXTE.hud.labelBewertung);
+  setText('hud-label-level',     TEXTE.hud.labelLevel);
+  setText('btn-feierabend',      TEXTE.hud.feierabend);
+
+  // Stand-Panel
+  setText('btn-open-stand',      TEXTE.stand.oeffnenDefault);
+  const standTitel = document.querySelector('#panel-inventory h3');
+  if (standTitel) standTitel.textContent = TEXTE.stand.panelTitel;
+
+  // Kunden-Aktions-Buttons
+  setText('btn-give-change',     TEXTE.customer.btnBedienen);
+  setText('btn-ablehnen',        TEXTE.customer.ablehnenStandard);
+
+  // Wechselgeld-Screen
+  const changeTitle = document.querySelector('.change-title');
+  if (changeTitle) changeTitle.textContent = TEXTE.wechselgeld.titel;
+  setText('btn-change-confirm',  TEXTE.wechselgeld.btnBestaetigen);
+
+  // Nacht-Overlay
+  setText('btn-grossmarkt',      TEXTE.nacht.btnGrossmarkt);
+  setText('btn-next-day',        TEXTE.nacht.btnNaechsterTag);
+
+  // Einstellungen
+  setText('btn-settings-back',   TEXTE.einstellungen.btnZurueck);
+}
+
 // Canvas-Klick: Preisschilder anklicken
 function canvasKlickPosition(e) {
   const rect   = canvas.getBoundingClientRect();
@@ -242,6 +275,9 @@ document.getElementById('btn-change-confirm').addEventListener('click', () => {
 document.getElementById('btn-next-day').addEventListener('click', () => {
   naechsterTag();
 });
+
+// Alle UI-Texte aus der TEXTE-Datenbank setzen
+initialisiereTexte();
 
 /* ================================================================
    STARTZEICHNUNG (Startbildschirm Hintergrund)

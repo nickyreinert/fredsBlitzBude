@@ -34,9 +34,11 @@ function starteTag() {
   if (standWarOffen) {
     document.getElementById('panel-inventory').classList.add('hidden');
     document.getElementById('btn-feierabend').classList.remove('hidden');
+    document.getElementById('hud-feierabend-item').classList.remove('hidden');
   } else {
     document.getElementById('panel-inventory').classList.remove('hidden');
     document.getElementById('btn-feierabend').classList.add('hidden');
+    document.getElementById('hud-feierabend-item').classList.add('hidden');
   }
 
   zeichneHudUhr(gameState.tagesfortschritt);
@@ -53,7 +55,7 @@ function starteTag() {
   if (!standWarOffen && !hatWare && !kannGrossmarkt) {
     lagerEin('gurke', 2);
     if (!gameState.prices['gurke']) gameState.prices['gurke'] = 0;
-    zeigeMeldung('👵 Oma bringt Notfall-Gurken! Nicht aufgeben!');
+    zeigeMeldung(TEXTE.meldungen.notfallLieferung);
     bauInventarPanel();
   }
 
@@ -72,12 +74,12 @@ function oeffneStand() {
 
   if (!hatPreis) {
     const btn = document.getElementById('btn-open-stand');
-    btn.textContent = '⚠️ Bitte Preis eingeben!';
+    btn.textContent = TEXTE.stand.oeffnenPreisHinweis;
     btn.style.background = 'linear-gradient(180deg,#ef9a9a,#e53935)';
     setTimeout(() => {
-      btn.textContent = '🏪 Stand öffnen!';
+      btn.textContent = TEXTE.stand.oeffnenDefault;
       btn.style.background = '';
-    }, 2000);
+    }, TEXTE.stand.oeffnenPreisHinweisTimeoutMs);
     return;
   }
 
@@ -95,6 +97,7 @@ function oeffneStand() {
   gameState.tagesZeitSlot     = 'morgen';
 
   document.getElementById('btn-feierabend').classList.remove('hidden');
+  document.getElementById('hud-feierabend-item').classList.remove('hidden');
   // Spielstand sichern damit Kunden-Queue und offener Stand nach Browser-Schließen erhalten bleibt
   speichereSpielstand();
 }
@@ -107,12 +110,13 @@ function tagesEnde() {
   gameState.customerVisible = false;
 
   document.getElementById('btn-feierabend').classList.add('hidden');
+  document.getElementById('hud-feierabend-item').classList.add('hidden');
 
   const nachtOverlay = document.getElementById('overlay-night');
   document.getElementById('night-title').textContent =
-    `Gute Nacht! Tag ${gameState.day} ist zu Ende.`;
+    TEXTE.dayEnd.titel(gameState.day);
   document.getElementById('night-text').textContent =
-    `Du hast heute ${gameState.customersServed} Kunden bedient!`;
+    TEXTE.dayEnd.kundenBedient(gameState.customersServed);
 
   const verluste = verderbeInventar();
   let verderb_html = '';
@@ -120,20 +124,20 @@ function tagesEnde() {
     const verloreneWaren = Object.entries(verluste)
       .map(([k, n]) => `${PRODUKTE[k]?.emoji || k} ${n}× ${PRODUKTE[k]?.name || k}`)
       .join(', ');
-    verderb_html = `<br>🗑️ Verdorben: <strong>${verloreneWaren}</strong>`;
+    verderb_html = `<br>${TEXTE.dayEnd.verdorben} <strong>${verloreneWaren}</strong>`;
   }
 
   let oma_html = '';
   if (gameState.phase === 1) {
     const omaText = omaLieferung();
     if (omaText.length > 0) {
-      oma_html = `<br>👵 Oma liefert: <strong>${omaText.join(', ')}</strong>`;
+      oma_html = `<br>${TEXTE.dayEnd.omaLiefert} <strong>${omaText.join(', ')}</strong>`;
     }
   }
 
   document.getElementById('night-stats').innerHTML = `
-    💰 Heute verdient: <strong>${formatEuro(gameState.dailyEarnings)}</strong><br>
-    🏦 Gesamt-Geld: <strong>${formatEuro(gameState.money)}</strong>
+    ${TEXTE.dayEnd.heuteVerdient} <strong>${formatEuro(gameState.dailyEarnings)}</strong><br>
+    ${TEXTE.dayEnd.gesamtGeld} <strong>${formatEuro(gameState.money)}</strong>
     ${verderb_html}${oma_html}
   `;
 

@@ -20,22 +20,22 @@ const PRODUKTE = {
 // ── Jahreszeiten: Farben, Name, Monate ──────────────────────────
 const JAHRESZEITEN = {
   fruehling: {
-    name: 'Frühling', emoji: '🌸', monate: [3, 4, 5],
+    name: 'Frühling', kurz: 'Frühl.', emoji: '🌸', monate: [3, 4, 5],
     himmel: ['#b3e5fc', '#e1f5fe'], horizont: '#aed581',
     boden: ['#8bc34a', '#33691e'], strasseRand: '#9ccc65',
   },
   sommer: {
-    name: 'Sommer', emoji: '☀️', monate: [6, 7, 8],
+    name: 'Sommer', kurz: 'Sommer', emoji: '☀️', monate: [6, 7, 8],
     himmel: ['#4fc3f7', '#b3e5fc'], horizont: '#66bb6a',
     boden: ['#4caf50', '#1b5e20'], strasseRand: '#81c784',
   },
   herbst: {
-    name: 'Herbst', emoji: '🍂', monate: [9, 10, 11],
+    name: 'Herbst', kurz: 'Herbst', emoji: '🍂', monate: [9, 10, 11],
     himmel: ['#ffcc80', '#ffe0b2'], horizont: '#a1887f',
     boden: ['#ff8f00', '#4e342e'], strasseRand: '#d4a574',
   },
   winter: {
-    name: 'Winter', emoji: '❄️', monate: [12, 1, 2],
+    name: 'Winter', kurz: 'Winter', emoji: '❄️', monate: [12, 1, 2],
     himmel: ['#b0bec5', '#eceff1'], horizont: '#90a4ae',
     boden: ['#e0e0e0', '#90a4ae'], strasseRand: '#bdbdbd',
   },
@@ -106,6 +106,98 @@ const INTRO_SCHRITTE = [
   'Vergiss nicht: Du musst den richtigen Preis setzen und\nauch das Wechselgeld stimmen! 💶',
   'Los geht\'s! Viel Spaß! 🎉',
 ];
+
+/* ================================================================
+   TEXTE – Zentrale Text-Datenbank
+   Alle sichtbaren Spieltexte hier ändern → wirkt sich sofort aus.
+   ================================================================ */
+const TEXTE = {
+  // ── HUD-Leiste ───────────────────────────────────────────────
+  hud: {
+    labelGeld:      '💰 Geld',
+    labelKunden:    '🛒 Kunden',
+    labelBewertung: '⭐ Bewertung',
+    labelLevel:     'Level',
+    feierabend:     '🌙 Feierabend',
+    tagPrefix:      'Tag',
+  },
+
+  // ── Inventar & Stand-Panel ───────────────────────────────────
+  stand: {
+    panelTitel:                   'Dein Stand',
+    oeffnenDefault:               '🏪 Stand öffnen!',
+    oeffnenPreisHinweis:          '⚠️ Bitte Preis eingeben!',
+    oeffnenPreisHinweisTimeoutMs: 1800,
+  },
+
+  // ── Kunden-Dialog ────────────────────────────────────────────
+  customer: {
+    fallbackProduktName:  'etwas',
+    btnBedienen:          '💶 Bedienen',
+    ablehnenStandard:     '🚫 Ablehnen',
+    ablehnenZuWenigGeld:  '❌ Ablehnen – zu wenig Geld!',
+  },
+
+  // ── Wechselgeld-Minispiel ────────────────────────────────────
+  wechselgeld: {
+    titel:          '💶 Wechselgeld rausgeben',
+    labelGezahlt:   'Gezahlt:',
+    labelTrinkgeld: 'davon Trinkgeld:',
+    labelPreis:     'Preis:',
+    labelGesamt:    'Gesamt:',
+    btnBestaetigen: '✅ Bestätigen',
+    btnWeiter:      '✅ Weiter',
+    btnTrotzdem:    '⚠️ Trotzdem geben!',
+    btnTrotzdemWeiter: '⚠️ Trotzdem weiter!',
+  },
+
+  // ── Nacht-Overlay ────────────────────────────────────────────
+  nacht: {
+    emoji:          '🌙',
+    btnGrossmarkt:  '🏪 Zum Großmarkt!',
+    btnNaechsterTag: '☀️ Neuer Tag',
+  },
+
+  // ── Tagesende-Meldungen ──────────────────────────────────────
+  dayEnd: {
+    titel:          (day) => `Gute Nacht! Tag ${day} ist zu Ende.`,
+    kundenBedient:  (count) => `Du hast heute ${count} Kunden bedient!`,
+    heuteVerdient:  '💰 Heute verdient:',
+    gesamtGeld:     '🏦 Gesamt-Geld:',
+    verdorben:      '🗑️ Verdorben:',
+    omaLiefert:     '👵 Oma liefert:',
+  },
+
+  // ── Großmarkt ────────────────────────────────────────────────
+  grossmarkt: {
+    titel:          '🏪 Großmarkt',
+    btnKaufen:      '🛒 Kaufen & Heimfahren',
+    btnZurueck:     '← Zurück',
+    labelBudget:    '💰 Dein Geld:',
+    labelGesamt:    'Gesamt:',
+  },
+
+  // ── Zubehör-Shop ─────────────────────────────────────────────
+  zubehoer: {
+    titel:          '🛍️ Zubehör-Shop',
+    btnZurueck:     '← Zurück',
+    btnKaufen:      '🛒 Kaufen',
+    btnZuWenig:     '💸 Zu wenig Geld',
+    statusGekauft:  '✅ Gekauft!',
+  },
+
+  // ── Einstellungen ────────────────────────────────────────────
+  einstellungen: {
+    btnZurueck:     '← Zurück',
+  },
+
+  // ── System-Meldungen ─────────────────────────────────────────
+  meldungen: {
+    notfallLieferung: '👵 Oma bringt Notfall-Gurken! Nicht aufgeben!',
+    zubehoerGekauft:  (name, emoji) => `${emoji} ${name} gekauft! Viel Spaß damit!`,
+    zuWenigGeld:      '💸 Nicht genug Geld!',
+  },
+};
 
 // ── Erfahrungssystem ────────────────────────────────────────────
 

@@ -8,10 +8,12 @@ function aktualisiereHUD() {
   document.getElementById('hud-money').textContent = keineKommazahlen
     ? `${Math.round(gameState.money)} €`
     : formatEuro(gameState.money);
-  // Tag + Jahreszeit (kein Monat mehr)
+  // Tag-Nummer und Jahreszeit-Emoji getrennt anzeigen
   const jz = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
-  document.getElementById('hud-day').textContent =
-    `${gameState.day} – ${jz.name} ${jz.emoji}`;
+  const dayNumEl = document.getElementById('hud-day-num');
+  if (dayNumEl) dayNumEl.textContent = gameState.day;
+  const seasonBadge = document.getElementById('hud-season-badge');
+  if (seasonBadge) seasonBadge.textContent = jz.emoji;
   // Kunden-Zähler: nur heute bediente Kunden anzeigen
   document.getElementById('hud-customers').textContent =
     `${gameState.customersServed}`;

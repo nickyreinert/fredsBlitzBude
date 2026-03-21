@@ -38,12 +38,14 @@ function animationsSchleife(zeitstempel) {
     const stunde   = Math.floor(aktuelleStunden);
     const uhrzeitEl = document.getElementById('hud-uhrzeit');
     if (uhrzeitEl) uhrzeitEl.textContent = `${stunde}:00`;
-    // Tageszeit-Slot-Emoji in der Tag-Anzeige (kein Monat – nur Jahreszeit)
+    // Jahreszeit-Emoji + Tageszeit-Slot im Season-Badge anzeigen
+    const jz2 = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
     const slot = gameState.tagesZeitSlot;
     const slotEmoji = TAGESRHYTHMUS[slot]?.emoji ?? '';
-    const jz2 = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
-    document.getElementById('hud-day').textContent =
-      `${gameState.day} – ${jz2.name} ${jz2.emoji} ${slotEmoji}`;
+    const dayNumEl = document.getElementById('hud-day-num');
+    if (dayNumEl) dayNumEl.textContent = gameState.day;
+    const seasonBadge = document.getElementById('hud-season-badge');
+    if (seasonBadge) seasonBadge.textContent = `${jz2.emoji} ${slotEmoji}`;
   }
 
   // Schleife fortsetzen
