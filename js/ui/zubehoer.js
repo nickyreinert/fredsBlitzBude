@@ -28,12 +28,12 @@ function zeigeZubehoerShop() {
       </div>
       <div class="zubehoer-rechts">
         ${bereitsGekauft
-          ? `<div class="zubehoer-status">✅ Gekauft!</div>`
+          ? `<div class="zubehoer-status">${TEXTE.zubehoer.statusGekauft}</div>`
           : `<div class="zubehoer-preis">${formatEuro(artikel.preis)}</div>
              <button class="btn btn-success btn-lg zubehoer-kaufen-btn"
                data-key="${key}"
                ${kannKaufen ? '' : 'disabled'}>
-               ${kannKaufen ? '🛒 Kaufen' : '💸 Zu wenig Geld'}
+               ${kannKaufen ? TEXTE.zubehoer.btnKaufen : TEXTE.zubehoer.btnZuWenig}
              </button>`
         }
       </div>
@@ -56,7 +56,7 @@ function zubehoerKaufen(key) {
   if (bereitsGekauft) return;
 
   if (gameState.money < artikel.preis) {
-    zeigeMeldung('💸 Nicht genug Geld!');
+    zeigeMeldung(TEXTE.meldungen.zuWenigGeld);
     return;
   }
 
@@ -65,7 +65,7 @@ function zubehoerKaufen(key) {
   gameState.zubehoer[key] = (gameState.zubehoer[key] ?? 0) + 1;
   speichereSpielstand();
 
-  zeigeMeldung(`${artikel.emoji} ${artikel.name} gekauft! Viel Spaß damit!`);
+  zeigeMeldung(TEXTE.meldungen.zubehoerGekauft(artikel.name, artikel.emoji));
 
   // Shop neu aufbauen damit Button deaktiviert wird
   zeigeZubehoerShop();

@@ -37,9 +37,6 @@
     <!-- Einstellungen-Button: immer sichtbar, oben rechts -->
     <button id="btn-settings" class="btn-icon" title="Einstellungen">⚙️</button>
 
-    <!-- Zubehör-Shop-Button: oben links, nur im Spielstand sichtbar -->
-    <button id="btn-zubehoer" class="btn-icon btn-icon-left hidden" title="Zubehör-Shop">🛍️</button>
-
     <!-- ── SCREEN 1: Startbildschirm ─────────────────────────── -->
     <div id="screen-start" class="screen active">
       <div class="start-box">
@@ -296,6 +293,12 @@
 
       <!-- Info-Leiste oben -->
       <div id="hud">
+        <!-- Zubehör-Shop-Button: als erstes HUD-Element -->
+        <div class="hud-item hud-item--icon hidden" id="hud-zubehoer-item">
+          <button id="btn-zubehoer" class="hud-icon-btn" title="Zubehör-Shop">🛍️</button>
+          <span class="hud-label">Shop</span>
+        </div>
+
         <!-- Uhr: dreht sich, zeigt wie viel vom Tag noch übrig ist -->
         <div class="hud-item hud-clock-item">
           <canvas id="hud-clock" width="52" height="52"></canvas>

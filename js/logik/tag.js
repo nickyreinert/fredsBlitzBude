@@ -61,7 +61,7 @@ function starteTag() {
 
   speichereSpielstand();
   // Zubehör-Shop-Button einblenden (nur im Spielstand sichtbar)
-  document.getElementById('btn-zubehoer').classList.remove('hidden');
+  document.getElementById('hud-zubehoer-item').classList.remove('hidden');
   zeigeScreen('screen-stand');
   starteAnimation();
 }
