@@ -74,6 +74,11 @@ canvas.addEventListener('touchend', (e) => {
 
 // Einstellungen öffnen
 document.getElementById('btn-settings').addEventListener('click', () => {
+  const hudMenu = document.getElementById('hud-menu');
+  const hudMenuBtn = document.getElementById('btn-hud-menu');
+  if (hudMenu) hudMenu.classList.add('hidden');
+  if (hudMenuBtn) hudMenuBtn.setAttribute('aria-expanded', 'false');
+
   screenVorEinstellungen = aktuellerScreen() || 'screen-start';
   // Toggle-Status aktuell setzen
   document.getElementById('toggle-nocomma').checked = keineKommazahlen;
@@ -84,6 +89,53 @@ document.getElementById('btn-settings').addEventListener('click', () => {
 document.getElementById('btn-zubehoer').addEventListener('click', () => {
   zeigeZubehoerShop();
 });
+
+// HUD-Burger / Menü (mobile): Toggle Menu und Menu-Shortcuts
+// HUD-Burger/Menu — sichere Initialisierung und robustes Klickverhalten
+function initHudMenu() {
+  const hudMenuBtn = document.getElementById('btn-hud-menu');
+  const hudMenu = document.getElementById('hud-menu');
+  if (!hudMenuBtn || !hudMenu) return;
+
+  // Make sure elements are clickable even if parent had pointer-events:none
+  hudMenuBtn.style.pointerEvents = 'all';
+  hudMenu.style.pointerEvents = 'all';
+
+  hudMenuBtn.addEventListener('click', (e) => {
+    // Toggle hidden class: hidden = closed
+    const isNowHidden = hudMenu.classList.toggle('hidden');
+    hudMenuBtn.setAttribute('aria-expanded', (!isNowHidden).toString());
+    e.stopPropagation();
+  });
+
+  const zubehoerMenuBtn = document.getElementById('btn-zubehoer-menu');
+  if (zubehoerMenuBtn) {
+    zubehoerMenuBtn.addEventListener('click', (e) => {
+      hudMenu.classList.add('hidden');
+      hudMenuBtn.setAttribute('aria-expanded', 'false');
+      e.stopPropagation();
+      zeigeZubehoerShop();
+    });
+  }
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!hudMenu.classList.contains('hidden')) {
+      const inside = e.target.closest && e.target.closest('#hud-actions');
+      if (!inside) {
+        hudMenu.classList.add('hidden');
+        hudMenuBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+}
+
+// Initialize after DOM ready (init.js is loaded at the end, but be defensive)
+try {
+  initHudMenu();
+} catch (err) {
+  console.warn('HUD-Menu Init failed', err);
+}
 
 // Zubehör-Shop: Zurück zum Stand
 document.getElementById('btn-zubehoer-zurueck').addEventListener('click', () => {
@@ -186,12 +238,31 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
 
 // Einstellungen schließen – zurück zum vorherigen Screen
 document.getElementById('btn-settings-back').addEventListener('click', () => {
-  zeigeScreen(screenVorEinstellungen);
+  const zielScreen = screenVorEinstellungen || 'screen-stand';
+  zeigeScreen(zielScreen);
   // Falls wir vom Stand zurückkommen, Animation neu starten
-  if (screenVorEinstellungen === 'screen-stand') {
+  if (zielScreen === 'screen-stand') {
     starteAnimation();
   }
 });
+
+// Beim Reload evtl. überlagerte aktive Screens bereinigen.
+// Dadurch startet die UI immer in einem sauberen Zustand.
+function normalisiereScreenZustand() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  const start = document.getElementById('screen-start');
+  if (start) start.classList.add('active');
+
+  const change = document.getElementById('screen-change');
+  if (change) change.classList.remove('active');
+
+  const hudMenu = document.getElementById('hud-menu');
+  const hudMenuBtn = document.getElementById('btn-hud-menu');
+  if (hudMenu) hudMenu.classList.add('hidden');
+  if (hudMenuBtn) hudMenuBtn.setAttribute('aria-expanded', 'false');
+}
+
+normalisiereScreenZustand();
 
 // Startbildschirm: "Spiel starten"
 document.getElementById('btn-start').addEventListener('click', () => {

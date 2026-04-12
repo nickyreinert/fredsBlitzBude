@@ -1,13 +1,13 @@
 /* ================================================================
    Freds Blitz-Bude – Service Worker
-   Strategie: Cache-First für alle lokalen Assets
+  Strategie: Network-First für HTML/CSS/JS, Cache-First für Rest
    Cache-Name: freds-blitz-bude-v2
    ================================================================ */
 
 'use strict';
 
 // Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-blitz-bude-v4';
+const CACHE_NAME = 'freds-blitz-bude-v5';
 
 // Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
 const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');
@@ -112,42 +112,56 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  const istKritischeDatei =
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document' ||
+    event.request.destination === 'style' ||
+    event.request.destination === 'script';
+
+  if (istKritischeDatei) {
+    // Für HTML/CSS/JS immer zuerst Netzwerk versuchen,
+    // damit normale Reloads sofort neue UI bekommen.
+    event.respondWith(
+      fetch(event.request)
+        .then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+
+          const responseZumCachen = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseZumCachen));
+          return networkResponse;
+        })
+        .catch(() => {
+          if (event.request.mode === 'navigate') {
+            return caches.match(`${APP_PREFIX}index.html`);
+          }
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Für restliche Assets: Cache-First (schnell/offline-freundlich)
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Cache-Hit: direkt aus Cache liefern
-        if (cachedResponse) {
-          console.log('[ServiceWorker] Aus Cache geladen:', event.request.url);
-          return cachedResponse;
-        }
+        if (cachedResponse) return cachedResponse;
 
-        // Cache-Miss: Netzwerk anfragen und im Cache speichern
-        console.log('[ServiceWorker] Vom Netzwerk laden:', event.request.url);
         return fetch(event.request)
           .then(networkResponse => {
-            // Nur gültige Antworten cachen
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
               return networkResponse;
             }
 
-            // Response klonen (da sie nur einmal gelesen werden kann)
             const responseZumCachen = networkResponse.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseZumCachen);
-              });
-
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseZumCachen));
             return networkResponse;
           })
           .catch(() => {
-            // Offline-Fallback: index.html zurückgeben wenn vorhanden
-            console.warn('[ServiceWorker] Offline – Fallback auf index.html');
-
             if (event.request.mode === 'navigate') {
               return caches.match(`${APP_PREFIX}index.html`);
             }
-
             return caches.match(event.request);
           });
       })
@@ -161,5 +175,10 @@ self.addEventListener('message', event => {
     caches.delete(CACHE_NAME).then(() => {
       event.ports[0].postMessage({ status: 'ok' });
     });
+    return;
+  }
+
+  if (event.data && event.data.typ === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });

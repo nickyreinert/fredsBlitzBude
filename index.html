@@ -19,8 +19,8 @@
 
   <title>Freds Blitz-Bude</title>
 
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- Game Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=20260412-1" />
 </head>
 <body>
 
@@ -34,8 +34,7 @@
        ============================================================ -->
   <div id="ui">
 
-    <!-- Einstellungen-Button: immer sichtbar, oben rechts -->
-    <button id="btn-settings" class="btn-icon" title="Einstellungen">⚙️</button>
+    <!-- Einstellungen-Button: (verschoben ins HUD für mobile/desktop) -->
 
     <!-- ── SCREEN 1: Startbildschirm ─────────────────────────── -->
     <div id="screen-start" class="screen active">
@@ -299,29 +298,29 @@
           <span class="hud-label">Shop</span>
         </div>
 
-        <!-- Uhr: dreht sich, zeigt wie viel vom Tag noch übrig ist -->
+        <!-- Uhr: Wert (Icon + Zeit) oben, Label (Tag/Saison) unten -->
         <div class="hud-item hud-clock-item">
-          <canvas id="hud-clock" width="52" height="52"></canvas>
-          <div class="hud-clock-text">
+          <div class="hud-clock-top">
+            <canvas id="hud-clock" width="52" height="52"></canvas>
             <span id="hud-uhrzeit" class="hud-uhrzeit">08:00</span>
-            <div class="hud-day-info">
-              <span class="hud-label" id="hud-tag-label">Tag <span id="hud-day-num">1</span></span>
-              <span class="hud-season-badge" id="hud-season-badge">🌸</span>
-            </div>
+          </div>
+          <div class="hud-day-info">
+            <span class="hud-label" id="hud-tag-label">Tag <span id="hud-day-num">1</span></span>
+            <span class="hud-season-badge" id="hud-season-badge">🌸</span>
           </div>
         </div>
         <div class="hud-item">
-          <span class="hud-label" id="hud-label-geld">💰 Geld</span>
           <span id="hud-money" class="hud-value">0,50 €</span>
+          <span class="hud-label" id="hud-label-geld">💰 Geld</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label" id="hud-label-kunden">🛒 Kunden</span>
           <span id="hud-customers" class="hud-value">0</span>
+          <span class="hud-label" id="hud-label-kunden">🛒 Kunden</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label" id="hud-label-bewertung">⭐ Bewertung</span>
           <span id="hud-stars" class="hud-value hud-stars">–</span>
           <span id="hud-total-customers" class="hud-stars-count"></span>
+          <span class="hud-label" id="hud-label-bewertung">⭐ Bewertung</span>
         </div>
 
         <!-- Level-Badge: erst ab Level 2 sichtbar -->
@@ -337,6 +336,15 @@
           <button id="btn-feierabend" class="btn btn-warning btn-sm hidden">
             🌙 Feierabend
           </button>
+        </div>
+
+        <!-- HUD Aktionen: Burger + Menü (Settings / Shop) -->
+        <div id="hud-actions" class="hud-actions">
+          <button id="btn-hud-menu" class="hud-icon-btn hud-burger" aria-expanded="false" aria-controls="hud-menu" title="Mehr">☰</button>
+          <div id="hud-menu" class="hud-menu hidden" role="menu">
+            <button id="btn-settings" class="btn hud-menu-btn" role="menuitem" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
+            <button id="btn-zubehoer-menu" class="btn hud-menu-btn" role="menuitem">🛍️ Zubehör</button>
+          </div>
         </div>
       </div>
 
@@ -531,9 +539,35 @@
     // Service Worker nur registrieren wenn unterstützt
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(reg => console.log('Service Worker registriert:', reg.scope))
+        navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
+          .then(reg => {
+            console.log('Service Worker registriert:', reg.scope);
+
+            // Immer aktiv nach neuer Version suchen
+            reg.update();
+
+            // Wenn ein Update bereitsteht, sofort aktivieren
+            if (reg.waiting) {
+              reg.waiting.postMessage({ typ: 'SKIP_WAITING' });
+            }
+
+            reg.addEventListener('updatefound', () => {
+              const worker = reg.installing;
+              if (!worker) return;
+
+              worker.addEventListener('statechange', () => {
+                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                  worker.postMessage({ typ: 'SKIP_WAITING' });
+                }
+              });
+            });
+          })
           .catch(err => console.warn('Service Worker Fehler:', err));
+
+        // Sobald neuer SW die Kontrolle übernimmt, Seite neu laden
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
       });
     }
   </script>
@@ -584,7 +618,7 @@
   <script src="js/ui/zubehoer.js"></script>
 
   <!-- Initialisierung (Event-Listener + Startup – muss zuletzt) -->
-  <script src="js/init.js"></script>
+  <script src="js/init.js?v=20260412-1"></script>
 
 </body>
 </html>
