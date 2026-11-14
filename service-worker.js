@@ -1,13 +1,17 @@
 /* ================================================================
    Freds Blitz-Bude – Service Worker
   Strategie: Network-First für HTML/CSS/JS, Cache-First für Rest
-   Cache-Name: freds-blitz-bude-v2
+   Cache-Name: freds-blitz-bude-<Version aus js/version.js>
    ================================================================ */
 
 'use strict';
 
-// Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-blitz-bude-v11';
+// Versionsnummer laden (wird bei jedem Commit automatisch hochgezählt).
+// Ändert sich die Version, erkennt der Browser einen neuen Service Worker → neuer Cache.
+importScripts('js/version.js');
+
+// Cache-Name folgt automatisch der Spiel-Version
+const CACHE_NAME = `freds-blitz-bude-${SPIEL_VERSION}`;
 
 // Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
 const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');
@@ -21,6 +25,7 @@ const ASSETS_ZU_CACHEN = [
   `${APP_PREFIX}icon-192.png`,
   `${APP_PREFIX}icon-512.png`,
   // Konfiguration und Grundlagen
+  `${APP_PREFIX}js/version.js`,
   `${APP_PREFIX}js/config.js`,
   `${APP_PREFIX}js/state.js`,
   `${APP_PREFIX}js/utils.js`,

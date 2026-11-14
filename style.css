@@ -2542,3 +2542,15 @@ body {
   border-radius: 10px;
   padding: 0.3rem 0.4rem;
 }
+
+/* Versionsnummer: ganz klein und kaum sichtbar unten rechts */
+.versions-anzeige {
+  position: fixed;
+  right: calc(6px + env(safe-area-inset-right));
+  bottom: calc(3px + env(safe-area-inset-bottom));
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  user-select: none;
+  z-index: 10000;
+}

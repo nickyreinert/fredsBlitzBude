@@ -367,6 +367,9 @@ document.getElementById('btn-next-day').addEventListener('click', () => {
 // Alle UI-Texte aus der TEXTE-Datenbank setzen
 initialisiereTexte();
 
+// Versionsnummer unten rechts anzeigen
+document.getElementById('versions-anzeige').textContent = `v${SPIEL_VERSION}`;
+
 /* ================================================================
    STARTZEICHNUNG (Startbildschirm Hintergrund)
    ================================================================ */
