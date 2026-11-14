@@ -33,47 +33,113 @@ function berechneKundenAnzahl() {
   return Math.max(1, anzahl + zufall(-1, 1));
 }
 
+// Kauflust für ein Produkt bei einem Preis (1 = normal, >1 = Schnäppchen, ~0 = viel zu teuer)
+// Ältere Ware ist weniger wert → ihr fairer Preis sinkt mit der Qualität.
+function kaufLust(key, stufe, preis, typKey) {
+  const prod = PRODUKTE[key];
+  if (!prod || !(preis > 0)) return 0;
+  const fair = (prod.fairPreis ?? 1.5) * (FRISCHE_STUFEN[stufe]?.qualitaet ?? 1);
+  const verhaeltnis = preis / fair;
+  const empfindlich = PREIS_EMPFINDLICHKEIT[typKey] ?? 1;
+  if (verhaeltnis <= 1) {
+    // Günstiger als üblich: Kunden greifen öfter zu (bis 2,5-fach)
+    return Math.min(2.5, 1 + (1 - verhaeltnis) * 1.5 * empfindlich);
+  }
+  // Teurer als üblich: Kauflust fällt schnell ab
+  return Math.exp(-PREIS_ABSCHRECKUNG * empfindlich * (verhaeltnis - 1));
+}
+
+// Wie attraktiv ist der Stand insgesamt? (Durchschnitt der Kauflust aller Waren mit Preis)
+function standAttraktivitaet() {
+  const werte = Object.keys(gameState.inventory)
+    .filter(k => (gameState.inventory[k] || 0) > 0 && gameState.prices[k] > 0)
+    .map(k => kaufLust(k, 'gruen', gameState.prices[k], 'erwachsen'));
+  if (werte.length === 0) return 1;
+  return werte.reduce((a, b) => a + b, 0) / werte.length;
+}
+
+// Will der Kunde zu diesen Preisen kaufen? (prüft jeden Posten, der teuerste entscheidet)
+function kundeWillKaufen(kunde) {
+  let chance = 1;
+  for (const pos of kunde.einkaufsliste) {
+    chance = Math.min(chance, kaufLust(pos.prodKey, pos.stufe, pos.preis, kunde.typKey));
+  }
+  return Math.random() < chance;
+}
+
+// Zufälliges Element nach Gewicht wählen: eintraege = [[wert, gewicht], ...]
+function gewichteteWahl(eintraege) {
+  const gesamt = eintraege.reduce((s, [, g]) => s + g, 0);
+  let rnd = Math.random() * gesamt;
+  for (const [wert, g] of eintraege) {
+    rnd -= g;
+    if (rnd <= 0) return wert;
+  }
+  return eintraege[eintraege.length - 1][0];
+}
+
+// Welche Frische-Stufe nimmt der Kunde? Er vergleicht Qualität und Preis:
+// alte Ware wird nur gern gekauft, wenn sie spürbar billiger ist.
+function waehleFrischeStufe(key, bestand) {
+  const moeglich = FRISCHE_REIHENFOLGE
+    .filter(st => bestand[st] > 0)
+    .map(st => {
+      const preis = Math.max(0.1, preisFuer(key, st));
+      const reiz  = FRISCHE_STUFEN[st].qualitaet / preis;
+      return [st, Math.max(1e-9, Math.pow(reiz, 3))];
+    });
+  if (moeglich.length === 0) return 'gruen';
+  return gewichteteWahl(moeglich);
+}
+
+// Einen Posten für die Einkaufsliste bauen (Produkt, Frische, Menge, Preis)
+function bauePosten(key, maxMenge, sim) {
+  const stufe = waehleFrischeStufe(key, sim[key]);
+  const menge = zufall(1, Math.max(1, Math.min(maxMenge, sim[key][stufe])));
+  let p = preisFuer(key, stufe);
+  if (keineKommazahlen) p = Math.max(1, Math.round(p));
+  sim[key][stufe] -= menge;
+  return { prodKey: key, menge, preis: p, stufe };
+}
+
 // Zufällige Kunden-Liste generieren
 function generiereKunden(anzahl) {
   const liste = [];
-  const simuliertesInventar = { ...gameState.inventory };
+  // Simulierter Bestand je Produkt und Frische-Stufe (damit nicht mehr verkauft wird als da ist)
+  const sim = {};
+  for (const [key, menge] of Object.entries(gameState.inventory)) {
+    if (menge > 0) sim[key] = bestandNachStufe(key);
+  }
+  const restMenge = (key) => sim[key] ? sim[key].gruen + sim[key].orange + sim[key].rot : 0;
 
   for (let i = 0; i < anzahl; i++) {
     const kd = zufallsElement(KUNDEN);
-    const verfuegbar = Object.entries(simuliertesInventar).filter(
-      ([k, v]) => v > 0 && gameState.prices[k] > 0
-    );
+    const verfuegbar = Object.keys(sim).filter(k => restMenge(k) > 0 && gameState.prices[k] > 0);
     if (verfuegbar.length === 0) break;
+
+    // Tages-Trend: das gefragte Produkt wird dreimal so oft gewählt
+    // Billige Ware wird öfter gewählt, sehr teure fast nie
+    const gewichtet = verfuegbar.map(k => {
+      const trend = k === gameState.trend ? TREND_GEWICHT : 1;
+      const lust  = Math.max(0.01, kaufLust(k, 'gruen', gameState.prices[k], 'erwachsen'));
+      return [k, trend * lust];
+    });
 
     // Einkaufsliste je nach Stufe aufbauen
     let einkaufsliste = [];
 
     if (einkaufsStufe >= 3) {
-      const maxPosten = Math.min(3, verfuegbar.length);
-      const anzahlPosten = zufall(1, maxPosten);
-      const gemischt = [...verfuegbar].sort(() => Math.random() - 0.5).slice(0, anzahlPosten);
-      for (const [pk] of gemischt) {
-        const maxMenge = Math.min(3, simuliertesInventar[pk]);
-        const menge = zufall(1, maxMenge);
-        let p = gameState.prices[pk];
-        if (keineKommazahlen) p = Math.max(1, Math.round(p));
-        einkaufsliste.push({ prodKey: pk, menge, preis: p });
-        simuliertesInventar[pk] -= menge;
+      const anzahlPosten = zufall(1, Math.min(3, verfuegbar.length));
+      const kandidaten = [...gewichtet];
+      for (let n = 0; n < anzahlPosten && kandidaten.length > 0; n++) {
+        const pk = gewichteteWahl(kandidaten);
+        kandidaten.splice(kandidaten.findIndex(([k]) => k === pk), 1);
+        einkaufsliste.push(bauePosten(pk, 3, sim));
       }
     } else if (einkaufsStufe === 2) {
-      const [prodKey2] = zufallsElement(verfuegbar);
-      const maxMenge = Math.min(4, simuliertesInventar[prodKey2]);
-      const menge = zufall(1, maxMenge);
-      let p = gameState.prices[prodKey2];
-      if (keineKommazahlen) p = Math.max(1, Math.round(p));
-      einkaufsliste.push({ prodKey: prodKey2, menge, preis: p });
-      simuliertesInventar[prodKey2] -= menge;
+      einkaufsliste.push(bauePosten(gewichteteWahl(gewichtet), 4, sim));
     } else {
-      const [pk] = zufallsElement(verfuegbar);
-      let p = gameState.prices[pk];
-      if (keineKommazahlen) p = Math.max(1, Math.round(p));
-      einkaufsliste.push({ prodKey: pk, menge: 1, preis: p });
-      simuliertesInventar[pk]--;
+      einkaufsliste.push(bauePosten(gewichteteWahl(gewichtet), 1, sim));
     }
 
     const gesamtPreis = einkaufsliste.reduce((s, pos) => s + pos.preis * pos.menge, 0);
@@ -148,9 +214,23 @@ function generiereKunden(anzahl) {
 function postenText(pos) {
   const prod = PRODUKTE[pos.prodKey];
   if (!prod) return TEXTE.customer.fallbackProduktName;
-  if (pos.menge === 1) return prod.einzahl;
   const zahl = ZAHLWOERTER[pos.menge] ?? String(pos.menge);
+  // Ältere Ware: "zwei von den älteren Erdbeeren" / "eine von den sehr reifen Bananen"
+  const wort = FRISCHE_STUFEN[pos.stufe]?.wort;
+  if (wort) {
+    const anzahlWort = pos.menge === 1 ? prod.einzahl.split(' ')[0] : zahl;
+    // Dativ Plural: hängt ein -n an, außer das Wort endet schon auf -n oder -s (Äpfel → Äpfeln)
+    const dativ = /[ns]$/.test(prod.mehrzahl) ? prod.mehrzahl : prod.mehrzahl + 'n';
+    return `${anzahlWort} von den ${wort} ${dativ}`;
+  }
+  if (pos.menge === 1) return prod.einzahl;
   return `${zahl} ${prod.mehrzahl}`;
+}
+
+// Frische-Kennzeichen für Listen (leer bei frischer Ware)
+function frischeMarke(pos) {
+  if (!pos.stufe || pos.stufe === 'gruen') return '';
+  return ` ${FRISCHE_STUFEN[pos.stufe].emoji}`;
 }
 
 // Ganze Einkaufsliste als Satzteil: "zwei Äpfel, eine Gurke und drei Tomaten"
@@ -170,7 +250,7 @@ function grossAnfang(text) {
 function aktualisiereKundenPreis(k) {
   let gesamtPreis = 0;
   for (const pos of k.einkaufsliste) {
-    let p = gameState.prices[pos.prodKey] ?? pos.preis;
+    let p = preisFuer(pos.prodKey, pos.stufe) || pos.preis;
     if (keineKommazahlen) p = Math.max(1, Math.round(p));
     pos.preis = p;
     gesamtPreis += p * pos.menge;
@@ -234,7 +314,7 @@ function zeigeKundenDialog() {
         const prod = PRODUKTE[pos.prodKey];
         const zeile = document.createElement('div');
         zeile.className = 'customer-einkaufsliste-zeile';
-        zeile.textContent = `${prod.emoji} ${pos.menge}× ${prod.name}`;
+        zeile.textContent = `${prod.emoji} ${pos.menge}× ${prod.name}${frischeMarke(pos)}`;
         listeEl.appendChild(zeile);
       });
       listeEl.classList.remove('hidden');

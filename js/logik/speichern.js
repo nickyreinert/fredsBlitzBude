@@ -27,6 +27,8 @@ function speichereSpielstand() {
     level:              gameState.level,
     zubehoer:           gameState.zubehoer,
     wetter:             gameState.wetter,
+    preiseFrische:      gameState.preiseFrische,
+    trend:              gameState.trend,
   };
   localStorage.setItem('spielstand', JSON.stringify(stand));
 }
@@ -58,6 +60,8 @@ function ladeSpielstand() {
     gameState.level            = stand.level            ?? 1;
     gameState.zubehoer         = stand.zubehoer         ?? {};
     gameState.wetter           = stand.wetter           ?? 'sonne';
+    gameState.preiseFrische    = stand.preiseFrische    ?? {};
+    gameState.trend            = stand.trend            ?? null;
     return true;
   } catch {
     return false;

@@ -57,14 +57,14 @@ function oeffneWechselgeldScreen() {
       zeile.id = `change-liste-zeile-${idx}`;
       if (einkaufsStufe === 2) {
         // Stufe 2: Menge × Produktname – Einzelpreis sichtbar
-        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name} à ${fmt(pos.preis)}</span>`;
+        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name}${frischeMarke(pos)} à ${fmt(pos.preis)}</span>`;
       } else {
         // Stufe 3: Menge × Produktname à Einzelpreis, Teilergebnis wird per Numpad eingegeben
         const teilBetrag = document.createElement('span');
         teilBetrag.className = 'change-teilbetrag';
         teilBetrag.id = `teilbetrag-${idx}`;
         teilBetrag.textContent = '?';
-        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name} à ${fmt(pos.preis)} =</span>`;
+        zeile.innerHTML = `<span>${prod.emoji} <strong>${pos.menge}×</strong> ${prod.name}${frischeMarke(pos)} à ${fmt(pos.preis)} =</span>`;
         zeile.appendChild(teilBetrag);
       }
       listeEl.appendChild(zeile);
@@ -114,6 +114,8 @@ function oeffneWechselgeldScreen() {
   btnConfirm.textContent     = '✅ Bestätigen';
   btnConfirm.className       = 'btn btn-success btn-xl';
   btnConfirm.dataset.trotzdem = '';
+  // Sperre vom letzten Kunden aufheben (Ziffernblock wieder bedienbar)
+  document.getElementById('change-container').classList.remove('abgeschlossen');
 
   // Modal über dem Stand einblenden (nicht als eigener Screen)
   document.getElementById('screen-change').classList.add('active');
@@ -252,13 +254,26 @@ function schliesseTransaktion(diffCent) {
   const kunde = gameState.currentCustomer;
   if (!kunde) return;
 
-  // Geld kassieren (Preis + Trinkgeld – Trinkgeld gehört dem Spieler)
-  const einnahme = kunde.preis + (kunde.trinkgeld ?? 0);
+  // Nur einmal abschließen (Schutz gegen Doppelklick)
+  if (kunde._abgeschlossen) return;
+  kunde._abgeschlossen = true;
+
+  // Fertig: Bestätigen-Knopf verschwindet, Ziffernblock wird gesperrt –
+  // es bleibt nur die Rückmeldung sichtbar, bis das Fenster sich schließt
+  document.getElementById('btn-change-confirm').classList.add('hidden');
+  document.getElementById('change-container').classList.add('abgeschlossen');
+
+  // Geld kassieren wie mit echtem Bargeld:
+  // Kasse bekommt, was der Kunde hinlegt, minus das Wechselgeld, das tatsächlich rausgegeben wurde.
+  // → Zu viel rausgegeben = weniger Geld, zu wenig rausgegeben = mehr Geld (aber schlechte Bewertung)
+  const richtigesWechselgeldCent = Math.round((kunde.zahlt - kunde.preis - (kunde.trinkgeld ?? 0)) * 100);
+  const gegebenCent = richtigesWechselgeldCent + diffCent;
+  const einnahme = (Math.round(kunde.zahlt * 100) - gegebenCent) / 100;
   gameState.money         = Math.round((gameState.money + einnahme) * 100) / 100;
   gameState.dailyEarnings = Math.round((gameState.dailyEarnings + einnahme) * 100) / 100;
   // Alle gekauften Posten aus dem Lager abbuchen
   for (const pos of kunde.einkaufsliste) {
-    lagerAus(pos.prodKey, pos.menge);
+    lagerAus(pos.prodKey, pos.menge, pos.stufe);
   }
   gameState.customersServed++;
 
@@ -266,7 +281,7 @@ function schliesseTransaktion(diffCent) {
   const sterne = vergebeKundenBewertung(diffCent);
 
   // XP vergeben (Umsatz + 1 Kunde + ggf. Bewertung)
-  const xp = xpFuerTransaktion(einnahme, sterne ?? 0);
+  const xp = xpFuerTransaktion(Math.max(0, einnahme), sterne ?? 0);
   addiereXP(xp);
 
   // Feedback kurz zeigen (Sterne nur wenn Bewertung abgegeben wurde)
@@ -278,11 +293,12 @@ function schliesseTransaktion(diffCent) {
     feedback.className = 'feedback-correct';
     feedback.textContent = `🎉 Genau richtig!${sterneStr}`;
   } else if (diffCent > 0) {
-    feedback.className = 'feedback-correct';
-    feedback.textContent = `😊 Großzügig!${sterneStr}`;
+    // Kunde freut sich – aber das Geld fehlt jetzt in der Kasse
+    feedback.className = 'feedback-wrong';
+    feedback.textContent = `😬 ${formatGeld(diffCent)} zu viel – das fehlt jetzt in deiner Kasse!${sterneStr}`;
   } else {
     feedback.className = 'feedback-wrong';
-    feedback.textContent = `😕 Zu wenig gegeben!${sterneStr}`;
+    feedback.textContent = `😕 Zu wenig gegeben – der Kunde ist sauer!${sterneStr}`;
   }
 
   // Neue Kunden nachlegen wenn Queue leer

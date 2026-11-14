@@ -74,6 +74,13 @@ function zeichneKopf(cx, cy, r, kunde, gespiegelt) {
   ctx.arc(cx + augeAbstand, cy - r * 0.1, r * 0.13, 0, Math.PI * 2);
   ctx.fill();
 
+  // Rote Bäckchen
+  ctx.fillStyle = 'rgba(244, 143, 177, 0.55)';
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.55, cy + r * 0.2, r * 0.16, 0, Math.PI * 2);
+  ctx.arc(cx + r * 0.55, cy + r * 0.2, r * 0.16, 0, Math.PI * 2);
+  ctx.fill();
+
   // Mund
   ctx.beginPath();
   ctx.strokeStyle = '#555';
@@ -142,59 +149,108 @@ function zeichneKunde(w, _h) {
   }
 }
 
-// Einen einzelnen Passanten zeichnen
+// Einen einzelnen Passanten zeichnen (Körper mit T-Shirt, Hose, Schuhen und Händen)
 function zeichnePassant(p, w, h) {
   const sz = szenenMasse(w, h);
   const x = p.x;
   const y = sz.laufY;
   const scale = p.groesse;
   const kopfR = sz.figurR * scale;
-  const koerperH = kopfR * 2.6;
+  const R = kopfR;
 
-  // Schatten
-  ctx.fillStyle = 'rgba(0,0,0,0.10)';
+  const shirt = p.shirt || '#1e88e5';
+  const hose  = p.hose  || '#37474f';
+  const haut  = p.kunde?.haut || '#FFCC80';
+
+  // Gehbewegung: Beine und Arme schwingen gegengleich, beim Stehen nur leichtes Wippen
+  const schwung = p.steht ? Math.sin(p.walkStep * 2) * 0.05 : Math.sin(p.walkStep) * 0.45;
+
+  const huefteY    = y + R * 2.55;
+  const beinL      = R * 2.25;
+  const schulterY  = y + R * 0.85;
+  const armL       = R * 1.75;
+
+  // Schatten unter den Füßen
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
   ctx.beginPath();
-  ctx.ellipse(x, y + koerperH + kopfR + 3, kopfR * 0.85, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, huefteY + beinL + R * 0.2, R * 1.1, R * 0.22, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  const schwung = p.steht ? Math.sin(p.walkStep * 2) * 0.06 : Math.sin(p.walkStep) * 0.3;
-
-  ctx.strokeStyle = '#5d4037';
-  ctx.lineWidth = Math.max(1.5, kopfR * 0.22);
   ctx.lineCap = 'round';
 
-  // Rumpf
-  ctx.beginPath();
-  ctx.moveTo(x, y + kopfR * 0.8);
-  ctx.lineTo(x, y + kopfR * 0.8 + koerperH);
-  ctx.stroke();
+  // Beine (Hose) mit Schuhen
+  [schwung, -schwung].forEach((winkel, i) => {
+    const hx = x + (i === 0 ? -R * 0.3 : R * 0.3);
+    const fx = hx + Math.sin(winkel) * beinL;
+    const fy = huefteY + Math.cos(winkel) * beinL;
+    ctx.strokeStyle = hose;
+    ctx.lineWidth = R * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(hx, huefteY);
+    ctx.lineTo(fx, fy);
+    ctx.stroke();
+    // Schuh zeigt in Laufrichtung
+    ctx.fillStyle = '#3e2723';
+    ctx.beginPath();
+    ctx.ellipse(fx + p.richtung * R * 0.15, fy + R * 0.1, R * 0.38, R * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-  // Arme
+  // Oberkörper (T-Shirt) – abgerundetes Rechteck
+  ctx.fillStyle = shirt;
   ctx.beginPath();
-  ctx.moveTo(x, y + kopfR + koerperH * 0.25);
-  ctx.lineTo(x - kopfR * 1.4 - schwung * kopfR * p.richtung, y + kopfR + koerperH * 0.75);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x, y + kopfR + koerperH * 0.25);
-  ctx.lineTo(x + kopfR * 1.4 + schwung * kopfR * p.richtung, y + kopfR + koerperH * 0.75);
-  ctx.stroke();
+  ctx.roundRect(x - R * 0.85, y + R * 0.55, R * 1.7, R * 2.15, R * 0.45);
+  ctx.fill();
 
-  // Beine
-  ctx.beginPath();
-  ctx.moveTo(x, y + kopfR * 0.8 + koerperH);
-  ctx.lineTo(x - kopfR * 0.7 - schwung * kopfR, y + kopfR * 0.8 + koerperH * 1.55);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x, y + kopfR * 0.8 + koerperH);
-  ctx.lineTo(x + kopfR * 0.7 + schwung * kopfR, y + kopfR * 0.8 + koerperH * 1.55);
-  ctx.stroke();
+  // Arme (Ärmel in Shirt-Farbe) mit Händen
+  [-schwung, schwung].forEach((winkel, i) => {
+    const sxA = x + (i === 0 ? -R * 0.75 : R * 0.75);
+    const seite = i === 0 ? -1 : 1;
+    const hx = sxA + seite * R * 0.35 + Math.sin(winkel) * armL;
+    const hy = schulterY + Math.cos(winkel) * armL;
+    ctx.strokeStyle = shirt;
+    ctx.lineWidth = R * 0.42;
+    ctx.beginPath();
+    ctx.moveTo(sxA, schulterY);
+    ctx.lineTo(hx, hy);
+    ctx.stroke();
+    ctx.fillStyle = haut;
+    ctx.beginPath();
+    ctx.arc(hx, hy, R * 0.24, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Hals
+  ctx.fillStyle = haut;
+  ctx.fillRect(x - R * 0.22, y + R * 0.3, R * 0.44, R * 0.35);
 
   // Kopf
   const kopfY = y - kopfR * 0.5;
   zeichneKopf(x, kopfY, kopfR, p.kunde, p.richtung === -1);
 
+  // Blase "Zu teuer!" mit traurigem Gesicht
+  if (p.steht && p.zuTeuer) {
+    const bh = Math.max(28, kopfR * 1.7);
+    ctx.font = `bold ${bh * 0.5}px system-ui`;
+    const bw = ctx.measureText('😞 Zu teuer!').width + bh * 0.8;   // Breite nach Text
+    const bx = Math.max(bw / 2 + 4, Math.min(canvas.width - bw / 2 - 4, x));
+    const by = Math.max(80, kopfY - kopfR - bh - 6);
+    ctx.fillStyle = '#ffebee';
+    ctx.strokeStyle = '#e53935';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(bx - bw / 2, by, bw, bh, 10);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#c62828';
+    ctx.font = `bold ${bh * 0.5}px system-ui`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('😞 Zu teuer!', bx, by + bh / 2);
+  }
+
   // Sprechblase wenn Passant steht und kaufen will
-  if (p.steht && !p.gespraechen && p.stehtTimer > 400
+  if (p.steht && !p.gespraechen && !p.zuTeuer && p.stehtTimer > 400
       && gameState.customers.length > 0) {
     const blasenW = Math.max(44, kopfR * 2.6);
     const blasenH = Math.max(26, kopfR * 1.6);
@@ -229,7 +285,10 @@ function zeichneHund(w, h) {
   const sz = szenenMasse(w, h);
 
   // Position: rechts neben dem Stand, auf dem Gehweg
-  const hundX = sz.mitteX + sz.standB * 0.5 + sz.figurR * 2;
+  // Grundeinheit relativ zur Figurengröße
+  const grHund = sz.figurR * 0.9;
+  // Neben der Kühlbox (falls gekauft) und nicht aus dem Bild laufen
+  const hundX = Math.min(sz.mitteX + sz.standB * 0.5 + sz.figurR * 2 + kuehlboxPlatz(sz), w - grHund * 2);
   const hundY = sz.laufY;
 
   // Grundeinheit relativ zur Figurengröße

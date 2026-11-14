@@ -19,6 +19,10 @@ const gameState = {
   prices: {
     gurke: 0            // Noch nicht gesetzt
   },
+  // Eigene Preise für ältere Ware: { erdbeere: { orange: 1.5, rot: 1.0 } }
+  preiseFrische: {},
+  // Tages-Trend: Produkt, das heute besonders gefragt ist (z.B. 'erdbeere')
+  trend: null,
   customers: [],        // Warteschlange für heutigen Tag
   currentCustomer: null,// Aktueller Kunde
   standOpen: false,     // Ist der Stand offen?

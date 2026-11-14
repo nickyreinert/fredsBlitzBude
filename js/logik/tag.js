@@ -61,7 +61,14 @@ function starteTag() {
 
   // Regentag ankündigen (nur vor dem Öffnen, damit es beim Spielen nicht stört)
   if (!standWarOffen && istRegen()) {
-    setTimeout(() => zeigeMeldung(TEXTE.meldungen.regenTag), 600);
+    const regenText = gameState.zubehoer.markise ? TEXTE.meldungen.regenTagMarkise : TEXTE.meldungen.regenTag;
+    setTimeout(() => zeigeMeldung(regenText), 600);
+  }
+  // Tages-Trend ansagen (nach der Regen-Meldung, damit sie sich nicht überdecken)
+  const trendProd = PRODUKTE[gameState.trend];
+  if (!standWarOffen && trendProd) {
+    const verzoegerung = istRegen() ? 3300 : 600;
+    setTimeout(() => zeigeMeldung(zufallsElement(TEXTE.trend.ansage(trendProd))), verzoegerung);
   }
 
   speichereSpielstand();
@@ -132,6 +139,11 @@ function tagesEnde() {
     verderb_html = `<br>${TEXTE.dayEnd.verdorben} <strong>${verloreneWaren}</strong>`;
   }
 
+  // Trend für morgen festlegen und ansagen → man kann im Großmarkt passend einkaufen
+  gameState.trend = waehleTrend(jahresZeitFuerTag(gameState.day + 1));
+  const trendProd = PRODUKTE[gameState.trend];
+  const trend_html = trendProd ? `<br><strong>${TEXTE.trend.morgenGefragt(trendProd)}</strong>` : '';
+
   let oma_html = '';
   if (gameState.phase === 1) {
     const omaText = omaLieferung();
@@ -143,8 +155,9 @@ function tagesEnde() {
   document.getElementById('night-stats').innerHTML = `
     ${TEXTE.dayEnd.heuteVerdient} <strong>${formatEuro(gameState.dailyEarnings)}</strong><br>
     ${TEXTE.dayEnd.gesamtGeld} <strong>${formatEuro(gameState.money)}</strong>
-    ${verderb_html}${oma_html}
+    ${verderb_html}${oma_html}${trend_html}
   `;
+  speichereSpielstand();
 
   const btnGrossmarkt = document.getElementById('btn-grossmarkt');
   if (gameState.money >= grossmarktMinGeld()) {

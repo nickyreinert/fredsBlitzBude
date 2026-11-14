@@ -6,9 +6,9 @@
    Die Werte pro Kundentyp stehen in config.js unter STIMMEN.
    ================================================================ */
 
-// Ist die Sprachausgabe eingeschaltet? (Standard: an)
+// Ist die Sprachausgabe eingeschaltet? (Standard: aus – muss in den Einstellungen aktiviert werden)
 function stimmenAktiv() {
-  return localStorage.getItem('stimmenAktiv') !== '0';
+  return localStorage.getItem('stimmenAktiv') === '1';
 }
 
 // Sprachausgabe im Browser vorhanden?

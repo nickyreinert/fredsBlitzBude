@@ -51,6 +51,14 @@ function omaLieferung() {
   return nachricht;
 }
 
+/* ── Tages-Trend ────────────────────────────────────────────────── */
+
+// Gefragtes Produkt für eine Jahreszeit auswürfeln (nur Saison-Produkte)
+function waehleTrend(jahreszeit) {
+  const saison = Object.keys(PRODUKTE).filter(k => PRODUKTE[k].saisons.includes(jahreszeit));
+  return saison.length > 0 ? zufallsElement(saison) : null;
+}
+
 /* ── Wetter ─────────────────────────────────────────────────────── */
 
 // Wetter für einen neuen Tag auswürfeln (abhängig von der Jahreszeit)
@@ -66,5 +74,7 @@ function istRegen() {
 
 // Multiplikator für Kunden/Passanten (Regen = weniger Leute)
 function wetterKundenFaktor() {
-  return istRegen() ? REGEN_KUNDEN_FAKTOR : 1.0;
+  if (!istRegen()) return 1.0;
+  // Mit Markise bleiben bei Regen deutlich mehr Kunden stehen
+  return gameState.zubehoer.markise ? REGEN_KUNDEN_FAKTOR_MARKISE : REGEN_KUNDEN_FAKTOR;
 }

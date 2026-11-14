@@ -55,27 +55,39 @@ function zeichneProdukte(_w, _h) {
     ctx.strokeText(`×${menge}`, px, py + r + 8);
     ctx.fillText(`×${menge}`, px, py + r + 8);
 
-    // Frische-Punkte (nur wenn Verderb aktiv)
+    // Frische-Anzeige (nur wenn Verderb aktiv): ein Punkt je Stufe mit Anzahl daneben
+    // statt einem Punkt pro Stück – sonst wären es bei 80 Erdbeeren 80 Kreise
     if (haltbarkeitTage() > 0) {
-      const auft = frischeProduktAufteilung(key);
-      const punkteFarben = [
-        ...Array(auft.gruen).fill('#4caf50'),
-        ...Array(auft.orange).fill('#ff9800'),
-        ...Array(auft.rot).fill('#f44336'),
-      ];
-      const punktR = Math.max(3, r * 0.22);
-      const gesamt = punkteFarben.length;
-      const startX = px - (gesamt - 1) * (punktR * 2.4) / 2;
-      punkteFarben.forEach((farbe, i) => {
-        const dotX = startX + i * (punktR * 2.4);
-        const dotY = py - r - 6;
+      const bestand = bestandNachStufe(key);
+      const farben = { gruen: '#4caf50', orange: '#ff9800', rot: '#f44336' };
+      const punktR = Math.max(4, r * 0.2);
+      const schrift = Math.max(10, punktR * 2.2);
+      ctx.font = `bold ${schrift}px system-ui`;
+      // Breite aller Einträge messen, um sie mittig über dem Produkt zu setzen
+      const eintraege = FRISCHE_REIHENFOLGE
+        .filter(st => bestand[st] > 0)
+        .map(st => ({ st, text: String(bestand[st]), b: punktR * 2 + 3 + ctx.measureText(String(bestand[st])).width }));
+      const luecke = punktR * 1.2;
+      const gesamtB = eintraege.reduce((sum, e) => sum + e.b, 0) + luecke * Math.max(0, eintraege.length - 1);
+      let ex = px - gesamtB / 2;
+      const ey = py - r - punktR - 4;
+      eintraege.forEach(e => {
         ctx.beginPath();
-        ctx.arc(dotX, dotY, punktR, 0, Math.PI * 2);
-        ctx.fillStyle = farbe;
+        ctx.arc(ex + punktR, ey, punktR, 0, Math.PI * 2);
+        ctx.fillStyle = farben[e.st];
         ctx.fill();
         ctx.strokeStyle = 'rgba(0,0,0,0.4)';
         ctx.lineWidth = 1;
         ctx.stroke();
+        // Anzahl mit weißem Rand (gut lesbar auf Holz)
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+        ctx.strokeText(e.text, ex + punktR * 2 + 3, ey);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(e.text, ex + punktR * 2 + 3, ey);
+        ex += e.b + luecke;
       });
     }
 

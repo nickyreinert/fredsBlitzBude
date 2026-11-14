@@ -188,6 +188,8 @@ document.getElementById('grossmarkt-sortiment').addEventListener('click', (e) =>
     grossmarktWarenkorb[key] = Math.max((grossmarktWarenkorb[key] || 0) - 1, 0);
   }
   document.getElementById(`gm-menge-${key}`).textContent = grossmarktWarenkorb[key] || 0;
+  // Kachel grün markieren, sobald etwas im Korb liegt
+  btn.closest('.grossmarkt-kachel')?.classList.toggle('grossmarkt-kachel--aktiv', (grossmarktWarenkorb[key] || 0) > 0);
   aktualisiereGrossmarktGesamt();
 });
 
@@ -203,7 +205,7 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     localStorage.clear();
     keineKommazahlen = false;
     document.getElementById('toggle-nocomma').checked = false;
-    document.getElementById('toggle-stimmen').checked = true;
+    document.getElementById('toggle-stimmen').checked = false;
     document.getElementById('toggle-trinkgeld').checked = false;
     document.getElementById('trinkgeld-detail-controls').classList.add('hidden');
     einkaufsStufe = 1;
@@ -238,6 +240,8 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     gameState.level             = 1;
     gameState.zubehoer          = {};
     gameState.wetter            = 'sonne';
+    gameState.preiseFrische     = {};
+    gameState.trend             = null;
     aktualisiereXpHud();
     zeigeMeldung('🗑️ Alles zurückgesetzt!');
     setTimeout(() => zeigeScreen('screen-start'), 1500);

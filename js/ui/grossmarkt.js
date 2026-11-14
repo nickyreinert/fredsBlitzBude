@@ -27,11 +27,19 @@ function erstelleGrossmarktSortiment() {
 // Gesamtkosten des Warenkorbs berechnen und Kaufen-Button aktualisieren
 function aktualisiereGrossmarktGesamt() {
   let gesamt = 0;
-  for (const [key, anzahl] of Object.entries(grossmarktWarenkorb)) {
-    gesamt += anzahl * (PRODUKTE[key]?.kaufPreis ?? 0);
-  }
   // Einfach-Modus: ganze Euro, sonst Cent-genau
   const fmt = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+  for (const key of Object.keys(grossmarktSortiment)) {
+    const anzahl = grossmarktWarenkorb[key] || 0;
+    const preis  = PRODUKTE[key]?.kaufPreis ?? 0;
+    gesamt += anzahl * preis;
+    // Zwischensumme je Produkt: "3 × 1,00 € = 3,00 €"
+    const summeEl = document.getElementById(`gm-summe-${key}`);
+    if (summeEl) {
+      summeEl.textContent = anzahl > 0 ? `${anzahl} × ${fmt(preis)} = ${fmt(anzahl * preis)}` : '';
+      summeEl.classList.toggle('hidden', anzahl === 0);
+    }
+  }
   document.getElementById('grossmarkt-gesamt-preis').textContent = fmt(gesamt);
   document.getElementById('grossmarkt-money').textContent = fmt(gameState.money);
 
@@ -57,19 +65,34 @@ function zeigeGrossmarkt() {
   for (const [key, info] of Object.entries(grossmarktSortiment)) {
     const prod   = PRODUKTE[key];
     const kachel = document.createElement('div');
-    kachel.className  = 'grossmarkt-kachel';
+    kachel.className  = 'grossmarkt-kachel' + (key === gameState.trend ? ' grossmarkt-kachel--trend' : '');
     kachel.dataset.key = key;
     const fmtGM = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
+    const trendBadge = key === gameState.trend
+      ? `<div class="grossmarkt-trend-badge">${TEXTE.trend.grossmarktBadge}</div>`
+      : '';
     kachel.innerHTML = `
+      ${trendBadge}
       <div class="grossmarkt-emoji">${prod.emoji}</div>
       <div class="grossmarkt-name">${prod.name}</div>
       <div class="grossmarkt-preis">${fmtGM(prod.kaufPreis)} / Stück</div>
-      <div class="grossmarkt-verfuegbar">Noch ${info.verfuegbar}x da</div>
+      <div class="grossmarkt-mengen">
+        <div class="grossmarkt-menge-box">
+          <span class="grossmarkt-menge-zahl">${info.verfuegbar}</span>
+          <span class="grossmarkt-menge-label">im Großmarkt</span>
+        </div>
+        <div class="grossmarkt-menge-box grossmarkt-menge-box--eigen">
+          <span class="grossmarkt-menge-zahl">${gameState.inventory[key] || 0}</span>
+          <span class="grossmarkt-menge-label">hast du schon</span>
+        </div>
+      </div>
       <div class="grossmarkt-stepper">
         <button class="btn btn-sm gm-minus" data-key="${key}">−</button>
         <span class="gm-menge" id="gm-menge-${key}">0</span>
         <button class="btn btn-sm gm-plus" data-key="${key}">+</button>
       </div>
+      <!-- Zwischensumme für dieses Produkt (Menge × Preis) -->
+      <div class="grossmarkt-zwischensumme" id="gm-summe-${key}"></div>
     `;
     container.appendChild(kachel);
   }

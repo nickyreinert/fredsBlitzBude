@@ -11,7 +11,9 @@ function neuerPassant() {
   const kannKaufen = gameState.standOpen
     && gameState.customers.length > 0
     && !gameState.currentCustomer;
-  const bleibtStehen = kannKaufen && Math.random() < 0.5;
+  // Günstige Preise locken mehr Leute an den Stand, Wucherpreise kaum jemanden
+  const anhalteChance = 0.5 * Math.min(1.6, Math.max(0.5, standAttraktivitaet()));
+  const bleibtStehen = kannKaufen && Math.random() < anhalteChance;
 
   return {
     x:          vonLinks ? -60 : canvas.width + 60,
@@ -25,6 +27,9 @@ function neuerPassant() {
     stehtTimer: 0,
     gespraechen: false,
     groesse:    PASSANT_GROESSE_MIN + Math.random() * PASSANT_GROESSE_RANGE,
+    // Kleidung: zufällige bunte Farben
+    shirt:      zufallsElement(SHIRT_FARBEN),
+    hose:       zufallsElement(HOSEN_FARBEN),
   };
 }
 
@@ -71,6 +76,16 @@ function aktualisierePassanten(delta) {
       p.stehtTimer += delta;
       p.walkStep += delta * 0.001;
 
+      // Fand es zu teuer: kurz traurig gucken, dann weitergehen
+      if (p.zuTeuer) {
+        p.zuTeuerTimer -= delta;
+        if (p.zuTeuerTimer <= 0) {
+          p.steht = false;
+          p.bleibtStehen = false;
+        }
+        return true;
+      }
+
       if (!p.gespraechen && !gameState.currentCustomer
           && gameState.customers.length > 0 && p.stehtTimer > PASSANT_WARTEZEIT_KAUF_MS) {
         p.gespraechen = true;
@@ -86,6 +101,8 @@ function aktualisierePassanten(delta) {
       if (kaufAbgeschlossen || zuLangeGewartet) {
         p.steht = false;
         p.gespraechen = false;
+        // Weitergehen und nicht gleich wieder anhalten (sonst kauft dieselbe Person mehrfach)
+        p.bleibtStehen = false;
       }
       return true;
     }
@@ -115,6 +132,18 @@ function passerWirdKunde(passant) {
   if (gameState.customers.length === 0) return;
   const kunde = gameState.customers.shift();
   if (!kunde) return;
+
+  // Preise prüfen: viel zu teuer → Kunde kauft nicht und geht traurig weiter
+  aktualisiereKundenPreis(kunde);
+  if (!kundeWillKaufen(kunde)) {
+    passant.zuTeuer = true;
+    passant.zuTeuerTimer = ZU_TEUER_ANZEIGE_MS;
+    // Warteschlange auffüllen, damit nach einer Preissenkung wieder Kunden kommen
+    if (gameState.customers.length === 0) {
+      gameState.customers.push(...generiereKunden(berechneKundenAnzahl()));
+    }
+    return;
+  }
 
   kunde.haut   = passant.kunde.haut;
   kunde.haar   = passant.kunde.haar;

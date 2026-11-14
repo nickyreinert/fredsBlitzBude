@@ -8,14 +8,15 @@
 // ── Produkte: Verfügbare Waren mit Eigenschaften ────────────────
 const PRODUKTE = {
   // einzahl = Akkusativ mit Artikel ("Ich hätte gern eine Gurke"), mehrzahl = Plural ("zwei Gurken")
-  gurke:    { name: 'Gurke',     einzahl: 'eine Gurke',    mehrzahl: 'Gurken',    emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
-  apfel:    { name: 'Apfel',     einzahl: 'einen Apfel',   mehrzahl: 'Äpfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
-  banane:   { name: 'Banane',    einzahl: 'eine Banane',   mehrzahl: 'Bananen',   emoji: '🍌', farbe: '#FFC107', form: 'banane',   kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
-  tomate:   { name: 'Tomate',    einzahl: 'eine Tomate',   mehrzahl: 'Tomaten',   emoji: '🍅', farbe: '#e53935', form: 'tomate',   kaufPreis: 1.20, saisons: ['sommer'] },
-  karotte:  { name: 'Karotte',   einzahl: 'eine Karotte',  mehrzahl: 'Karotten',  emoji: '🥕', farbe: '#FF7043', form: 'karotte',  kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
-  erdbeere: { name: 'Erdbeere',  einzahl: 'eine Erdbeere', mehrzahl: 'Erdbeeren', emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
-  kuerbis:  { name: 'Kürbis',    einzahl: 'einen Kürbis',  mehrzahl: 'Kürbisse',  emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  kaufPreis: 2.00, saisons: ['herbst'] },
-  zitrone:  { name: 'Zitrone',   einzahl: 'eine Zitrone',  mehrzahl: 'Zitronen',  emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
+  // fairPreis = üblicher Ladenpreis: billiger → mehr Käufer, viel teurer → kaum jemand kauft
+  gurke:    { name: 'Gurke',     einzahl: 'eine Gurke',    mehrzahl: 'Gurken',    emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    fairPreis: 1.20, kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
+  apfel:    { name: 'Apfel',     einzahl: 'einen Apfel',   mehrzahl: 'Äpfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    fairPreis: 1.50, kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
+  banane:   { name: 'Banane',    einzahl: 'eine Banane',   mehrzahl: 'Bananen',   emoji: '🍌', farbe: '#FFC107', form: 'banane',   fairPreis: 1.20, kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
+  tomate:   { name: 'Tomate',    einzahl: 'eine Tomate',   mehrzahl: 'Tomaten',   emoji: '🍅', farbe: '#e53935', form: 'tomate',   fairPreis: 1.80, kaufPreis: 1.20, saisons: ['sommer'] },
+  karotte:  { name: 'Karotte',   einzahl: 'eine Karotte',  mehrzahl: 'Karotten',  emoji: '🥕', farbe: '#FF7043', form: 'karotte',  fairPreis: 1.30, kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
+  erdbeere: { name: 'Erdbeere',  einzahl: 'eine Erdbeere', mehrzahl: 'Erdbeeren', emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', fairPreis: 2.50, kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
+  kuerbis:  { name: 'Kürbis',    einzahl: 'einen Kürbis',  mehrzahl: 'Kürbisse',  emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  fairPreis: 3.50, kaufPreis: 2.00, saisons: ['herbst'] },
+  zitrone:  { name: 'Zitrone',   einzahl: 'eine Zitrone',  mehrzahl: 'Zitronen',  emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  fairPreis: 1.50, kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
 };
 
 // Zahlwörter für natürliche Sätze ("drei Äpfel" statt "3× Apfel")
@@ -198,6 +199,19 @@ const TEXTE = {
     btnZurueck:     '← Zurück',
   },
 
+  // ── Tages-Trend ──────────────────────────────────────────────
+  trend: {
+    heuteGefragt: (prod) => `📈 Heute gefragt: ${prod.emoji} ${prod.mehrzahl}!`,
+    morgenGefragt: (prod) => `📈 Morgen gefragt: ${prod.emoji} ${prod.mehrzahl}`,
+    grossmarktBadge: '📈 Morgen gefragt!',
+    // Ansage am Morgen (zufällig eine davon)
+    ansage: (prod) => [
+      `📈 Heute haben alle Lust auf ${prod.mehrzahl}! ${prod.emoji}`,
+      `📈 ${prod.mehrzahl} sind heute der Renner! ${prod.emoji}`,
+      `📈 Alle wollen heute ${prod.mehrzahl}! ${prod.emoji}`,
+    ],
+  },
+
   // ── System-Meldungen ─────────────────────────────────────────
   meldungen: {
     notfallLieferung: '👵 Oma bringt Notfall-Gurken! Nicht aufgeben!',
@@ -205,6 +219,7 @@ const TEXTE = {
     zuWenigGeld:      '💸 Nicht genug Geld!',
     kundeWeggeschickt: '👋 Tschüss! Wer frech ist, kriegt nichts.',
     regenTag:         '🌧️ Heute regnet es – es kommen weniger Kunden.',
+    regenTagMarkise:  '🌧️ Heute regnet es – aber deine Markise hält die Kunden trocken! ⛱️',
   },
 };
 
@@ -439,10 +454,12 @@ const BEWERTUNG_CHANCE_STUFEN = [
 
 // ── Zubehör-Shop ─────────────────────────────────────────────────
 
-// Verfügbare Zubehör-Artikel (Tiere)
-// wirkung: 'kunden' = mehr Kunden kommen, 'trinkgeld' = öfter Trinkgeld
+// Verfügbare Zubehör-Artikel (Tiere und Stand-Erweiterungen)
+// wirkung: 'kunden' = mehr Kunden kommen, 'trinkgeld' = öfter Trinkgeld,
+//          'regenschutz' = weniger Kundenverlust bei Regen, 'frische' = Ware hält länger
 // Der Bonus wird pro Wirkung über alle passenden Tiere berechnet (gedämpft, siehe unten).
 const ZUBEHOER_ARTIKEL = {
+  // ── Tiere ──
   hund: {
     name:         'Hund',
     emoji:        '🐕',
@@ -450,6 +467,7 @@ const ZUBEHOER_ARTIKEL = {
     preis:        15.00,
     maxAnzahl:    1,
     wirkung:      ['kunden', 'trinkgeld'],
+    kategorie:    'tier',
   },
   katze: {
     name:         'Katze',
@@ -458,6 +476,7 @@ const ZUBEHOER_ARTIKEL = {
     preis:        12.00,
     maxAnzahl:    1,
     wirkung:      ['trinkgeld'],
+    kategorie:    'tier',
   },
   fisch: {
     name:         'Goldfisch',
@@ -466,6 +485,7 @@ const ZUBEHOER_ARTIKEL = {
     preis:        6.00,
     maxAnzahl:    3,
     wirkung:      ['kunden'],
+    kategorie:    'tier',
   },
   papagei: {
     name:         'Papagei',
@@ -474,8 +494,56 @@ const ZUBEHOER_ARTIKEL = {
     preis:        20.00,
     maxAnzahl:    1,
     wirkung:      ['kunden'],
+    kategorie:    'tier',
+  },
+
+  // ── Erweiterungen für den Stand ──
+  markise: {
+    name:         'Markise',
+    emoji:        '⛱️',
+    beschreibung: 'Ein gestreiftes Dach über der Theke. Bei Regen bleiben die Kunden trotzdem stehen – fast so viele wie bei Sonne!',
+    preis:        25.00,
+    maxAnzahl:    1,
+    wirkung:      ['regenschutz'],
+    kategorie:    'stand',
+  },
+  kuehlbox: {
+    name:         'Kühlbox',
+    emoji:        '🧊',
+    beschreibung: 'Hält Obst und Gemüse kühl. Die Ware bleibt 2 Tage länger frisch.',
+    preis:        30.00,
+    maxAnzahl:    1,
+    wirkung:      ['frische'],
+    kategorie:    'stand',
+  },
+  blumen: {
+    name:         'Blumenkästen',
+    emoji:        '🌻',
+    beschreibung: 'Bunte Blumen am Stand. Sieht schön aus – es kommen mehr Kunden!',
+    preis:        10.00,
+    maxAnzahl:    1,
+    wirkung:      ['kunden'],
+    kategorie:    'stand',
+  },
+  werbeschild: {
+    name:         'Werbeschild',
+    emoji:        '📣',
+    beschreibung: 'Ein großes Schild auf dem Dach: „FRISCH!“. Man sieht es von weitem – es kommen mehr Kunden!',
+    preis:        18.00,
+    maxAnzahl:    1,
+    wirkung:      ['kunden'],
+    kategorie:    'stand',
   },
 };
+
+// Abschnitte im Shop
+const ZUBEHOER_KATEGORIEN = {
+  tier:  '🐾 Tiere',
+  stand: '🏪 Für deinen Stand',
+};
+
+// Markise: bei Regen kommen so viele Kunden wie sonst (statt REGEN_KUNDEN_FAKTOR)
+const REGEN_KUNDEN_FAKTOR_MARKISE = 0.85;
 
 // Bonus-Stärke: logarithmische Dämpfung damit viel Zubehör nicht überpowered ist.
 // Formel: bonus = staerke * log2(gesamtAnzahl + 1)
@@ -506,3 +574,40 @@ const STIMMEN = {
   reich:     { pitch: 0.8, rate: 0.95 },
   star:      { pitch: 1.4, rate: 1.05 },
 };
+
+// ── Frische-Stufen (für eigene Preise je Frische) ───────────────
+// qualitaet: wie gern Kunden diese Stufe kaufen (frisch = 1).
+// Kunden vergleichen Qualität und Preis – alte Ware verkauft sich nur, wenn sie billiger ist.
+const FRISCHE_STUFEN = {
+  gruen:  { emoji: '🟢', label: 'frisch',        qualitaet: 1.0,  wort: '' },
+  orange: { emoji: '🟡', label: 'wird alt',      qualitaet: 0.7,  wort: 'älteren' },
+  rot:    { emoji: '🔴', label: 'verdirbt bald', qualitaet: 0.45, wort: 'sehr reifen' },
+};
+const FRISCHE_REIHENFOLGE = ['gruen', 'orange', 'rot'];
+
+// Kühlbox: so viele Tage hält Ware länger
+const KUEHLBOX_EXTRA_TAGE = 2;
+
+// Tages-Trend: so viel öfter wird das gefragte Produkt gekauft
+const TREND_GEWICHT = 3;
+
+// Kleidungsfarben der Passanten
+const SHIRT_FARBEN = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00acc1', '#fdd835', '#ec407a'];
+const HOSEN_FARBEN = ['#37474f', '#3f51b5', '#5d4037', '#455a64', '#1a237e', '#6d4c41'];
+
+// ── Preis-Reaktion der Kunden ────────────────────────────────────
+// Wie stark Kunden auf zu hohe Preise reagieren (1 = normal, kleiner = egal, größer = sparsam)
+const PREIS_EMPFINDLICHKEIT = {
+  kind:      1.3,
+  jugend:    1.2,
+  erwachsen: 1.0,
+  rentner:   1.2,
+  familie:   1.1,
+  reich:     0.4,
+  star:      0.2,
+};
+// Wie schnell die Kauflust bei zu hohen Preisen sinkt:
+// doppelter Preis → ca. 20 % kaufen noch, dreifacher Preis → ca. 4 %
+const PREIS_ABSCHRECKUNG = 1.6;
+// Wie lange ein Passant mit "Zu teuer!"-Blase stehen bleibt (ms)
+const ZU_TEUER_ANZEIGE_MS = 1600;

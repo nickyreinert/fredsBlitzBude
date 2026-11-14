@@ -22,7 +22,17 @@ function zeigeZubehoerShop() {
   const liste = document.getElementById('zubehoer-artikel-liste');
   liste.innerHTML = '';
 
+  let letzteKategorie = null;
   for (const [key, artikel] of Object.entries(ZUBEHOER_ARTIKEL)) {
+    // Abschnitts-Überschrift (Tiere / Für deinen Stand)
+    if (artikel.kategorie !== letzteKategorie) {
+      letzteKategorie = artikel.kategorie;
+      const titel = document.createElement('h3');
+      titel.className = 'zubehoer-abschnitt';
+      titel.textContent = ZUBEHOER_KATEGORIEN[artikel.kategorie] ?? '';
+      liste.appendChild(titel);
+    }
+
     const anzahl         = gameState.zubehoer[key] ?? 0;
     const bereitsGekauft = anzahl >= artikel.maxAnzahl;
     const kannKaufen     = !bereitsGekauft && gameState.money >= artikel.preis;
