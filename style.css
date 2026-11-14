@@ -2163,6 +2163,12 @@ body {
   font-weight: 900;
   margin-bottom: 0.2rem;
 }
+.zubehoer-anzahl {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff9c4;
+  margin-top: 0.3rem;
+}
 .zubehoer-beschreibung {
   font-size: 0.85rem;
   opacity: 0.85;

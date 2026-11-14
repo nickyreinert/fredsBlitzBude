@@ -327,3 +327,95 @@ function zeichneHund(w, h) {
 
   ctx.restore();
 }
+
+/* ── Weitere Tiere aus dem Zubehör-Shop ─────────────────────────── */
+
+// Punkt auf der Dachschräge berechnen (t = 0 → Dachkante, t = 1 → Dachspitze)
+// seite: -1 = linke Schräge, +1 = rechte Schräge (Geometrie wie in stand.js)
+function dachPunkt(sz, seite, t) {
+  const ueberstand = sz.standB * 0.15;
+  const kanteX = sz.mitteX + seite * (sz.standB / 2 + ueberstand);
+  const kanteY = sz.standY + 5;
+  const spitzeY = sz.standY - sz.standH * 0.45;
+  return {
+    x: kanteX + (sz.mitteX - kanteX) * t,
+    y: kanteY + (spitzeY - kanteY) * t,
+  };
+}
+
+// Emoji auf den Canvas malen (unten mittig ausgerichtet)
+function zeichneTierEmoji(emoji, x, y, groesse, spiegeln) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (spiegeln) ctx.scale(-1, 1);
+  ctx.font = `${groesse}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(emoji, 0, 0);
+  ctx.restore();
+}
+
+// Alle gekauften Tiere (außer Hund – der hat eigene Zeichnung) zeichnen
+function zeichneTiere(w, h) {
+  const sz = szenenMasse(w, h);
+  const zeit = performance.now();
+  const tierGroesse = sz.figurR * 2.6;
+
+  // Katze: steht auf der linken Dachschräge und "atmet" leicht
+  if (gameState.zubehoer.katze) {
+    const p = dachPunkt(sz, -1, 0.45);
+    const atmen = 1 + Math.sin(zeit * 0.002) * 0.03;
+    zeichneTierEmoji('🐈', p.x, p.y + tierGroesse * 0.12, tierGroesse * atmen, false);
+  }
+
+  // Papagei: sitzt auf der rechten Dachschräge und wippt
+  if (gameState.zubehoer.papagei) {
+    const p = dachPunkt(sz, 1, 0.45);
+    const wippen = Math.sin(zeit * 0.004) * sz.figurR * 0.15;
+    zeichneTierEmoji('🦜', p.x, p.y + tierGroesse * 0.1 + wippen, tierGroesse, true);
+  }
+
+  // Goldfische: rundes Glas auf einem Hocker links neben dem Stand
+  const fische = gameState.zubehoer.fisch || 0;
+  if (fische > 0) {
+    const glasR = sz.figurR * 2.1;
+    const glasX = Math.max(glasR + 6, sz.mitteX - sz.standB / 2 - glasR * 1.4);
+    const hockerH = glasR * 0.9;
+    const bodenY = sz.strasseY;                 // Hocker steht am Straßenrand
+    const glasY = bodenY - hockerH - glasR;     // Mittelpunkt des Glases
+
+    // Hocker (Holz)
+    ctx.fillStyle = '#795548';
+    ctx.fillRect(glasX - glasR * 0.7, bodenY - hockerH, glasR * 1.4, glasR * 0.2);
+    ctx.fillRect(glasX - glasR * 0.6, bodenY - hockerH, glasR * 0.15, hockerH);
+    ctx.fillRect(glasX + glasR * 0.45, bodenY - hockerH, glasR * 0.15, hockerH);
+
+    // Wasser im Glas
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(glasX, glasY, glasR, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(129, 212, 250, 0.55)';
+    ctx.fillRect(glasX - glasR, glasY - glasR * 0.55, glasR * 2, glasR * 2);
+
+    // Fische schwimmen hin und her
+    for (let i = 0; i < fische; i++) {
+      const phase = zeit * 0.0012 + i * 2.1;
+      const fx = glasX + Math.sin(phase) * glasR * 0.45;
+      const fy = glasY + glasR * (0.35 - i * 0.28) + Math.sin(phase * 1.7) * glasR * 0.06;
+      // Blickrichtung passend zur Schwimmrichtung
+      zeichneTierEmoji("🐠", fx, fy + glasR * 0.3, glasR * 0.8, Math.cos(phase) > 0);
+    }
+    ctx.restore();
+
+    // Glasrand mit Glanzlicht
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = Math.max(2, glasR * 0.08);
+    ctx.beginPath();
+    ctx.arc(glasX, glasY, glasR, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(glasX, glasY, glasR * 0.75, Math.PI * 1.1, Math.PI * 1.4);
+    ctx.stroke();
+  }
+}

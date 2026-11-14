@@ -156,6 +156,12 @@ document.getElementById('toggle-nocomma').addEventListener('change', (e) => {
   localStorage.setItem('keineKommazahlen', keineKommazahlen ? '1' : '0');
 });
 
+// Toggle: Kunden sprechen laut
+document.getElementById('toggle-stimmen').addEventListener('change', (e) => {
+  localStorage.setItem('stimmenAktiv', e.target.checked ? '1' : '0');
+  if (!e.target.checked) stoppeStimme();
+});
+
 // Großmarkt öffnen (vom Nacht-Overlay)
 document.getElementById('btn-grossmarkt').addEventListener('click', zeigeGrossmarkt);
 
@@ -197,6 +203,7 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     localStorage.clear();
     keineKommazahlen = false;
     document.getElementById('toggle-nocomma').checked = false;
+    document.getElementById('toggle-stimmen').checked = true;
     document.getElementById('toggle-trinkgeld').checked = false;
     document.getElementById('trinkgeld-detail-controls').classList.add('hidden');
     einkaufsStufe = 1;
@@ -314,6 +321,7 @@ document.getElementById('btn-give-change').addEventListener('click', () => {
 
 // Kauf ablehnen (zu wenig Geld oder unfreundlich)
 document.getElementById('btn-ablehnen').addEventListener('click', () => {
+  stoppeStimme();
   const kunde = gameState.currentCustomer;
   if (kunde && kunde.passantRef) {
     // Passant geht wieder weg

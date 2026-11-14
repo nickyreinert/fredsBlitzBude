@@ -190,6 +190,7 @@ const TEXTE = {
     btnKaufen:      '🛒 Kaufen',
     btnZuWenig:     '💸 Zu wenig Geld',
     statusGekauft:  '✅ Gekauft!',
+    anzahlText:     (n, max) => `Du hast ${n} von ${max}`,
   },
 
   // ── Einstellungen ────────────────────────────────────────────
@@ -438,14 +439,41 @@ const BEWERTUNG_CHANCE_STUFEN = [
 
 // ── Zubehör-Shop ─────────────────────────────────────────────────
 
-// Verfügbare Zubehör-Artikel
+// Verfügbare Zubehör-Artikel (Tiere)
+// wirkung: 'kunden' = mehr Kunden kommen, 'trinkgeld' = öfter Trinkgeld
+// Der Bonus wird pro Wirkung über alle passenden Tiere berechnet (gedämpft, siehe unten).
 const ZUBEHOER_ARTIKEL = {
   hund: {
     name:         'Hund',
     emoji:        '🐕',
-    beschreibung: 'Ein treuer Begleiter! Kunden mögen Hunde und geben mehr Trinkgeld.',
+    beschreibung: 'Ein treuer Begleiter! Kunden mögen Hunde, kommen gern vorbei und geben mehr Trinkgeld.',
     preis:        15.00,
     maxAnzahl:    1,
+    wirkung:      ['kunden', 'trinkgeld'],
+  },
+  katze: {
+    name:         'Katze',
+    emoji:        '🐈',
+    beschreibung: 'Spaziert auf dem Dach herum. Die Kunden finden das so süß, dass sie öfter Trinkgeld geben.',
+    preis:        12.00,
+    maxAnzahl:    1,
+    wirkung:      ['trinkgeld'],
+  },
+  fisch: {
+    name:         'Goldfisch',
+    emoji:        '🐠',
+    beschreibung: 'Schwimmt in einem Glas neben dem Stand. Leute bleiben stehen und gucken – es kommen mehr Kunden! Bis zu 3 Fische.',
+    preis:        6.00,
+    maxAnzahl:    3,
+    wirkung:      ['kunden'],
+  },
+  papagei: {
+    name:         'Papagei',
+    emoji:        '🦜',
+    beschreibung: 'Sitzt auf dem Dach und ist bunt und laut. Das lockt mehr Kunden an!',
+    preis:        20.00,
+    maxAnzahl:    1,
+    wirkung:      ['kunden'],
   },
 };
 
@@ -466,3 +494,15 @@ const REGEN_CHANCE = {
 
 // Bei Regen kommen weniger Leute vorbei (Faktor auf Passanten und Kunden)
 const REGEN_KUNDEN_FAKTOR = 0.5;
+
+// ── Stimmen der Kunden (Vorlesen per Sprachausgabe des Browsers) ─
+// pitch: Tonhöhe (0 = tief, 1 = normal, 2 = sehr hoch), rate: Sprechtempo (1 = normal)
+const STIMMEN = {
+  kind:      { pitch: 1.9, rate: 1.1  },
+  jugend:    { pitch: 1.35, rate: 1.1 },
+  erwachsen: { pitch: 1.0, rate: 1.0  },
+  familie:   { pitch: 1.1, rate: 1.0  },
+  rentner:   { pitch: 0.55, rate: 0.85 },
+  reich:     { pitch: 0.8, rate: 0.95 },
+  star:      { pitch: 1.4, rate: 1.05 },
+};

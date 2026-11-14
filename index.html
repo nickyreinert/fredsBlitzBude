@@ -20,7 +20,7 @@
   <title>Freds Blitz-Bude</title>
 
   <!-- Game Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=20261114-1" />
+  <link rel="stylesheet" href="style.css?v=20261114-2" />
 </head>
 <body>
 
@@ -71,6 +71,20 @@
             </div>
             <div class="toggle-wrap">
               <input type="checkbox" id="toggle-nocomma" class="toggle-input" />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+
+          <hr class="settings-divider" />
+
+          <!-- Kunden sprechen laut -->
+          <label class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-label">🔊 Kunden sprechen</span>
+              <span class="settings-row-desc">Kunden lesen ihre Sätze laut vor</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="toggle-stimmen" class="toggle-input" />
               <span class="toggle-slider"></span>
             </div>
           </label>
@@ -599,6 +613,7 @@
   <script src="js/ui/inventar.js"></script>
   <script src="js/ui/intro.js"></script>
   <script src="js/ui/preispopup.js"></script>
+  <script src="js/ui/stimme.js"></script>
 
   <!-- Spiellogik -->
   <script src="js/logik/bewertung.js"></script>
@@ -623,7 +638,7 @@
   <script src="js/ui/zubehoer.js"></script>
 
   <!-- Initialisierung (Event-Listener + Startup – muss zuletzt) -->
-  <script src="js/init.js?v=20261114-1"></script>
+  <script src="js/init.js?v=20261114-2"></script>
 
 </body>
 </html>

@@ -26,6 +26,9 @@ function zeichneSpielwelt() {
   // Hund neben dem Stand (wenn gekauft)
   zeichneHund(w, h);
 
+  // Weitere Tiere: Katze, Papagei, Goldfische
+  zeichneTiere(w, h);
+
   // Passanten auf der Straße
   zeichnePassanten(w, h);
 

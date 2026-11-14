@@ -24,7 +24,8 @@ function trinkgeldMaxCent() {
 
 // Zubehör-Bonus (logarithmisch gedämpft) für Trinkgeld-Chance
 function zubehoerTrinkgeldBonus() {
-  const anzahl = Object.values(gameState.zubehoer).reduce((s, n) => s + n, 0);
+  // Nur Tiere zählen, die Trinkgeld bringen (z.B. Hund, Katze)
+  const anzahl = zubehoerAnzahlMitWirkung('trinkgeld');
   if (anzahl === 0) return 1.0;
   return 1 + ZUBEHOER_BONUS_STAERKE_TRINKGELD * Math.log2(anzahl + 1);
 }

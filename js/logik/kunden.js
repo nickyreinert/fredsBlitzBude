@@ -6,7 +6,8 @@
 
 // Zubehör-Bonus (logarithmisch gedämpft) auf Kundenanzahl
 function zubehoerKundenBonus() {
-  const anzahl = Object.values(gameState.zubehoer).reduce((s, n) => s + n, 0);
+  // Nur Tiere zählen, die Kunden anlocken (z.B. Hund, Fische, Papagei)
+  const anzahl = zubehoerAnzahlMitWirkung('kunden');
   if (anzahl === 0) return 1.0;
   return 1 + ZUBEHOER_BONUS_STAERKE_KUNDEN * Math.log2(anzahl + 1);
 }
@@ -214,6 +215,8 @@ function zeigeKundenDialog() {
 
   document.getElementById('customer-emoji').textContent  = anzeigeEmoji;
   document.getElementById('customer-speech').textContent = sprache;
+  // Satz laut vorlesen (Stimme passend zum Alter)
+  sprich(sprache, kunde.typKey, kunde.unfreundlich);
   // Buttons erst nach kurzer Pause zeigen (Kind soll zuerst lesen)
   document.getElementById('customer-payment-info').classList.add('hidden');
   panel.classList.remove('hidden');

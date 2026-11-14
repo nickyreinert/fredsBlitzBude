@@ -4,6 +4,15 @@
    ZUBEHÖR-SHOP – Shop öffnen, Artikel kaufen, UI aufbauen
    ================================================================ */
 
+// Anzahl gekaufter Artikel mit einer bestimmten Wirkung ('kunden' oder 'trinkgeld')
+function zubehoerAnzahlMitWirkung(wirkung) {
+  let anzahl = 0;
+  for (const [key, n] of Object.entries(gameState.zubehoer)) {
+    if (ZUBEHOER_ARTIKEL[key]?.wirkung?.includes(wirkung)) anzahl += n;
+  }
+  return anzahl;
+}
+
 // Zubehör-Shop öffnen (pausiert die Spielzeit automatisch durch Screen-Wechsel)
 function zeigeZubehoerShop() {
   // Geldbetrag im Shop-Header aktualisieren
@@ -14,8 +23,13 @@ function zeigeZubehoerShop() {
   liste.innerHTML = '';
 
   for (const [key, artikel] of Object.entries(ZUBEHOER_ARTIKEL)) {
-    const bereitsGekauft = (gameState.zubehoer[key] ?? 0) >= artikel.maxAnzahl;
+    const anzahl         = gameState.zubehoer[key] ?? 0;
+    const bereitsGekauft = anzahl >= artikel.maxAnzahl;
     const kannKaufen     = !bereitsGekauft && gameState.money >= artikel.preis;
+    // Bei Artikeln, die man mehrfach kaufen kann (Fische), den Stand anzeigen
+    const anzahlHTML = artikel.maxAnzahl > 1 && anzahl > 0
+      ? `<div class="zubehoer-anzahl">${TEXTE.zubehoer.anzahlText(anzahl, artikel.maxAnzahl)}</div>`
+      : '';
 
     const karte = document.createElement('div');
     karte.className = 'zubehoer-karte' + (bereitsGekauft ? ' zubehoer-karte--gekauft' : '');
@@ -25,6 +39,7 @@ function zeigeZubehoerShop() {
       <div class="zubehoer-info">
         <div class="zubehoer-name">${artikel.name}</div>
         <div class="zubehoer-beschreibung">${artikel.beschreibung}</div>
+        ${anzahlHTML}
       </div>
       <div class="zubehoer-rechts">
         ${bereitsGekauft

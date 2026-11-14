@@ -19,6 +19,7 @@ document.querySelectorAll('.settings-tab').forEach(tab => {
 // Einstellung: keine Komma-Zahlen – beim Start aus localStorage laden
 keineKommazahlen = localStorage.getItem('keineKommazahlen') === '1';
 document.getElementById('toggle-nocomma').checked = keineKommazahlen;
+document.getElementById('toggle-stimmen').checked = stimmenAktiv();
 
 // Einstellung: Einkaufsstufe (1 = einfach, 2 = eine Sorte viele Stück, 3 = mehrere Produkte)
 einkaufsStufe = parseInt(localStorage.getItem('einkaufsStufe') ?? '1', 10);

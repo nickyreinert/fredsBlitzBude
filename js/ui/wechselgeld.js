@@ -39,7 +39,9 @@ function oeffneWechselgeldScreen() {
   }
 
   // Was der Kunde beim Bezahlen sagt (z.B. "Hier sind 5 €. Mach 3 €, der Rest ist für dich!")
-  document.getElementById('change-kunde-spruch').textContent = bezahlSpruch(kunde);
+  const spruch = bezahlSpruch(kunde);
+  document.getElementById('change-kunde-spruch').textContent = spruch;
+  sprich(spruch, kunde.typKey, kunde.unfreundlich);
 
   // Einkaufsliste im Change-Modal zeigen (Stufe 2+3)
   const listeEl = document.getElementById('change-einkaufsliste');
