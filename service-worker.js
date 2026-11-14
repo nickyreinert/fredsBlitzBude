@@ -47,6 +47,7 @@ const ASSETS_ZU_CACHEN = [
   `${APP_PREFIX}js/ui/preispopup.js`,
   `${APP_PREFIX}js/ui/stimme.js`,
   `${APP_PREFIX}js/ui/wechselgeld.js`,
+  `${APP_PREFIX}js/ui/einpacken.js`,
   `${APP_PREFIX}js/ui/grossmarkt.js`,
   `${APP_PREFIX}js/ui/einstellungen.js`,
   `${APP_PREFIX}js/ui/zubehoer.js`,

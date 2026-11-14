@@ -6,4 +6,4 @@
    Nicht von Hand ändern – höchstens die ersten beiden Stellen.
    ================================================================ */
 
-const SPIEL_VERSION = '1.0.1';
+const SPIEL_VERSION = '1.0.2';

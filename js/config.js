@@ -199,6 +199,14 @@ const TEXTE = {
     btnZurueck:     '← Zurück',
   },
 
+  // ── Lese-Profi: Ware einpacken ───────────────────────────────
+  einpacken: {
+    titel:   '📦 Ware einpacken',
+    richtig: '✅ Richtig eingepackt! Jetzt das Geld …',
+    falsch:  '🤔 Das stimmt noch nicht – lies nochmal genau!',
+    tipp:    '💡 Grün ist richtig, Rot stimmt noch nicht.',
+  },
+
   // ── Tages-Trend ──────────────────────────────────────────────
   trend: {
     heuteGefragt: (prod) => `📈 Heute gefragt: ${prod.emoji} ${prod.mehrzahl}!`,

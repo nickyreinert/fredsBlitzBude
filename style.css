@@ -2554,3 +2554,80 @@ body {
   user-select: none;
   z-index: 10000;
 }
+
+/* ================================================================
+   LESE-PROFI: Ware einpacken
+   ================================================================ */
+#change-einpacken {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+#change-einpacken.hidden { display: none; }
+.einpacken-spruch {
+  font-size: clamp(1.25rem, 4.6vw, 1.6rem);
+  padding: 0.7rem 1rem;
+}
+.einpacken-frage {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #e65100;
+}
+.einpacken-produkte {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+  gap: 0.7rem;
+}
+.einpacken-kachel {
+  background: #fff;
+  border: 3px solid #ffe082;
+  border-radius: 18px;
+  padding: 0.6rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+.einpacken-kachel--gewaehlt { border-color: #42a5f5; background: #e3f2fd; }
+.einpacken-kachel--richtig  { border-color: #43a047; background: #e8f5e9; }
+.einpacken-kachel--falsch   { border-color: #e53935; background: #ffebee; }
+.einpacken-emoji { font-size: 2.6rem; line-height: 1; }
+.einpacken-name  { font-size: 1.15rem; font-weight: 800; color: #33691e; }
+.einpacken-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+.einpacken-stepper .btn {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  font-size: 1.7rem;
+  color: #fff;
+  border-radius: 14px;
+}
+.einpacken-minus { background: linear-gradient(180deg, #ef5350, #c62828); }
+.einpacken-plus  { background: linear-gradient(180deg, #66bb6a, #388e3c); }
+.einpacken-menge {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #1b5e20;
+  min-width: 1.6ch;
+  text-align: center;
+}
+#einpacken-feedback {
+  border-radius: 16px;
+  padding: 0.6rem 0.9rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-align: center;
+}
+#einpacken-feedback.feedback-correct { background: #c8e6c9; color: #1b5e20; border: 3px solid #4CAF50; }
+#einpacken-feedback.feedback-wrong   { background: #ffcdd2; color: #b71c1c; border: 3px solid #f44336; }
+#einpacken-feedback.hidden { display: none; }
+#btn-einpacken { width: 100%; }

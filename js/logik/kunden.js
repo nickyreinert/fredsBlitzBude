@@ -295,6 +295,8 @@ function zeigeKundenDialog() {
 
   document.getElementById('customer-emoji').textContent  = anzeigeEmoji;
   document.getElementById('customer-speech').textContent = sprache;
+  // Satz merken – im Lese-Profi-Modus muss das Kind ihn beim Einpacken lesen
+  kunde._sprache = sprache;
   // Satz laut vorlesen (Stimme passend zum Alter)
   sprich(sprache, kunde.typKey, kunde.unfreundlich);
   // Buttons erst nach kurzer Pause zeigen (Kind soll zuerst lesen)
@@ -308,7 +310,8 @@ function zeigeKundenDialog() {
 
     // Einkaufsliste anzeigen (ab Stufe 2, nur Produktnamen – keine Preise hier)
     const listeEl = document.getElementById('customer-einkaufsliste');
-    if (einkaufsStufe >= 2 && k.einkaufsliste.length > 0) {
+    // Im Lese-Profi-Modus keine Liste zeigen – das Kind soll den Satz lesen
+    if (einkaufsStufe >= 2 && k.einkaufsliste.length > 0 && !leseModusAktiv()) {
       listeEl.innerHTML = '';
       k.einkaufsliste.forEach(pos => {
         const prod = PRODUKTE[pos.prodKey];

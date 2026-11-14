@@ -91,6 +91,20 @@
 
           <hr class="settings-divider" />
 
+          <!-- Lese-Profi: Kind liest den Wunsch und packt selbst ein -->
+          <label class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-label">📖 Lese-Profi</span>
+              <span class="settings-row-desc">Lesen, was der Kunde will, und die Ware selbst einpacken</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="toggle-lesemodus" class="toggle-input" />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+
+          <hr class="settings-divider" />
+
           <!-- Einkaufsstufe -->
           <div class="settings-row-text">
             <span class="settings-row-label">🛒 Einkaufsstufe</span>
@@ -425,6 +439,15 @@
         <h2 class="change-title">💶 Wechselgeld rausgeben</h2>
 
         <!-- Zweispalten-Layout: links Infos, rechts Eingabe -->
+        <!-- Lese-Profi: erst Ware einpacken (Kind liest, was der Kunde will) -->
+        <div id="change-einpacken" class="hidden">
+          <div id="einpacken-spruch" class="change-kunde-spruch einpacken-spruch"></div>
+          <div class="einpacken-frage">Was packst du ein? 📦</div>
+          <div id="einpacken-produkte" class="einpacken-produkte"></div>
+          <div id="einpacken-feedback" class="hidden"></div>
+          <button id="btn-einpacken" class="btn btn-success btn-xl">📦 Einpacken</button>
+        </div>
+
         <div id="change-columns">
 
           <!-- LINKE SPALTE: Preisinfo + Einkaufsliste + Feedback -->
@@ -634,6 +657,7 @@
   <!-- Kunden und Wechselgeld (brauchen Erfahrung + Logik) -->
   <script src="js/logik/kunden.js"></script>
   <script src="js/ui/wechselgeld.js"></script>
+  <script src="js/ui/einpacken.js"></script>
   <script src="js/ui/grossmarkt.js"></script>
   <script src="js/logik/passanten.js"></script>
   <script src="js/logik/tag.js"></script>

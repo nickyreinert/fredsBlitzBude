@@ -156,6 +156,11 @@ document.getElementById('toggle-nocomma').addEventListener('change', (e) => {
   localStorage.setItem('keineKommazahlen', keineKommazahlen ? '1' : '0');
 });
 
+// Toggle: Lese-Profi (Ware selbst einpacken)
+document.getElementById('toggle-lesemodus').addEventListener('change', (e) => {
+  localStorage.setItem('leseModus', e.target.checked ? '1' : '0');
+});
+
 // Toggle: Kunden sprechen laut
 document.getElementById('toggle-stimmen').addEventListener('change', (e) => {
   localStorage.setItem('stimmenAktiv', e.target.checked ? '1' : '0');
@@ -206,6 +211,7 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     keineKommazahlen = false;
     document.getElementById('toggle-nocomma').checked = false;
     document.getElementById('toggle-stimmen').checked = false;
+    document.getElementById('toggle-lesemodus').checked = false;
     document.getElementById('toggle-trinkgeld').checked = false;
     document.getElementById('trinkgeld-detail-controls').classList.add('hidden');
     einkaufsStufe = 1;

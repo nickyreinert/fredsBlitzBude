@@ -20,6 +20,7 @@ document.querySelectorAll('.settings-tab').forEach(tab => {
 keineKommazahlen = localStorage.getItem('keineKommazahlen') === '1';
 document.getElementById('toggle-nocomma').checked = keineKommazahlen;
 document.getElementById('toggle-stimmen').checked = stimmenAktiv();
+document.getElementById('toggle-lesemodus').checked = leseModusAktiv();
 
 // Einstellung: Einkaufsstufe (1 = einfach, 2 = eine Sorte viele Stück, 3 = mehrere Produkte)
 einkaufsStufe = parseInt(localStorage.getItem('einkaufsStufe') ?? '1', 10);
