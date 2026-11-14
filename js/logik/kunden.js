@@ -220,7 +220,7 @@ function postenText(pos) {
   if (wort) {
     const anzahlWort = pos.menge === 1 ? prod.einzahl.split(' ')[0] : zahl;
     // Dativ Plural: hängt ein -n an, außer das Wort endet schon auf -n oder -s (Äpfel → Äpfeln)
-    const dativ = /[ns]$/.test(prod.mehrzahl) ? prod.mehrzahl : prod.mehrzahl + 'n';
+    const dativ = prod.dativ ?? (/[ns]$/.test(prod.mehrzahl) ? prod.mehrzahl : prod.mehrzahl + 'n');
     return `${anzahlWort} von den ${wort} ${dativ}`;
   }
   if (pos.menge === 1) return prod.einzahl;

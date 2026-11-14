@@ -19,6 +19,10 @@ function zeichneProdukte(_w, _h) {
   const anzahl  = Object.values(gameState.inventory).filter(m => m > 0).length;
   const abstand = Math.min(sB * 0.22, (sB * 0.9) / Math.max(1, anzahl));
   let produktX  = sX + sB / 2 - (anzahl - 1) * abstand / 2;
+  let produktNr = 0;
+  // Wenig Platz (viele Sorten / schmaler Bildschirm): Preisschilder im Zickzack
+  // auf zwei Reihen verteilen → jedes Schild darf doppelt so breit sein
+  const zickzack = abstand < 62;
   const r       = Math.min(sB * 0.075, abstand * 0.38, 44);
 
   Object.entries(gameState.inventory).forEach(([key, menge]) => {
@@ -39,10 +43,11 @@ function zeichneProdukte(_w, _h) {
       case 'kuerbis':  zeichneKuerbis(px, py, r);  break;
       case 'zitrone':  zeichneZitrone(px, py, r);  break;
       default:
-        ctx.beginPath();
-        ctx.arc(px, py, r, 0, Math.PI * 2);
-        ctx.fillStyle = prod.farbe;
-        ctx.fill();
+        // Kein eigenes Bild: Emoji in Produktgröße zeichnen
+        ctx.font = `${r * 2.1}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(prod.emoji, px, py);
     }
 
     // Menge
@@ -92,7 +97,11 @@ function zeichneProdukte(_w, _h) {
     }
 
     // Preisschild
-    zeichnePreisschild(key, prod, px, py + r + 22, r, abstand * 0.95);
+    const schildReihe = zickzack ? produktNr % 2 : 0;
+    const schildHoehe = Math.max(r * 1.4, 26);
+    zeichnePreisschild(key, prod, px, py + r + 22 + schildReihe * (schildHoehe + 4), r,
+      abstand * (zickzack ? 1.9 : 0.95));
+    produktNr++;
 
     produktX += abstand;
   });
@@ -111,11 +120,14 @@ function zeichnePreisschild(key, _prod, cx, topY, r, maxB) {
   // Schrift so groß wie möglich, aber das Schild darf nicht breiter als maxB werden
   let schriftPx = Math.max(10, schildH * 0.5);
   let iconSize, textFont, schildW;
+  let mitStift = true;
   do {
     iconSize = Math.max(9, schriftPx * 0.9);
     textFont = `bold ${schriftPx}px system-ui`;
     ctx.font = textFont;
-    schildW = ctx.measureText(preisText).width + iconSize * 1.3 + 12;
+    // Bei sehr wenig Platz den Stift weglassen – der Preis ist wichtiger
+    if (schriftPx < 12) mitStift = false;
+    schildW = ctx.measureText(preisText).width + (mitStift ? iconSize * 1.3 : 0) + 12;
     schriftPx -= 1;
   } while (schildW > maxB && schriftPx >= 9);
   schildW = Math.min(Math.max(schildW, 44), Math.max(maxB, 44));
@@ -130,18 +142,20 @@ function zeichnePreisschild(key, _prod, cx, topY, r, maxB) {
   ctx.fill();
   ctx.stroke();
 
-  // Bleistift-Symbol
-  ctx.font = `${iconSize}px serif`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('✏️', schildX + schildW - 4, schildY + schildH / 2);
+  // Bleistift-Symbol (nur wenn Platz ist)
+  if (mitStift) {
+    ctx.font = `${iconSize}px serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✏️', schildX + schildW - 4, schildY + schildH / 2);
+  }
 
-  // Preis-Text
+  // Preis-Text (ohne Stift mittig)
   ctx.fillStyle    = hatPreis ? '#e65100' : '#bf360c';
   ctx.font         = textFont;
-  ctx.textAlign    = 'left';
+  ctx.textAlign    = mitStift ? 'left' : 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(preisText, schildX + 5, schildY + schildH / 2);
+  ctx.fillText(preisText, mitStift ? schildX + 5 : cx, schildY + schildH / 2);
 
   preisschilderHitbox.push({ key, x: schildX, y: schildY, w: schildW, h: schildH });
 }

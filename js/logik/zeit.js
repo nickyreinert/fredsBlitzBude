@@ -29,7 +29,7 @@ function omaLieferung() {
   if (gameState.grossmarktGenutzt && Math.random() < 0.6) return [];
 
   const verfuegbar = Object.entries(PRODUKTE)
-    .filter(([, p]) => p.saisons.includes(gameState.jahreszeit));
+    .filter(([, p]) => p.saisons.includes(gameState.jahreszeit) && p.garten);
 
   const anzahlProdukte = gameState.grossmarktGenutzt ? 1 : zufall(1, 2);
   const nachricht = [];

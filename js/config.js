@@ -7,16 +7,51 @@
 
 // ── Produkte: Verfügbare Waren mit Eigenschaften ────────────────
 const PRODUKTE = {
-  // einzahl = Akkusativ mit Artikel ("Ich hätte gern eine Gurke"), mehrzahl = Plural ("zwei Gurken")
+  // name      = Anzeigename
+  // einzahl   = Akkusativ mit Artikel ("Ich hätte gern eine Gurke"), mehrzahl = Plural ("zwei Gurken")
+  // dativ     = (optional) Dativ Plural, falls nicht einfach "-n" angehängt wird ("von den älteren Säcken Kartoffeln")
+  // sorte     = (optional) Name für Ansagen, falls die Mehrzahl eine Verpackung ist ("Kartoffeln" statt "Säcke Kartoffeln")
   // fairPreis = üblicher Ladenpreis: billiger → mehr Käufer, viel teurer → kaum jemand kauft
-  gurke:    { name: 'Gurke',     einzahl: 'eine Gurke',    mehrzahl: 'Gurken',    emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    fairPreis: 1.20, kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
-  apfel:    { name: 'Apfel',     einzahl: 'einen Apfel',   mehrzahl: 'Äpfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    fairPreis: 1.50, kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
-  banane:   { name: 'Banane',    einzahl: 'eine Banane',   mehrzahl: 'Bananen',   emoji: '🍌', farbe: '#FFC107', form: 'banane',   fairPreis: 1.20, kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
-  tomate:   { name: 'Tomate',    einzahl: 'eine Tomate',   mehrzahl: 'Tomaten',   emoji: '🍅', farbe: '#e53935', form: 'tomate',   fairPreis: 1.80, kaufPreis: 1.20, saisons: ['sommer'] },
-  karotte:  { name: 'Karotte',   einzahl: 'eine Karotte',  mehrzahl: 'Karotten',  emoji: '🥕', farbe: '#FF7043', form: 'karotte',  fairPreis: 1.30, kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
-  erdbeere: { name: 'Erdbeere',  einzahl: 'eine Erdbeere', mehrzahl: 'Erdbeeren', emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', fairPreis: 2.50, kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
-  kuerbis:  { name: 'Kürbis',    einzahl: 'einen Kürbis',  mehrzahl: 'Kürbisse',  emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  fairPreis: 3.50, kaufPreis: 2.00, saisons: ['herbst'] },
-  zitrone:  { name: 'Zitrone',   einzahl: 'eine Zitrone',  mehrzahl: 'Zitronen',  emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  fairPreis: 1.50, kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
+  // kaufPreis = Preis im Großmarkt (0 = gibt es nur bei Oma)
+  // form      = eigene Zeichnung auf dem Stand, ohne form wird das Emoji gezeichnet
+  // garten    = wächst in Omas Garten (nur solche Sachen liefert Oma)
+
+  // ── Bisherige Produkte (mit eigener Zeichnung) ──
+  gurke:    { name: 'Gurke',     einzahl: 'eine Gurke',    mehrzahl: 'Gurken',    emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    fairPreis: 1.20, kaufPreis: 0,    saisons: ['fruehling', 'sommer'], garten: true },
+  apfel:    { name: 'Apfel',     einzahl: 'einen Apfel',   mehrzahl: 'Äpfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    fairPreis: 1.50, kaufPreis: 1.00, saisons: ['herbst', 'winter'], garten: true },
+  banane:   { name: 'Banane',    einzahl: 'eine Banane',   mehrzahl: 'Bananen',   emoji: '🍌', farbe: '#FFC107', form: 'banane',   fairPreis: 1.20, kaufPreis: 0.80, saisons: ['sommer', 'herbst'], garten: true },
+  tomate:   { name: 'Tomate',    einzahl: 'eine Tomate',   mehrzahl: 'Tomaten',   emoji: '🍅', farbe: '#e53935', form: 'tomate',   fairPreis: 1.80, kaufPreis: 1.20, saisons: ['sommer'], garten: true },
+  karotte:  { name: 'Karotte',   einzahl: 'eine Karotte',  mehrzahl: 'Karotten',  emoji: '🥕', farbe: '#FF7043', form: 'karotte',  fairPreis: 1.30, kaufPreis: 0.90, saisons: ['herbst', 'winter'], garten: true },
+  erdbeere: { name: 'Erdbeere',  einzahl: 'eine Erdbeere', mehrzahl: 'Erdbeeren', emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', fairPreis: 2.50, kaufPreis: 1.50, saisons: ['fruehling', 'sommer'], garten: true },
+  kuerbis:  { name: 'Kürbis',    einzahl: 'einen Kürbis',  mehrzahl: 'Kürbisse',  emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  fairPreis: 3.50, kaufPreis: 2.00, saisons: ['herbst'], garten: true },
+  zitrone:  { name: 'Zitrone',   einzahl: 'eine Zitrone',  mehrzahl: 'Zitronen',  emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  fairPreis: 1.50, kaufPreis: 1.00, saisons: ['winter', 'fruehling'], garten: true },
+
+  // ── Obst ──
+  birne:       { name: 'Birne',       einzahl: 'eine Birne',          mehrzahl: 'Birnen',            emoji: '🍐', fairPreis: 1.50, kaufPreis: 1.00, saisons: ['herbst', 'winter'], garten: true },
+  kirschen:    { name: 'Kirschen',    einzahl: 'eine Schale Kirschen', mehrzahl: 'Schalen Kirschen', sorte: 'Kirschen',   emoji: '🍒', fairPreis: 3.00, kaufPreis: 2.00, saisons: ['sommer'], garten: true },
+  pfirsich:    { name: 'Pfirsich',    einzahl: 'einen Pfirsich',      mehrzahl: 'Pfirsiche',         emoji: '🍑', fairPreis: 1.40, kaufPreis: 0.90, saisons: ['sommer'] },
+  weintraube:  { name: 'Weintraube',  einzahl: 'eine Weintraube',     mehrzahl: 'Weintrauben',       emoji: '🍇', fairPreis: 2.20, kaufPreis: 1.50, saisons: ['herbst'] },
+  wassermelone:{ name: 'Wassermelone',einzahl: 'eine Wassermelone',   mehrzahl: 'Wassermelonen',     emoji: '🍉', fairPreis: 4.50, kaufPreis: 3.00, saisons: ['sommer'] },
+  honigmelone: { name: 'Honigmelone', einzahl: 'eine Honigmelone',    mehrzahl: 'Honigmelonen',      emoji: '🍈', fairPreis: 3.00, kaufPreis: 2.00, saisons: ['sommer'] },
+  blaubeeren:  { name: 'Blaubeeren',  einzahl: 'eine Schale Blaubeeren', mehrzahl: 'Schalen Blaubeeren', sorte: 'Blaubeeren', emoji: '🫐', fairPreis: 3.00, kaufPreis: 2.00, saisons: ['sommer'], garten: true },
+  orange:      { name: 'Orange',      einzahl: 'eine Orange',         mehrzahl: 'Orangen',           emoji: '🍊', fairPreis: 1.00, kaufPreis: 0.60, saisons: ['winter'] },
+  kiwi:        { name: 'Kiwi',        einzahl: 'eine Kiwi',           mehrzahl: 'Kiwis',             emoji: '🥝', fairPreis: 0.70, kaufPreis: 0.40, saisons: ['winter', 'fruehling'] },
+  ananas:      { name: 'Ananas',      einzahl: 'eine Ananas',         mehrzahl: 'Ananas',            emoji: '🍍', fairPreis: 3.00, kaufPreis: 2.00, saisons: ['winter', 'fruehling'] },
+  mango:       { name: 'Mango',       einzahl: 'eine Mango',          mehrzahl: 'Mangos',            emoji: '🥭', fairPreis: 2.20, kaufPreis: 1.50, saisons: ['sommer'] },
+  kokosnuss:   { name: 'Kokosnuss',   einzahl: 'eine Kokosnuss',      mehrzahl: 'Kokosnüsse',        emoji: '🥥', fairPreis: 2.50, kaufPreis: 1.50, saisons: ['winter'] },
+
+  // ── Gemüse ──
+  kartoffel:   { name: 'Kartoffeln',  einzahl: 'einen Beutel Kartoffeln', mehrzahl: 'Beutel Kartoffeln', dativ: 'Beuteln Kartoffeln', sorte: 'Kartoffeln', emoji: '🥔', fairPreis: 2.50, kaufPreis: 1.50, saisons: ['herbst', 'winter'], garten: true },
+  suesskartoffel: { name: 'Süßkartoffel', einzahl: 'eine Süßkartoffel', mehrzahl: 'Süßkartoffeln', emoji: '🍠', fairPreis: 1.30, kaufPreis: 0.80, saisons: ['herbst', 'winter'] },
+  zwiebel:     { name: 'Zwiebeln',    einzahl: 'einen Beutel Zwiebeln', mehrzahl: 'Beutel Zwiebeln', dativ: 'Beuteln Zwiebeln', sorte: 'Zwiebeln', emoji: '🧅', fairPreis: 1.60, kaufPreis: 1.00, saisons: ['fruehling', 'sommer', 'herbst', 'winter'], garten: true },
+  knoblauch:   { name: 'Knoblauch',   einzahl: 'eine Knoblauchknolle', mehrzahl: 'Knoblauchknollen', sorte: 'Knoblauch', emoji: '🧄', fairPreis: 0.70, kaufPreis: 0.40, saisons: ['sommer', 'herbst'], garten: true },
+  salat:       { name: 'Salat',       einzahl: 'einen Salat',         mehrzahl: 'Salate',            sorte: 'Salat',      emoji: '🥬', fairPreis: 1.30, kaufPreis: 0.80, saisons: ['fruehling', 'sommer'], garten: true },
+  brokkoli:    { name: 'Brokkoli',    einzahl: 'einen Brokkoli',      mehrzahl: 'Brokkoli',          dativ: 'Brokkoli',   emoji: '🥦', fairPreis: 1.60, kaufPreis: 1.00, saisons: ['fruehling', 'herbst'], garten: true },
+  paprika:     { name: 'Paprika',     einzahl: 'eine Paprika',        mehrzahl: 'Paprikas',          sorte: 'Paprika',    emoji: '🫑', fairPreis: 1.10, kaufPreis: 0.70, saisons: ['sommer', 'herbst'], garten: true },
+  mais:        { name: 'Maiskolben',  einzahl: 'einen Maiskolben',    mehrzahl: 'Maiskolben',        emoji: '🌽', fairPreis: 1.00, kaufPreis: 0.60, saisons: ['sommer', 'herbst'], garten: true },
+  aubergine:   { name: 'Aubergine',   einzahl: 'eine Aubergine',      mehrzahl: 'Auberginen',        emoji: '🍆', fairPreis: 1.40, kaufPreis: 0.90, saisons: ['sommer'] },
+  chili:       { name: 'Chili',       einzahl: 'eine Chili',          mehrzahl: 'Chilis',            emoji: '🌶️', fairPreis: 0.40, kaufPreis: 0.20, saisons: ['sommer'], garten: true },
+  avocado:     { name: 'Avocado',     einzahl: 'eine Avocado',        mehrzahl: 'Avocados',          emoji: '🥑', fairPreis: 1.50, kaufPreis: 0.90, saisons: ['winter', 'fruehling'] },
 };
 
 // Zahlwörter für natürliche Sätze ("drei Äpfel" statt "3× Apfel")
@@ -209,14 +244,14 @@ const TEXTE = {
 
   // ── Tages-Trend ──────────────────────────────────────────────
   trend: {
-    heuteGefragt: (prod) => `📈 Heute gefragt: ${prod.emoji} ${prod.mehrzahl}!`,
-    morgenGefragt: (prod) => `📈 Morgen gefragt: ${prod.emoji} ${prod.mehrzahl}`,
+    heuteGefragt: (prod) => `📈 Heute gefragt: ${prod.emoji} ${prod.sorte ?? prod.mehrzahl}!`,
+    morgenGefragt: (prod) => `📈 Morgen gefragt: ${prod.emoji} ${prod.sorte ?? prod.mehrzahl}`,
     grossmarktBadge: '📈 Morgen gefragt!',
     // Ansage am Morgen (zufällig eine davon)
     ansage: (prod) => [
-      `📈 Heute haben alle Lust auf ${prod.mehrzahl}! ${prod.emoji}`,
-      `📈 ${prod.mehrzahl} sind heute der Renner! ${prod.emoji}`,
-      `📈 Alle wollen heute ${prod.mehrzahl}! ${prod.emoji}`,
+      `📈 Heute haben alle Lust auf ${prod.sorte ?? prod.mehrzahl}! ${prod.emoji}`,
+      `📈 ${prod.sorte ?? prod.mehrzahl} – heute der Renner! ${prod.emoji}`,
+      `📈 Alle wollen heute ${prod.sorte ?? prod.mehrzahl}! ${prod.emoji}`,
     ],
   },
 
