@@ -1298,11 +1298,23 @@ body {
   color: #666;
 }
 
-#btn-open-stand {
-  display: flex;
-  /* Bleibt beim Scrollen im Panel immer sichtbar */
+/* Knöpfe unten im Inventar: bleiben beim Scrollen sichtbar */
+.inventory-aktionen {
   position: sticky;
   bottom: 0;
+  display: flex;
+  gap: 0.7rem;
+  max-width: 520px;
+  margin: 0 auto;
+}
+#btn-grossmarkt-morgen {
+  flex: 0 0 auto;
+  min-height: 60px;
+  font-size: 1.15rem;
+}
+#btn-open-stand {
+  display: flex;
+  flex: 1;
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
@@ -2631,3 +2643,22 @@ body {
 #einpacken-feedback.feedback-wrong   { background: #ffcdd2; color: #b71c1c; border: 3px solid #f44336; }
 #einpacken-feedback.hidden { display: none; }
 #btn-einpacken { width: 100%; }
+
+/* Wegwerfen-Knopf neben dem Preis alter Ware */
+.inventory-wegwerfen {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 0.5rem;
+  font-size: 1.3rem;
+  background: #eceff1;
+  color: #37474f;
+  box-shadow: 0 3px 0 #b0bec5;
+  margin-left: 0.3rem;
+  white-space: nowrap;
+}
+.inventory-wegwerfen--sicher {
+  background: linear-gradient(180deg, #ef5350, #c62828);
+  color: #fff;
+  font-size: 1rem;
+  box-shadow: 0 3px 0 #b71c1c;
+}

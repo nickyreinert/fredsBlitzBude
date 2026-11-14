@@ -6,6 +6,8 @@
 
 // Warenkorb und Sortiment (nur während Großmarkt-Screen aktiv)
 let grossmarktWarenkorb = {};
+// true = Besuch am Morgen (vom Stand aus): danach zurück zum Stand statt neuer Tag
+let grossmarktAmMorgen = false;
 let grossmarktSortiment = {};
 
 // Saisonales Sortiment generieren – alle verfügbaren Saisonprodukte, größere Mengen
@@ -52,7 +54,8 @@ function aktualisiereGrossmarktGesamt() {
 }
 
 // Großmarkt-Screen aufbauen und anzeigen (Animation pausiert)
-function zeigeGrossmarkt() {
+function zeigeGrossmarkt(amMorgen = false) {
+  grossmarktAmMorgen = amMorgen === true;
   stoppeAnimation();
 
   grossmarktSortiment = erstelleGrossmarktSortiment();
@@ -69,7 +72,7 @@ function zeigeGrossmarkt() {
     kachel.dataset.key = key;
     const fmtGM = keineKommazahlen ? (n) => `${Math.round(n)} €` : formatEuro;
     const trendBadge = key === gameState.trend
-      ? `<div class="grossmarkt-trend-badge">${TEXTE.trend.grossmarktBadge}</div>`
+      ? `<div class="grossmarkt-trend-badge">${grossmarktAmMorgen ? TEXTE.trend.grossmarktBadgeHeute : TEXTE.trend.grossmarktBadge}</div>`
       : '';
     kachel.innerHTML = `
       ${trendBadge}
@@ -118,7 +121,21 @@ function grossmarktKaufen() {
   gameState.grossmarktGenutzt = true;
   speichereSpielstand();
 
-  // Direkt neuen Tag starten
   starteAnimation();
-  naechsterTag();
+  if (grossmarktAmMorgen) {
+    // Morgens eingekauft: zurück zum Stand, Preise setzen, Stand öffnen
+    zurueckVomGrossmarktAmMorgen();
+  } else {
+    // Abends eingekauft: direkt neuen Tag starten
+    naechsterTag();
+  }
+}
+
+// Vom Morgen-Großmarkt zurück zum Stand (gleicher Tag)
+function zurueckVomGrossmarktAmMorgen() {
+  grossmarktAmMorgen = false;
+  zeigeScreen('screen-stand');
+  aktualisiereHUD();
+  bauInventarPanel();
+  starteAnimation();
 }

@@ -37,6 +37,10 @@ function bauInventarPanel() {
 
   const verderbAn = haltbarkeitTage() > 0;
 
+  // Morgens nochmal zum Großmarkt (nur wenn genug Geld da ist)
+  document.getElementById('btn-grossmarkt-morgen')
+    .classList.toggle('hidden', gameState.money < grossmarktMinGeld());
+
   Object.entries(gameState.inventory).forEach(([key, menge]) => {
     if (menge <= 0) return;
     const prod = PRODUKTE[key];
@@ -67,7 +71,10 @@ function bauInventarPanel() {
         .map(st => `
           <div class="inventory-frische-preis">
             <span class="inventory-frische-label">${FRISCHE_STUFEN[st].emoji} ${bestand[st]}x ${FRISCHE_STUFEN[st].label}</span>
-            <div class="inventory-item-price">${stepperHTML(key, st, preisFuer(key, st))}</div>
+            <div class="inventory-item-price">
+              ${stepperHTML(key, st, preisFuer(key, st))}
+              ${st !== 'gruen' ? `<button class="btn inventory-wegwerfen" data-produkt="${key}" data-stufe="${st}" aria-label="wegwerfen">${TEXTE.stand.wegwerfen}</button>` : ''}
+            </div>
           </div>`)
         .join('');
     }
@@ -84,6 +91,35 @@ function bauInventarPanel() {
       ${altPreiseHTML}
     `;
     liste.appendChild(div);
+  });
+
+  // Wegwerfen: erst antippen → "Sicher?", nochmal antippen → alte Stücke wegwerfen
+  liste.querySelectorAll('.inventory-wegwerfen').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (btn.dataset.sicher !== 'ja') {
+        btn.dataset.sicher = 'ja';
+        btn.textContent = TEXTE.stand.wegwerfenSicher;
+        btn.classList.add('inventory-wegwerfen--sicher');
+        // Nach 3 Sekunden ohne zweiten Tipp wieder zurücksetzen
+        setTimeout(() => {
+          if (!btn.isConnected) return;
+          btn.dataset.sicher = '';
+          btn.textContent = TEXTE.stand.wegwerfen;
+          btn.classList.remove('inventory-wegwerfen--sicher');
+        }, 3000);
+        return;
+      }
+      const key = btn.dataset.produkt;
+      const stufe = btn.dataset.stufe;
+      const anzahl = bestandNachStufe(key)[stufe] || 0;
+      if (anzahl > 0) {
+        lagerAus(key, anzahl, stufe);
+        zeigeMeldung(TEXTE.meldungen.weggeworfen(anzahl, PRODUKTE[key]));
+        speichereSpielstand();
+      }
+      bauInventarPanel();
+    });
   });
 
   // Preis-Stepper: Plus/Minus-Buttons

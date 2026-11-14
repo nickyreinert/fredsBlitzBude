@@ -168,10 +168,17 @@ document.getElementById('toggle-stimmen').addEventListener('change', (e) => {
 });
 
 // Großmarkt öffnen (vom Nacht-Overlay)
-document.getElementById('btn-grossmarkt').addEventListener('click', zeigeGrossmarkt);
+document.getElementById('btn-grossmarkt').addEventListener('click', () => zeigeGrossmarkt(false));
+
+// Großmarkt am Morgen (vom Stand aus, bevor er öffnet)
+document.getElementById('btn-grossmarkt-morgen').addEventListener('click', () => zeigeGrossmarkt(true));
 
 // Großmarkt: Zurück ohne Kauf
 document.getElementById('btn-grossmarkt-zurueck').addEventListener('click', () => {
+  if (grossmarktAmMorgen) {
+    zurueckVomGrossmarktAmMorgen();
+    return;
+  }
   starteAnimation();
   zeigeScreen('screen-stand');
   document.getElementById('overlay-night').classList.remove('hidden');

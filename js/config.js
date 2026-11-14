@@ -164,6 +164,8 @@ const TEXTE = {
 
   // ── Inventar & Stand-Panel ───────────────────────────────────
   stand: {
+    wegwerfen:          '🗑️',
+    wegwerfenSicher:    '🗑️ Sicher?',
     panelTitel:                   'Dein Stand',
     oeffnenDefault:               '🏪 Stand öffnen!',
     oeffnenPreisHinweis:          '⚠️ Bitte Preis eingeben!',
@@ -247,6 +249,7 @@ const TEXTE = {
     heuteGefragt: (prod) => `📈 Heute gefragt: ${prod.emoji} ${prod.sorte ?? prod.mehrzahl}!`,
     morgenGefragt: (prod) => `📈 Morgen gefragt: ${prod.emoji} ${prod.sorte ?? prod.mehrzahl}`,
     grossmarktBadge: '📈 Morgen gefragt!',
+    grossmarktBadgeHeute: '📈 Heute gefragt!',
     // Ansage am Morgen (zufällig eine davon)
     ansage: (prod) => [
       `📈 Heute haben alle Lust auf ${prod.sorte ?? prod.mehrzahl}! ${prod.emoji}`,
@@ -260,6 +263,7 @@ const TEXTE = {
     notfallLieferung: '👵 Oma bringt Notfall-Gurken! Nicht aufgeben!',
     zubehoerGekauft:  (name, emoji) => `${emoji} ${name} gekauft! Viel Spaß damit!`,
     zuWenigGeld:      '💸 Nicht genug Geld!',
+    weggeworfen:      (n, prod) => `🗑️ ${n}x ${prod.name} weggeworfen`,
     kundeWeggeschickt: '👋 Tschüss! Wer frech ist, kriegt nichts.',
     regenTag:         '🌧️ Heute regnet es – es kommen weniger Kunden.',
     regenTagMarkise:  '🌧️ Heute regnet es – aber deine Markise hält die Kunden trocken! ⛱️',

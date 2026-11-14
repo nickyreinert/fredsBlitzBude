@@ -384,9 +384,15 @@
         <div id="inventory-list">
           <!-- Wird per JS befüllt -->
         </div>
-        <button id="btn-open-stand" class="btn btn-success btn-lg">
-          🏪 Stand öffnen!
-        </button>
+        <!-- Knöpfe unten: morgens nochmal zum Großmarkt, oder Stand öffnen -->
+        <div class="inventory-aktionen">
+          <button id="btn-grossmarkt-morgen" class="btn btn-warning btn-lg hidden">
+            🛒 Großmarkt
+          </button>
+          <button id="btn-open-stand" class="btn btn-success btn-lg">
+            🏪 Stand öffnen!
+          </button>
+        </div>
       </div>
 
       <!-- Kunden-Dialog (erscheint wenn Kunde kommt) -->
