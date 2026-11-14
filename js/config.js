@@ -7,15 +7,19 @@
 
 // ── Produkte: Verfügbare Waren mit Eigenschaften ────────────────
 const PRODUKTE = {
-  gurke:    { name: 'Gurke',     emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
-  apfel:    { name: 'Apfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
-  banane:   { name: 'Banane',    emoji: '🍌', farbe: '#FFC107', form: 'banane',   kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
-  tomate:   { name: 'Tomate',    emoji: '🍅', farbe: '#e53935', form: 'tomate',   kaufPreis: 1.20, saisons: ['sommer'] },
-  karotte:  { name: 'Karotte',   emoji: '🥕', farbe: '#FF7043', form: 'karotte',  kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
-  erdbeere: { name: 'Erdbeere',  emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
-  kuerbis:  { name: 'Kürbis',    emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  kaufPreis: 2.00, saisons: ['herbst'] },
-  zitrone:  { name: 'Zitrone',   emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
+  // einzahl = Akkusativ mit Artikel ("Ich hätte gern eine Gurke"), mehrzahl = Plural ("zwei Gurken")
+  gurke:    { name: 'Gurke',     einzahl: 'eine Gurke',    mehrzahl: 'Gurken',    emoji: '🥒', farbe: '#4CAF50', form: 'gurke',    kaufPreis: 0,    saisons: ['fruehling', 'sommer'] },
+  apfel:    { name: 'Apfel',     einzahl: 'einen Apfel',   mehrzahl: 'Äpfel',     emoji: '🍎', farbe: '#f44336', form: 'apfel',    kaufPreis: 1.00, saisons: ['herbst', 'winter'] },
+  banane:   { name: 'Banane',    einzahl: 'eine Banane',   mehrzahl: 'Bananen',   emoji: '🍌', farbe: '#FFC107', form: 'banane',   kaufPreis: 0.80, saisons: ['sommer', 'herbst'] },
+  tomate:   { name: 'Tomate',    einzahl: 'eine Tomate',   mehrzahl: 'Tomaten',   emoji: '🍅', farbe: '#e53935', form: 'tomate',   kaufPreis: 1.20, saisons: ['sommer'] },
+  karotte:  { name: 'Karotte',   einzahl: 'eine Karotte',  mehrzahl: 'Karotten',  emoji: '🥕', farbe: '#FF7043', form: 'karotte',  kaufPreis: 0.90, saisons: ['herbst', 'winter'] },
+  erdbeere: { name: 'Erdbeere',  einzahl: 'eine Erdbeere', mehrzahl: 'Erdbeeren', emoji: '🍓', farbe: '#e91e63', form: 'erdbeere', kaufPreis: 1.50, saisons: ['fruehling', 'sommer'] },
+  kuerbis:  { name: 'Kürbis',    einzahl: 'einen Kürbis',  mehrzahl: 'Kürbisse',  emoji: '🎃', farbe: '#FF6F00', form: 'kuerbis',  kaufPreis: 2.00, saisons: ['herbst'] },
+  zitrone:  { name: 'Zitrone',   einzahl: 'eine Zitrone',  mehrzahl: 'Zitronen',  emoji: '🍋', farbe: '#FDD835', form: 'zitrone',  kaufPreis: 1.00, saisons: ['winter', 'fruehling'] },
 };
+
+// Zahlwörter für natürliche Sätze ("drei Äpfel" statt "3× Apfel")
+const ZAHLWOERTER = ['', 'ein', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf'];
 
 // ── Jahreszeiten: Farben, Name, Monate ──────────────────────────
 const JAHRESZEITEN = {
@@ -136,13 +140,15 @@ const TEXTE = {
     btnBedienen:          '💶 Bedienen',
     ablehnenStandard:     '🚫 Ablehnen',
     ablehnenZuWenigGeld:  '❌ Ablehnen – zu wenig Geld!',
+    ablehnenUnhoeflich:   '🚫 Wegschicken!',
+    unhoeflichHinweis:    '😠 Ui, der ist unhöflich! Du darfst ihn wegschicken.',
   },
 
   // ── Wechselgeld-Minispiel ────────────────────────────────────
   wechselgeld: {
     titel:          '💶 Wechselgeld rausgeben',
     labelGezahlt:   'Gezahlt:',
-    labelTrinkgeld: 'davon Trinkgeld:',
+    labelTrinkgeld: '🎁 Trinkgeld für dich:',
     labelPreis:     'Preis:',
     labelGesamt:    'Gesamt:',
     btnBestaetigen: '✅ Bestätigen',
@@ -196,6 +202,8 @@ const TEXTE = {
     notfallLieferung: '👵 Oma bringt Notfall-Gurken! Nicht aufgeben!',
     zubehoerGekauft:  (name, emoji) => `${emoji} ${name} gekauft! Viel Spaß damit!`,
     zuWenigGeld:      '💸 Nicht genug Geld!',
+    kundeWeggeschickt: '👋 Tschüss! Wer frech ist, kriegt nichts.',
+    regenTag:         '🌧️ Heute regnet es – es kommen weniger Kunden.',
   },
 };
 
@@ -276,41 +284,93 @@ const PASSANT_WARTEZEIT_KAUF_MS = 600;    // ms bis Kaufdialog startet
 const PASSANT_MAX_WARTEZEIT_MS = 8000;    // ms bis Passant weggeht
 
 // ── Kunden-Dialog Sprüche ───────────────────────────────────────
+// pn = Einkauf im Akkusativ, z.B. "eine Gurke" oder "zwei Äpfel und eine Zitrone"
+// Pn = dasselbe, aber großgeschrieben (für den Satzanfang)
 const KUNDEN_SPRUECHE = {
-  kind:      (pn) => [`Hallo! Ich möchte bitte ${pn}! 🍬`, `Darf ich ${pn} kaufen?`, `Kann ich ${pn} haben? Ich hab Taschengeld!`],
-  jugend:    (pn) => [`Hey, was kostet ${pn}?`, `Ich nehm ${pn}, bitte.`, `Haben Sie noch ${pn}?`],
-  erwachsen: (pn) => [`Hallo! Ich hätte gerne ${pn}. Was kostet das?`, `Guten Tag! Darf ich ${pn} haben?`, `Einmal ${pn} bitte!`],
-  rentner:   (pn) => [`Guten Morgen! Ich suche schöne ${pn}.`, `Ach, ${pn}! Die nehme ich! Was kostet das denn?`, `${pn}? Die schaut gut aus! Was verlangen Sie dafür?`],
-  familie:   (pn) => [`Kinder, schaut mal! Wir nehmen ${pn}!`, `Haben Sie genug ${pn} für uns alle?`, `Wir brauchen ${pn}, bitte!`],
-  reich:     (pn) => [`Ich nehme ${pn}. Geben Sie her.`, `${pn}? Gut, ich nehme es.`, `Einmal ${pn} – und machen Sie schnell.`],
-  star:      (pn) => [`Oh! ${pn}! Fabulous! Ich nehme alles!`, `Darling, ${pn}! So rustikal! Ich liebe es!`, `${pn}? Für meine neue Detox-Kur! Herrlich!`],
+  kind: (pn, Pn) => [
+    `Hallo! Ich hätte gern ${pn}, bitte! 😊`,
+    `Darf ich ${pn} kaufen? Ich hab mein Taschengeld dabei!`,
+    `Mama hat gesagt, ich soll ${pn} holen.`,
+    `Hallo Fred! ${Pn}, bitte!`,
+  ],
+  jugend: (pn, Pn) => [
+    `Hi! Einmal ${pn}, bitte.`,
+    `Hey, ich nehm ${pn}.`,
+    `Moin! Kann ich ${pn} haben?`,
+    `${Pn}, bitte. Danke dir!`,
+  ],
+  erwachsen: (pn, Pn) => [
+    `Guten Tag! Ich hätte gern ${pn}.`,
+    `Hallo! Ich nehme ${pn}, bitte.`,
+    `Das sieht aber lecker aus! Ich hätte gern ${pn}.`,
+    `${Pn}, bitte. Danke schön!`,
+  ],
+  rentner: (pn, Pn) => [
+    `Guten Tag, mein Junge! Ich hätte gern ${pn}.`,
+    `Ach, wie schön frisch! Gib mir bitte ${pn}.`,
+    `So was Feines gibt es heute selten. Ich nehme ${pn}.`,
+    `${Pn}, bitte. Danke, mein Junge!`,
+  ],
+  familie: (pn, Pn) => [
+    `Hallo! Wir hätten gern ${pn}.`,
+    `Kinder, schaut mal, wie lecker! Wir nehmen ${pn}.`,
+    `Für unser Picknick brauchen wir ${pn}.`,
+    `${Pn}, bitte – für die ganze Familie!`,
+  ],
+  reich: (pn, Pn) => [
+    `Guten Tag. Ich nehme ${pn}.`,
+    `Für mein Abendessen brauche ich ${pn}. Nur das Beste!`,
+    `${Pn}, bitte. Sieht ordentlich aus.`,
+  ],
+  star: (pn, Pn) => [
+    `Hallöchen, Schätzchen! Ich nehme ${pn}!`,
+    `Wie süß, ein echter Marktstand! ${Pn}, bitte!`,
+    `Ich brauche ${pn} für meinen Smoothie. Fabelhaft!`,
+  ],
 };
 
-// Unfreundliche Sprüche (nur reich/star)
-const UNFREUNDLICH_SPRUECHE = {
-  reich: (pn) => [
-    { text: `Na wird's bald?! Ich will ${pn}! 😤`,         emoji: '😤' },
-    { text: `${pn}! Sofort! Ich hab keine Zeit! 😒`,        emoji: '😒' },
-    { text: `Soll ich ewig warten?! Her mit dem ${pn}! 🙄`, emoji: '🙄' },
-    { text: `Ich bin wichtig. ${pn}. Jetzt. 😠`,            emoji: '😠' },
-  ],
-  star: (pn) => [
-    { text: `Ugh, ${pn}?! Ich hoffe das ist bio! 😤`,               emoji: '😤' },
-    { text: `Mein Assistent hätte das bestellen sollen. ${pn}. Schnell! 💅`, emoji: '💅' },
-    { text: `Wissen Sie wer ich bin?! Ich will ${pn}! 🙄`,           emoji: '🙄' },
-    { text: `Das hier ist unter meiner Würde. ${pn}. Mach hin. 😒`,  emoji: '😒' },
+// ── Unhöfliche Kunden ───────────────────────────────────────────
+// Wahrscheinlichkeit pro Kundentyp, dass der Kunde unhöflich ist (0–1)
+const UNFREUNDLICH_CHANCE = {
+  kind:      0,
+  jugend:    0.12,
+  erwachsen: 0.10,
+  rentner:   0.08,
+  familie:   0.06,
+  reich:     0.35,
+  star:      0.35,
+};
+
+// Unhöfliche Sprüche (für alle Typen außer Kinder)
+const UNFREUNDLICH_SPRUECHE = (pn, Pn) => [
+  { text: `He, du! ${Pn}. Aber zackig!`,                         emoji: '😤' },
+  { text: `Na endlich! Gib mir ${pn}, ich hab nicht ewig Zeit.`, emoji: '😒' },
+  { text: `${Pn}. Und guck nicht so!`,                           emoji: '🙄' },
+  { text: `Ist das alles hier? Na gut, dann eben ${pn}.`,        emoji: '😠' },
+  { text: `Ich will ${pn}. Und zwar sofort!`,                    emoji: '😤' },
+];
+
+// ── Bezahl-Sprüche (im Wechselgeld-Fenster) ─────────────────────
+// gibt = Betrag den der Kunde hinlegt, ziel = Preis + Trinkgeld ("Mach 3 €")
+const BEZAHL_SPRUECHE = {
+  normal:   (gibt) => [`Hier sind ${gibt}.`, `Bitte schön, ${gibt}.`, `Ich gebe dir ${gibt}.`],
+  stimmtSo: (gibt) => [`Hier sind ${gibt}. Stimmt so!`, `${gibt} – der Rest ist für dich!`, `Bitte, ${gibt}. Stimmt so!`],
+  aufrunden: (gibt, ziel) => [
+    `Hier sind ${gibt}. Mach ${ziel}, der Rest ist für dich!`,
+    `Ich gebe dir ${gibt}. Mach ${ziel} draus!`,
+    `${gibt}, bitte. Mach ${ziel}, stimmt so.`,
   ],
 };
 
 // ── Trinkgeld-Großzügigkeitsfaktoren pro Kundentyp ──────────────
 const TRINKGELD_GROSSZUEGIGKEIT = {
-  kind:      0.2,
-  jugend:    0.3,
-  erwachsen: 0.5,
-  rentner:   0.6,
-  familie:   0.5,
-  reich:     1.5,
-  star:      2.0,
+  kind:      0,
+  jugend:    0.10,
+  erwachsen: 0.25,
+  rentner:   0.35,
+  familie:   0.25,
+  reich:     0.60,
+  star:      0.90,
 };
 
 // ── Standard-Trinkgeld-Einstellungen ────────────────────────────
@@ -394,3 +454,15 @@ const ZUBEHOER_ARTIKEL = {
 // Beispiel bei staerke=0.20: 1 Artikel → +20%, 3 → +32%, 7 → +46%
 const ZUBEHOER_BONUS_STAERKE_TRINKGELD = 0.20; // Zusatz-Multiplikator auf Trinkgeld-Chance
 const ZUBEHOER_BONUS_STAERKE_KUNDEN    = 0.15; // Zusatz-Multiplikator auf Kundenanzahl
+
+// ── Wetter ───────────────────────────────────────────────────────
+// Regen-Wahrscheinlichkeit pro Tag je Jahreszeit (0–1)
+const REGEN_CHANCE = {
+  fruehling: 0.30,
+  sommer:    0.15,
+  herbst:    0.40,
+  winter:    0.25,
+};
+
+// Bei Regen kommen weniger Leute vorbei (Faktor auf Passanten und Kunden)
+const REGEN_KUNDEN_FAKTOR = 0.5;

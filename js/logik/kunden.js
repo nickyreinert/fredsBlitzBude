@@ -25,7 +25,9 @@ function berechneKundenAnzahl() {
   const preisfaktor  = Math.max(0.2, 1 - abweichung * 0.3);
   // Zubehör-Bonus: Hund lockt mehr Kunden an den Stand
   const zBonus = zubehoerKundenBonus();
-  const anzahl = Math.round(globalBasis * preisfaktor * bewertungsFaktor() * zBonus);
+  // Wetter: bei Regen kommen weniger Kunden
+  const wFaktor = wetterKundenFaktor();
+  const anzahl = Math.round(globalBasis * preisfaktor * bewertungsFaktor() * zBonus * wFaktor);
 
   return Math.max(1, anzahl + zufall(-1, 1));
 }
@@ -114,9 +116,11 @@ function generiereKunden(anzahl) {
       zahlt = moeglicheBetraege[index];
     }
 
-    const kannUnfreundlich = typKey === 'reich' || typKey === 'star';
-    const istUnfreundlich  = kannUnfreundlich && Math.random() < 0.5;
-    const trinkgeld = berechneKundenTrinkgeld(typKey);
+    // Unhöflich? (Wahrscheinlichkeit je Kundentyp, Kinder sind nie unhöflich)
+    const istUnfreundlich = Math.random() < (UNFREUNDLICH_CHANCE[typKey] ?? 0);
+    // Trinkgeld: hier nur auswürfeln OB – der Betrag wird erst beim Bezahlen
+    // passend zum aktuellen Preis berechnet (Preis kann sich noch ändern)
+    const willTrinkgeld = !istUnfreundlich && kundeMoechteTrinkgeldGeben(typKey);
 
     liste.push({
       haut:          kd.haut,
@@ -130,14 +134,53 @@ function generiereKunden(anzahl) {
       produkt:       prodKey,
       einkaufsliste,
       preis:         preis,
-      trinkgeld,
+      willTrinkgeld,
+      trinkgeld:     0,
+      // Der Kunde legt immer einen glatten Schein/eine Münze hin
       zahlt:         zahlt / 100,
-      wechsel:       zahlt / 100 - preis,
     });
-
-    liste[liste.length - 1].zahlt = zahlt / 100 + trinkgeld;
   }
   return liste;
+}
+
+// Einen Posten als natürlichen Text: "eine Gurke", "drei Äpfel"
+function postenText(pos) {
+  const prod = PRODUKTE[pos.prodKey];
+  if (!prod) return TEXTE.customer.fallbackProduktName;
+  if (pos.menge === 1) return prod.einzahl;
+  const zahl = ZAHLWOERTER[pos.menge] ?? String(pos.menge);
+  return `${zahl} ${prod.mehrzahl}`;
+}
+
+// Ganze Einkaufsliste als Satzteil: "zwei Äpfel, eine Gurke und drei Tomaten"
+function einkaufText(liste) {
+  const teile = liste.map(postenText);
+  if (teile.length === 0) return TEXTE.customer.fallbackProduktName;
+  if (teile.length === 1) return teile[0];
+  return teile.slice(0, -1).join(', ') + ' und ' + teile[teile.length - 1];
+}
+
+// Ersten Buchstaben großschreiben (für den Satzanfang)
+function grossAnfang(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// Preise des Kunden aktualisieren (Spieler kann Preise ändern, während der Stand offen ist)
+function aktualisiereKundenPreis(k) {
+  let gesamtPreis = 0;
+  for (const pos of k.einkaufsliste) {
+    let p = gameState.prices[pos.prodKey] ?? pos.preis;
+    if (keineKommazahlen) p = Math.max(1, Math.round(p));
+    pos.preis = p;
+    gesamtPreis += p * pos.menge;
+  }
+  if (keineKommazahlen) gesamtPreis = Math.round(gesamtPreis);
+  k.preis = Math.round(gesamtPreis * 100) / 100;
+
+  // Trinkgeld passend zum aktuellen Preis: Preis + Trinkgeld = glatter Betrag
+  k.trinkgeld = k.willTrinkgeld
+    ? berechneTrinkgeldCent(k.typKey, Math.round(k.preis * 100), Math.round(k.zahlt * 100)) / 100
+    : 0;
 }
 
 // Kundendialog einblenden
@@ -145,45 +188,40 @@ function zeigeKundenDialog() {
   const kunde = gameState.currentCustomer;
   if (!kunde) return;
 
-  const prod = PRODUKTE[kunde.produkt];
-  let prodName;
-  if (kunde.einkaufsliste && kunde.einkaufsliste.length > 1) {
-    const namen = kunde.einkaufsliste.map(pos => PRODUKTE[pos.prodKey]?.name ?? 'etwas');
-    prodName = namen.slice(0, -1).join(', ') + ' und ' + namen[namen.length - 1];
-  } else {
-    prodName = prod ? prod.name : TEXTE.customer.fallbackProduktName;
-  }
+  // Preise + Trinkgeld vor dem Anzeigen aktualisieren
+  aktualisiereKundenPreis(kunde);
+
+  const pn = einkaufText(kunde.einkaufsliste);
+  const Pn = grossAnfang(pn);
 
   let sprache, anzeigeEmoji;
-  if (kunde.unfreundlich && UNFREUNDLICH_SPRUECHE[kunde.typKey]) {
-    const eintrag = zufallsElement(UNFREUNDLICH_SPRUECHE[kunde.typKey](prodName));
+  if (kunde.unfreundlich) {
+    const eintrag = zufallsElement(UNFREUNDLICH_SPRUECHE(pn, Pn));
     sprache      = eintrag.text;
     anzeigeEmoji = eintrag.emoji;
   } else {
-    const saetze = KUNDEN_SPRUECHE[kunde.typKey]?.(prodName) || KUNDEN_SPRUECHE.erwachsen(prodName);
+    const saetze = (KUNDEN_SPRUECHE[kunde.typKey] || KUNDEN_SPRUECHE.erwachsen)(pn, Pn);
     sprache      = zufallsElement(saetze);
     anzeigeEmoji = kunde.typEmoji || '🧑';
   }
 
+  const panel = document.getElementById('panel-customer');
+  // Unhöfliche Kunden deutlich rot markieren
+  panel.classList.toggle('kunde-unhoeflich', !!kunde.unfreundlich);
+  const hinweis = document.getElementById('customer-unhoeflich-hinweis');
+  hinweis.textContent = TEXTE.customer.unhoeflichHinweis;
+  hinweis.classList.toggle('hidden', !kunde.unfreundlich);
+
   document.getElementById('customer-emoji').textContent  = anzeigeEmoji;
   document.getElementById('customer-speech').textContent = sprache;
-  document.getElementById('panel-customer').classList.remove('hidden');
+  // Buttons erst nach kurzer Pause zeigen (Kind soll zuerst lesen)
+  document.getElementById('customer-payment-info').classList.add('hidden');
+  panel.classList.remove('hidden');
 
   // Nach kurzer Pause Aktions-Buttons zeigen
   setTimeout(() => {
     if (!gameState.currentCustomer) return;
     const k = gameState.currentCustomer;
-
-    // Preise aktualisieren (wird für Wechselgeld-Screen gebraucht)
-    let gesamtPreis = 0;
-    for (const pos of k.einkaufsliste) {
-      let p = gameState.prices[pos.prodKey] ?? pos.preis;
-      if (keineKommazahlen) p = Math.max(1, Math.round(p));
-      pos.preis = p;
-      gesamtPreis += p * pos.menge;
-    }
-    if (keineKommazahlen) gesamtPreis = Math.round(gesamtPreis);
-    k.preis = gesamtPreis;
 
     // Einkaufsliste anzeigen (ab Stufe 2, nur Produktnamen – keine Preise hier)
     const listeEl = document.getElementById('customer-einkaufsliste');
@@ -211,8 +249,8 @@ function zeigeKundenDialog() {
       btnAblehnen.classList.remove('hidden');
       btnBedienen.classList.add('hidden');
     } else if (k.unfreundlich) {
-      // Unfreundlich: beide Buttons zeigen – Kind entscheidet selbst
-      btnAblehnen.textContent = TEXTE.customer.ablehnenStandard;
+      // Unhöflich: beide Buttons zeigen – Kind entscheidet selbst
+      btnAblehnen.textContent = TEXTE.customer.ablehnenUnhoeflich;
       btnAblehnen.classList.remove('hidden');
       btnBedienen.classList.remove('hidden');
     } else {

@@ -17,8 +17,9 @@ function bauInventarPanel() {
 
     const div = document.createElement('div');
     div.className = 'inventory-item';
+    // Preis mit deutschem Komma anzeigen
     const inputWert = aktuellerPreis > 0
-      ? (keineKommazahlen ? Math.round(aktuellerPreis) : aktuellerPreis.toFixed(2))
+      ? (keineKommazahlen ? String(Math.round(aktuellerPreis)) : aktuellerPreis.toFixed(2).replace('.', ','))
       : '';
 
     // Frische pro Einheit anzeigen (nicht gemittelt!)
@@ -27,24 +28,27 @@ function bauInventarPanel() {
     if (tage > 0) {
       const auft = frischeProduktAufteilung(key);
       const teile = [];
-      if (auft.gruen  > 0) teile.push(`<span style="color:#4caf50">🟢 ${auft.gruen}x frisch</span>`);
-      if (auft.orange > 0) teile.push(`<span style="color:#ff9800">🟡 ${auft.orange}x wird alt</span>`);
-      if (auft.rot    > 0) teile.push(`<span style="color:#f44336">🔴 ${auft.rot}x verdirbt bald!</span>`);
+      if (auft.gruen  > 0) teile.push(`<span style="color:#2e7d32">🟢 ${auft.gruen}x frisch</span>`);
+      if (auft.orange > 0) teile.push(`<span style="color:#ef6c00">🟡 ${auft.orange}x wird alt</span>`);
+      if (auft.rot    > 0) teile.push(`<span style="color:#c62828">🔴 ${auft.rot}x verdirbt bald!</span>`);
       if (teile.length > 0) {
-        frischeHTML = `<div class="inventory-item-freshness">${teile.join(' &middot; ')}</div>`;
+        frischeHTML = `<div class="inventory-item-freshness">${teile.join(' ')}</div>`;
       }
     }
 
+    // Kompakte Zeile: Emoji | Name + Vorrat | Preis-Stepper
     div.innerHTML = `
-      <div class="inventory-item-name">${prod.emoji} ${prod.name}</div>
-      <div class="inventory-item-count">Vorrat: ${menge}x</div>
-      ${frischeHTML}
+      <div class="inventory-item-emoji">${prod.emoji}</div>
+      <div class="inventory-item-info">
+        <div class="inventory-item-name">${prod.name}</div>
+        <div class="inventory-item-count">Vorrat: ${menge}x</div>
+        ${frischeHTML}
+      </div>
       <div class="inventory-item-price">
-        <span class="price-label">Preis:</span>
         <div class="preis-stepper" data-produkt="${key}">
-          <button class="preis-minus btn">−</button>
+          <button class="preis-minus btn" aria-label="billiger">−</button>
           <span class="preis-wert">${inputWert || '0'}</span>
-          <button class="preis-plus btn">+</button>
+          <button class="preis-plus btn" aria-label="teurer">+</button>
         </div>
         <span class="price-label">€</span>
       </div>
@@ -68,7 +72,7 @@ function bauInventarPanel() {
       wert = Math.round(wert / schritt) * schritt;
       wert = Math.min(maxPreis, Math.max(minPreis, wert));
       gameState.prices[key] = wert;
-      anzeige.textContent = keineKommazahlen ? wert : wert.toFixed(2);
+      anzeige.textContent = keineKommazahlen ? wert : wert.toFixed(2).replace('.', ',');
     }
 
     btnMinus.addEventListener('click', (e) => {

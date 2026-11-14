@@ -20,7 +20,7 @@
   <title>Freds Blitz-Bude</title>
 
   <!-- Game Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=20260412-1" />
+  <link rel="stylesheet" href="style.css?v=20261114-1" />
 </head>
 <body>
 
@@ -361,6 +361,8 @@
 
       <!-- Kunden-Dialog (erscheint wenn Kunde kommt) -->
       <div id="panel-customer" class="hidden">
+        <!-- Warnhinweis bei unhöflichen Kunden -->
+        <div id="customer-unhoeflich-hinweis" class="customer-unhoeflich-hinweis hidden"></div>
         <div class="customer-bubble">
           <span id="customer-emoji" class="customer-emoji">🧑</span>
           <div class="speech-bubble">
@@ -412,6 +414,9 @@
           <!-- LINKE SPALTE: Preisinfo + Einkaufsliste + Feedback -->
           <div id="change-col-left">
 
+            <!-- Was der Kunde beim Bezahlen sagt -->
+            <div id="change-kunde-spruch" class="change-kunde-spruch"></div>
+
             <!-- Einkaufsliste (Stufe 2+3: mehrere Posten) -->
             <div id="change-einkaufsliste" class="hidden">
               <!-- Wird per JS befüllt -->
@@ -433,7 +438,7 @@
                 <strong id="change-paid"></strong>
               </div>
               <div class="change-info-row change-trinkgeld-row hidden" id="change-trinkgeld-row">
-                <span>Davon Trinkgeld:</span>
+                <span id="change-trinkgeld-label">🎁 Trinkgeld für dich:</span>
                 <strong id="change-trinkgeld" class="trinkgeld-betrag">0 €</strong>
               </div>
             </div>
@@ -618,7 +623,7 @@
   <script src="js/ui/zubehoer.js"></script>
 
   <!-- Initialisierung (Event-Listener + Startup – muss zuletzt) -->
-  <script src="js/init.js?v=20260412-1"></script>
+  <script src="js/init.js?v=20261114-1"></script>
 
 </body>
 </html>

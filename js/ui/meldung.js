@@ -4,12 +4,19 @@
    MELDUNG – Kurze Bestätigungs-Meldung (Toast)
    ================================================================ */
 
-// Kurze Bestätigungs-Meldung im Einstellungs-Screen anzeigen
+// Kurze Meldung anzeigen:
+// – im Einstellungs-Screen innerhalb der Einstellungs-Box
+// – sonst als schwebende Meldung oben in der Bildschirmmitte
 function zeigeMeldung(text) {
-  const box = document.querySelector('.settings-box');
-  const el  = document.createElement('div');
-  el.className = 'settings-toast';
+  const el = document.createElement('div');
   el.textContent = text;
-  box.appendChild(el);
-  setTimeout(() => el.remove(), 2500);
+
+  if (aktuellerScreen() === 'screen-settings') {
+    el.className = 'settings-toast';
+    document.querySelector('.settings-box').appendChild(el);
+  } else {
+    el.className = 'spiel-toast';
+    document.body.appendChild(el);
+  }
+  setTimeout(() => el.remove(), 2600);
 }

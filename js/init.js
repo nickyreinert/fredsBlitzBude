@@ -230,6 +230,7 @@ document.getElementById('btn-reset-all').addEventListener('click', () => {
     gameState.gesamtXP          = 0;
     gameState.level             = 1;
     gameState.zubehoer          = {};
+    gameState.wetter            = 'sonne';
     aktualisiereXpHud();
     zeigeMeldung('🗑️ Alles zurückgesetzt!');
     setTimeout(() => zeigeScreen('screen-start'), 1500);
@@ -323,6 +324,10 @@ document.getElementById('btn-ablehnen').addEventListener('click', () => {
   // Bei zu wenig Geld: Kunde kommt NICHT zurück – er hat schlicht nicht genug (Endlosschleife verhindern)
   if (kunde && !kunde.unfreundlich && !(kunde.zahlt < kunde.preis)) {
     gameState.customers.push(kunde);
+  }
+  // Rückmeldung fürs Kind: unhöflichen Kunden erfolgreich weggeschickt
+  if (kunde && kunde.unfreundlich) {
+    zeigeMeldung(TEXTE.meldungen.kundeWeggeschickt);
   }
   gameState.currentCustomer = null;
   gameState.customerVisible  = false;

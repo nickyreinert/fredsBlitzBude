@@ -5,7 +5,8 @@
    ================================================================ */
 
 function zeichneBoden(w, h) {
-  const bodenY = h * 0.65;
+  const sz = szenenMasse(w, h);
+  const bodenY = sz.bodenY;
   const jz = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
 
   // Gras-Bereich
@@ -25,10 +26,11 @@ function zeichneBoden(w, h) {
     ctx.fillRect(0, bodenY, w, h * 0.07);
   }
 
-  // Straße
-  const strasseY = h * 0.78;
+  // Straße (endet am unteren Rand der Szene – darunter ist im Hochformat wieder Wiese)
+  const strasseY = sz.strasseY;
+  const strasseEnde = sz.szeneH;
   ctx.fillStyle = '#9e9e9e';
-  ctx.fillRect(0, strasseY, w, h - strasseY);
+  ctx.fillRect(0, strasseY, w, strasseEnde - strasseY);
 
   // Straßenrand (saisonal)
   ctx.fillStyle = jz.strasseRand;
@@ -40,8 +42,8 @@ function zeichneBoden(w, h) {
   ctx.lineWidth = 3;
   ctx.strokeStyle = '#ffee58';
   ctx.beginPath();
-  ctx.moveTo(0, strasseY + (h - strasseY) * 0.5);
-  ctx.lineTo(w, strasseY + (h - strasseY) * 0.5);
+  ctx.moveTo(0, strasseY + (strasseEnde - strasseY) * 0.5);
+  ctx.lineTo(w, strasseY + (strasseEnde - strasseY) * 0.5);
   ctx.stroke();
   ctx.setLineDash([]);
 }

@@ -37,6 +37,7 @@ const gameState = {
   passantenTimer: 0,    // Zeit bis zum nächsten Passanten (ms)
   tagesfortschritt: 0,  // 0.0–1.0
   tagesZeitSlot: 'morgen',
+  wetter: 'sonne',      // 'sonne' oder 'regen' (wird jeden Tag neu ausgewürfelt)
   // Bewertungssystem
   bewertungSumme: 0,
   bewertungAnzahl: 0,

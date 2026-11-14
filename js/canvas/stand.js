@@ -5,16 +5,19 @@
    ================================================================ */
 
 function zeichneStand(w, h) {
-  const standBreite  = Math.min(w * 0.6, 340);
-  const standHoehe   = Math.min(h * 0.28, 180);
-  const standX       = (w - standBreite) / 2;
-  const standY       = h * 0.48;
+  // Maße kommen zentral aus szenenMasse() (passt sich an Bildschirm und Panels an)
+  const sz           = szenenMasse(w, h);
+  const mitteX       = sz.mitteX;
+  const standBreite  = sz.standB;
+  const standHoehe   = sz.standH;
+  const standX       = mitteX - standBreite / 2;
+  const standY       = sz.standY;
   const theke        = standHoehe * 0.4;
 
   // Schatten
   ctx.fillStyle = 'rgba(0,0,0,0.15)';
   ctx.beginPath();
-  ctx.ellipse(w / 2, standY + standHoehe + 6, standBreite * 0.52, 10, 0, 0, Math.PI * 2);
+  ctx.ellipse(mitteX, standY + standHoehe + 6, standBreite * 0.52, 10, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Holz-Rückwand
@@ -55,7 +58,7 @@ function zeichneStand(w, h) {
   ctx.fillStyle = '#e53935';
   ctx.beginPath();
   ctx.moveTo(standX - dachUeberstand, standY + 5);
-  ctx.lineTo(w / 2, standY - standHoehe * 0.45);
+  ctx.lineTo(mitteX, standY - standHoehe * 0.45);
   ctx.lineTo(standX + standBreite + dachUeberstand, standY + 5);
   ctx.closePath();
   ctx.fill();
@@ -72,7 +75,7 @@ function zeichneStand(w, h) {
 
   // Schild
   const schildBreite = standBreite * 0.55;
-  const schildX = (w - schildBreite) / 2;
+  const schildX = mitteX - schildBreite / 2;
   const schildY = standY + (standHoehe - theke) * 0.15;
   const schildH = (standHoehe - theke) * 0.3;
 
@@ -88,7 +91,7 @@ function zeichneStand(w, h) {
   ctx.font = `bold ${Math.max(12, schildH * 0.55)}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🥦 Freds Blitz-Bude', w / 2, schildY + schildH / 2);
+  ctx.fillText('🥦 Freds Blitz-Bude', mitteX, schildY + schildH / 2);
 
   // Stand-Koordinaten für Produkte speichern
   gameState._stand = { x: standX, y: standY, b: standBreite, h: standHoehe, theke };

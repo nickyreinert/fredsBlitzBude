@@ -7,11 +7,18 @@
 // Himmel (Farbverlauf – saisonal eingefärbt)
 function zeichneHimmel(w, h) {
   const jz = JAHRESZEITEN[gameState.jahreszeit] || JAHRESZEITEN.fruehling;
-  const grad = ctx.createLinearGradient(0, 0, 0, h * 0.65);
-  grad.addColorStop(0, jz.himmel[0]);
-  grad.addColorStop(1, jz.himmel[1]);
+  const himmelH = szenenMasse(w, h).bodenY;
+  const grad = ctx.createLinearGradient(0, 0, 0, himmelH);
+  if (istRegen()) {
+    // Regentag: grauer, trüber Himmel
+    grad.addColorStop(0, '#78909c');
+    grad.addColorStop(1, '#b0bec5');
+  } else {
+    grad.addColorStop(0, jz.himmel[0]);
+    grad.addColorStop(1, jz.himmel[1]);
+  }
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, w, h * 0.65);
+  ctx.fillRect(0, 0, w, himmelH);
 
   // Winter: Schneeflocken-Punkte im Himmel
   if (gameState.jahreszeit === 'winter') {
@@ -45,11 +52,16 @@ function zeichneHimmel(w, h) {
 // Sonne (bewegt sich von links nach rechts als Sinusbogen)
 function zeichneSonne(w, h) {
   const t = gameState.sunX;
+  const sz = szenenMasse(w, h);
   const x = w * (0.05 + t * 0.90);
-  const bogenHoehe = h * 0.55;
-  const grundY = h * 0.68;
+  const bogenHoehe = sz.szeneH * 0.55;
+  const grundY = sz.szeneH * 0.68;
   const y = grundY - Math.sin(t * Math.PI) * bogenHoehe;
-  const r = Math.min(w, h) * 0.055;
+  const r = Math.min(w, sz.szeneH) * 0.055;
+
+  // Bei Regen ist die Sonne nur blass hinter den Wolken zu sehen
+  ctx.save();
+  if (istRegen()) ctx.globalAlpha = 0.3;
 
   // Strahlen
   ctx.save();
@@ -75,25 +87,61 @@ function zeichneSonne(w, h) {
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fillStyle = sunGrad;
   ctx.fill();
+  ctx.restore();
 }
 
-// Wolken (einfache Kreisgruppen)
+// Wolken (einfache Kreisgruppen) – bei Regen mehr und dunkler
 function zeichneWolken(w, h) {
-  const wolkenPositionen = [
-    { x: w * 0.25, y: h * 0.08, size: 1.0 },
-    { x: w * 0.65, y: h * 0.05, size: 0.7 },
-    { x: w * 0.85, y: h * 0.11, size: 0.8 },
-  ];
+  const regen = istRegen();
+  const wolkenPositionen = regen
+    ? [
+        { x: w * 0.08, y: h * 0.07, size: 1.1 },
+        { x: w * 0.28, y: h * 0.10, size: 1.2 },
+        { x: w * 0.50, y: h * 0.06, size: 1.0 },
+        { x: w * 0.72, y: h * 0.10, size: 1.2 },
+        { x: w * 0.92, y: h * 0.07, size: 1.0 },
+      ]
+    : [
+        { x: w * 0.25, y: h * 0.08, size: 1.0 },
+        { x: w * 0.65, y: h * 0.05, size: 0.7 },
+        { x: w * 0.85, y: h * 0.11, size: 0.8 },
+      ];
+  const farbe = regen ? 'rgba(96, 110, 120, 0.95)' : 'rgba(255, 255, 255, 0.9)';
   wolkenPositionen.forEach(wolke => {
-    zeichneWolke(wolke.x, wolke.y, wolke.size * Math.min(w, h) * 0.08);
+    zeichneWolke(wolke.x, wolke.y, wolke.size * Math.min(w, h) * 0.08, farbe);
   });
 }
 
-function zeichneWolke(x, y, r) {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+function zeichneWolke(x, y, r, farbe = 'rgba(255, 255, 255, 0.9)') {
+  ctx.fillStyle = farbe;
   [[0, 0], [-r * 0.9, r * 0.3], [r * 0.9, r * 0.3], [-r * 0.5, -r * 0.3], [r * 0.5, -r * 0.2]].forEach(([dx, dy]) => {
     ctx.beginPath();
     ctx.arc(x + dx, y + dy, r * 0.7, 0, Math.PI * 2);
     ctx.fill();
   });
+}
+
+// Regentropfen (schräge Striche, fallen animiert nach unten)
+function zeichneRegen(w, h) {
+  if (!istRegen()) return;
+  const zeit = performance.now();
+  const anzahl = Math.round(Math.min(160, w * 0.12));
+  const laenge = Math.max(10, h * 0.025);
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(200, 225, 255, 0.65)';
+  ctx.lineWidth = Math.max(1.5, w * 0.0015);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let i = 0; i < anzahl; i++) {
+    // Feste Pseudo-Zufallsposition pro Tropfen, Fallbewegung über die Zeit
+    const startX = (i * 7919) % w;
+    const tempo  = 0.5 + ((i * 31) % 10) / 20;      // px pro ms
+    const y = ((i * 6271) + zeit * tempo) % (h + laenge) - laenge;
+    const x = startX - y * 0.15;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - laenge * 0.15, y + laenge);
+  }
+  ctx.stroke();
+  ctx.restore();
 }

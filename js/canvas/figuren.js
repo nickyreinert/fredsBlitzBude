@@ -144,11 +144,11 @@ function zeichneKunde(w, _h) {
 
 // Einen einzelnen Passanten zeichnen
 function zeichnePassant(p, w, h) {
-  const strasseY = h * 0.84;
+  const sz = szenenMasse(w, h);
   const x = p.x;
-  const y = strasseY;
+  const y = sz.laufY;
   const scale = p.groesse;
-  const kopfR = Math.min(w * 0.032, 18) * scale;
+  const kopfR = sz.figurR * scale;
   const koerperH = kopfR * 2.6;
 
   // Schatten
@@ -196,8 +196,8 @@ function zeichnePassant(p, w, h) {
   // Sprechblase wenn Passant steht und kaufen will
   if (p.steht && !p.gespraechen && p.stehtTimer > 400
       && gameState.customers.length > 0) {
-    const blasenW = 44;
-    const blasenH = 26;
+    const blasenW = Math.max(44, kopfR * 2.6);
+    const blasenH = Math.max(26, kopfR * 1.6);
     let blasenX = x + (p.richtung === 1 ? kopfR * 2.5 : -kopfR * 2.5);
     let blasenY = kopfY - kopfR - blasenH - 4;
     blasenX = Math.max(blasenW / 2 + 4, Math.min(canvas.width - blasenW / 2 - 4, blasenX));
@@ -226,15 +226,14 @@ function zeichnePassanten(w, h) {
 function zeichneHund(w, h) {
   if (!gameState.zubehoer.hund) return;
 
-  const standInfo = gameState._stand || { x: w * 0.2, breite: w * 0.35 };
-  const strasseY = h * 0.84;
+  const sz = szenenMasse(w, h);
 
-  // Position: rechts vom Stand-Tresen
-  const hundX = standInfo.x + (standInfo.breite ?? w * 0.35) * 0.55 + Math.min(w * 0.06, 40);
-  const hundY = strasseY;
+  // Position: rechts neben dem Stand, auf dem Gehweg
+  const hundX = sz.mitteX + sz.standB * 0.5 + sz.figurR * 2;
+  const hundY = sz.laufY;
 
-  // Grundeinheit relativ zur Canvas-Breite
-  const gr = Math.min(w * 0.028, 16);
+  // Grundeinheit relativ zur Figurengröße
+  const gr = sz.figurR * 0.9;
 
   // Leichte Schwanz-Wackelanimation
   const wag = Math.sin(Date.now() * 0.004) * 0.15;

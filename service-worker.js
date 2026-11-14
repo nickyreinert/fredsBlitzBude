@@ -7,7 +7,7 @@
 'use strict';
 
 // Cache-Name und Version – bei Updates hier hochzählen
-const CACHE_NAME = 'freds-blitz-bude-v5';
+const CACHE_NAME = 'freds-blitz-bude-v6';
 
 // Basis-Pfad der App ermitteln, damit die PWA auch unter Unterpfaden funktioniert
 const APP_PREFIX = self.location.pathname.replace(/service-worker\.js$/, '');

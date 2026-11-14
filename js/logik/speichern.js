@@ -26,6 +26,7 @@ function speichereSpielstand() {
     gesamtXP:           gameState.gesamtXP,
     level:              gameState.level,
     zubehoer:           gameState.zubehoer,
+    wetter:             gameState.wetter,
   };
   localStorage.setItem('spielstand', JSON.stringify(stand));
 }
@@ -56,6 +57,7 @@ function ladeSpielstand() {
     gameState.gesamtXP         = stand.gesamtXP         ?? 0;
     gameState.level            = stand.level            ?? 1;
     gameState.zubehoer         = stand.zubehoer         ?? {};
+    gameState.wetter           = stand.wetter           ?? 'sonne';
     return true;
   } catch {
     return false;

@@ -29,6 +29,9 @@ function zeichneSpielwelt() {
   // Passanten auf der Straße
   zeichnePassanten(w, h);
 
+  // Regen über allem (nur an Regentagen)
+  zeichneRegen(w, h);
+
   // Tageszeit-Stimmungsoverlay
   if (gameState.standOpen) {
     zeichneTagesOverlay(w, h);

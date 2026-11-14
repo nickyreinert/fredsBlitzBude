@@ -31,11 +31,15 @@ function oeffneWechselgeldScreen() {
   // Trinkgeld-Zeile im Change-Modal
   const changeTrinkgeldRow = document.getElementById('change-trinkgeld-row');
   if (kunde.trinkgeld > 0) {
+    document.getElementById('change-trinkgeld-label').textContent = TEXTE.wechselgeld.labelTrinkgeld;
     document.getElementById('change-trinkgeld').textContent = fmt(kunde.trinkgeld);
     changeTrinkgeldRow.classList.remove('hidden');
   } else {
     changeTrinkgeldRow.classList.add('hidden');
   }
+
+  // Was der Kunde beim Bezahlen sagt (z.B. "Hier sind 5 €. Mach 3 €, der Rest ist für dich!")
+  document.getElementById('change-kunde-spruch').textContent = bezahlSpruch(kunde);
 
   // Einkaufsliste im Change-Modal zeigen (Stufe 2+3)
   const listeEl = document.getElementById('change-einkaufsliste');
@@ -111,6 +115,28 @@ function oeffneWechselgeldScreen() {
 
   // Modal über dem Stand einblenden (nicht als eigener Screen)
   document.getElementById('screen-change').classList.add('active');
+}
+
+// Geldbetrag so formatieren, wie man ihn sagt: "5 €" statt "5,00 €", sonst "2,50 €"
+function geldGesprochen(euro) {
+  const cent = Math.round(euro * 100);
+  if (keineKommazahlen || cent % 100 === 0) return `${Math.round(cent / 100)} €`;
+  return formatEuro(cent / 100);
+}
+
+// Bezahl-Satz des Kunden passend zu Schein und Trinkgeld
+function bezahlSpruch(kunde) {
+  const gibt = geldGesprochen(kunde.zahlt);
+  if (!kunde.trinkgeld || kunde.trinkgeld <= 0) {
+    return `„${zufallsElement(BEZAHL_SPRUECHE.normal(gibt))}“`;
+  }
+  const zielCent  = Math.round((kunde.preis + kunde.trinkgeld) * 100);
+  const zahltCent = Math.round(kunde.zahlt * 100);
+  if (zielCent === zahltCent) {
+    return `„${zufallsElement(BEZAHL_SPRUECHE.stimmtSo(gibt))}“`;
+  }
+  const ziel = geldGesprochen(zielCent / 100);
+  return `„${zufallsElement(BEZAHL_SPRUECHE.aufrunden(gibt, ziel))}“`;
 }
 
 // Nächsten Teilrechnungs-Schritt in Stufe 3 anzeigen

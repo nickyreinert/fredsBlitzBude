@@ -13,7 +13,7 @@ function aktualisiereHUD() {
   const dayNumEl = document.getElementById('hud-day-num');
   if (dayNumEl) dayNumEl.textContent = gameState.day;
   const seasonBadge = document.getElementById('hud-season-badge');
-  if (seasonBadge) seasonBadge.textContent = jz.emoji;
+  if (seasonBadge) seasonBadge.textContent = jz.emoji + (istRegen() ? ' 🌧️' : '');
   // Kunden-Zähler: nur heute bediente Kunden anzeigen
   document.getElementById('hud-customers').textContent =
     `${gameState.customersServed}`;
@@ -29,8 +29,10 @@ function aktualisiereHUD() {
     const voll  = Math.floor(avg);
     const halb  = avg - voll >= 0.5 ? 1 : 0;
     const leer  = 5 - voll - halb;
-    sterneEl.textContent = '★'.repeat(voll) + (halb ? '½' : '') + '☆'.repeat(leer)
-      + ` ${avg.toFixed(1)}`;
+    // Symbole und Zahl getrennt – auf kleinen Bildschirmen wird nur die Zahl gezeigt
+    sterneEl.innerHTML =
+      `<span class="hud-sterne-symbole">${'★'.repeat(voll) + (halb ? '½' : '') + '☆'.repeat(leer)}</span>`
+      + ` <span class="hud-sterne-zahl">${avg.toFixed(1).replace('.', ',')}</span>`;
   }
   gesamtEl.textContent = gameState.bewertungAnzahl > 0
     ? `${gameState.bewertungAnzahl} Bew.`

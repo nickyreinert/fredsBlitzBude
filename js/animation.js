@@ -45,7 +45,8 @@ function animationsSchleife(zeitstempel) {
     const dayNumEl = document.getElementById('hud-day-num');
     if (dayNumEl) dayNumEl.textContent = gameState.day;
     const seasonBadge = document.getElementById('hud-season-badge');
-    if (seasonBadge) seasonBadge.textContent = `${jz2.emoji} ${slotEmoji}`;
+    const wetterEmoji = istRegen() ? ' 🌧️' : '';
+    if (seasonBadge) seasonBadge.textContent = `${jz2.emoji} ${slotEmoji}${wetterEmoji}`;
   }
 
   // Schleife fortsetzen

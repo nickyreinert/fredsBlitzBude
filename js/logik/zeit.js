@@ -50,3 +50,21 @@ function omaLieferung() {
 
   return nachricht;
 }
+
+/* ── Wetter ─────────────────────────────────────────────────────── */
+
+// Wetter für einen neuen Tag auswürfeln (abhängig von der Jahreszeit)
+function wuerfleWetter() {
+  const chance = REGEN_CHANCE[gameState.jahreszeit] ?? 0.25;
+  gameState.wetter = Math.random() < chance ? 'regen' : 'sonne';
+}
+
+// Regnet es heute?
+function istRegen() {
+  return gameState.wetter === 'regen';
+}
+
+// Multiplikator für Kunden/Passanten (Regen = weniger Leute)
+function wetterKundenFaktor() {
+  return istRegen() ? REGEN_KUNDEN_FAKTOR : 1.0;
+}

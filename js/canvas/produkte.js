@@ -15,8 +15,11 @@ function zeichneProdukte(_w, _h) {
   preisschilderHitbox.length = 0;
 
   const thekeY = sY + sH - theke * 0.5;
-  let produktX = sX + sB * 0.15;
-  const abstand = sB * 0.22;
+  // Produkte gleichmäßig um die Stand-Mitte verteilen (passt auch bei vielen Sorten)
+  const anzahl  = Object.values(gameState.inventory).filter(m => m > 0).length;
+  const abstand = Math.min(sB * 0.22, (sB * 0.9) / Math.max(1, anzahl));
+  let produktX  = sX + sB / 2 - (anzahl - 1) * abstand / 2;
+  const r       = Math.min(sB * 0.075, abstand * 0.38, 44);
 
   Object.entries(gameState.inventory).forEach(([key, menge]) => {
     if (menge <= 0) return;
@@ -25,7 +28,6 @@ function zeichneProdukte(_w, _h) {
 
     const px = produktX;
     const py = thekeY;
-    const r  = Math.min(sB * 0.09, 24);
 
     switch (prod.form) {
       case 'gurke':    zeichneGurke(px, py, r);    break;
@@ -78,22 +80,33 @@ function zeichneProdukte(_w, _h) {
     }
 
     // Preisschild
-    zeichnePreisschild(key, prod, px, py + r + 22, r);
+    zeichnePreisschild(key, prod, px, py + r + 22, r, abstand * 0.95);
 
     produktX += abstand;
   });
 }
 
 // Einzelnes Preisschild zeichnen und Hitbox speichern
-function zeichnePreisschild(key, _prod, cx, topY, r) {
+// maxB = maximale Schildbreite, damit sich Nachbar-Schilder nicht überlappen
+function zeichnePreisschild(key, _prod, cx, topY, r, maxB) {
   const preis  = gameState.prices[key] || 0;
   const hatPreis = preis > 0;
   const preisText = hatPreis
     ? (keineKommazahlen ? `${Math.round(preis)} €` : formatEuro(preis))
     : '? €';
 
-  const schildW = Math.max(r * 2.8, 52);
   const schildH = Math.max(r * 1.4, 26);
+  // Schrift so groß wie möglich, aber das Schild darf nicht breiter als maxB werden
+  let schriftPx = Math.max(10, schildH * 0.5);
+  let iconSize, textFont, schildW;
+  do {
+    iconSize = Math.max(9, schriftPx * 0.9);
+    textFont = `bold ${schriftPx}px system-ui`;
+    ctx.font = textFont;
+    schildW = ctx.measureText(preisText).width + iconSize * 1.3 + 12;
+    schriftPx -= 1;
+  } while (schildW > maxB && schriftPx >= 9);
+  schildW = Math.min(Math.max(schildW, 44), Math.max(maxB, 44));
   const schildX = cx - schildW / 2;
   const schildY = topY;
 
@@ -106,7 +119,6 @@ function zeichnePreisschild(key, _prod, cx, topY, r) {
   ctx.stroke();
 
   // Bleistift-Symbol
-  const iconSize = Math.max(10, schildH * 0.45);
   ctx.font = `${iconSize}px serif`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
@@ -114,7 +126,7 @@ function zeichnePreisschild(key, _prod, cx, topY, r) {
 
   // Preis-Text
   ctx.fillStyle    = hatPreis ? '#e65100' : '#bf360c';
-  ctx.font         = `bold ${Math.max(10, schildH * 0.5)}px system-ui`;
+  ctx.font         = textFont;
   ctx.textAlign    = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(preisText, schildX + 5, schildY + schildH / 2);

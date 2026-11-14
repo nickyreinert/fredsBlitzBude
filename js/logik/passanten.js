@@ -31,8 +31,9 @@ function neuerPassant() {
 // Alle Passanten aktualisieren
 function aktualisierePassanten(delta) {
   const w = canvas.width;
-  const standMitteX = w / 2;
-  const standBereich = w * 0.18;
+  const sz = szenenMasse(w, canvas.height);
+  const standMitteX = sz.mitteX;
+  const standBereich = sz.standB * 0.6;
 
   // Tagesfortschritt aktualisieren
   if (gameState.standOpen) {
@@ -55,7 +56,9 @@ function aktualisierePassanten(delta) {
       gameState.passanten.push(neuerPassant());
     }
     const basisIntervall = basisPassantenIntervall();
-    const intervall = faktor > 0 ? basisIntervall / faktor : 60000;
+    // Bei Regen kommen weniger Passanten (längerer Abstand)
+    const wetterFaktor = wetterKundenFaktor();
+    const intervall = faktor > 0 ? basisIntervall / (faktor * wetterFaktor) : 60000;
     gameState.passantenTimer = intervall * (0.7 + Math.random() * 0.6);
     speichereSpielstand();
   }

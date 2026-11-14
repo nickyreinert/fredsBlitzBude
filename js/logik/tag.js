@@ -59,6 +59,11 @@ function starteTag() {
     bauInventarPanel();
   }
 
+  // Regentag ankündigen (nur vor dem Öffnen, damit es beim Spielen nicht stört)
+  if (!standWarOffen && istRegen()) {
+    setTimeout(() => zeigeMeldung(TEXTE.meldungen.regenTag), 600);
+  }
+
   speichereSpielstand();
   // Zubehör-Shop-Button einblenden (nur im Spielstand sichtbar)
   document.getElementById('hud-zubehoer-item').classList.remove('hidden');
@@ -162,6 +167,10 @@ function naechsterTag() {
   const alteJahreszeit = gameState.jahreszeit;
   const neueJahreszeit = jahresZeitFuerTag(gameState.day);
   const jahreszeitWechsel = neueJahreszeit !== alteJahreszeit;
+
+  // Wetter für den neuen Tag auswürfeln (braucht die neue Jahreszeit)
+  gameState.jahreszeit = neueJahreszeit;
+  wuerfleWetter();
 
   if (jahreszeitWechsel) {
     // Toast erst nach aktualisiereZeit() zeigen (neuer Wert)
