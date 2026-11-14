@@ -36,6 +36,7 @@ const ASSETS_ZU_CACHEN = [
   `${APP_PREFIX}js/canvas/stand.js`,
   `${APP_PREFIX}js/canvas/produkte.js`,
   `${APP_PREFIX}js/canvas/figuren.js`,
+  `${APP_PREFIX}js/canvas/sitzecke.js`,
   `${APP_PREFIX}js/canvas/spielwelt.js`,
   `${APP_PREFIX}js/canvas/uhr.js`,
   // UI
@@ -59,6 +60,7 @@ const ASSETS_ZU_CACHEN = [
   `${APP_PREFIX}js/logik/speichern.js`,
   `${APP_PREFIX}js/logik/kunden.js`,
   `${APP_PREFIX}js/logik/passanten.js`,
+  `${APP_PREFIX}js/logik/gaeste.js`,
   `${APP_PREFIX}js/logik/tag.js`,
   // Erfahrung, Animation, Init
   `${APP_PREFIX}js/erfahrung.js`,

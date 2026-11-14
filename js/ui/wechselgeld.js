@@ -318,6 +318,8 @@ function schliesseTransaktion(diffCent) {
   setTimeout(() => {
     document.getElementById('screen-change').classList.remove('active');
     if (kunde.passantRef) {
+      // Manchmal setzt sich der Kunde noch in die Sitzecke
+      gastSetztSich(kunde.passantRef);
       gameState.passanten = gameState.passanten.filter(p => p !== kunde.passantRef);
     }
     gameState.currentCustomer = null;

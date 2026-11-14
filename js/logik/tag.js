@@ -120,6 +120,8 @@ function tagesEnde() {
   if (!gameState.standOpen) return;
   gameState.standOpen = false;
   gameState.customerVisible = false;
+  // Feierabend: alle Gäste gehen nach Hause
+  gameState.gaeste = [];
 
   document.getElementById('btn-feierabend').classList.add('hidden');
   document.getElementById('hud-feierabend-item').classList.add('hidden');

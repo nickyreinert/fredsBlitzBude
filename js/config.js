@@ -542,13 +542,43 @@ const ZUBEHOER_ARTIKEL = {
     wirkung:      ['kunden'],
     kategorie:    'stand',
   },
+
+  // ── Möbel: Kunden können sich nach dem Einkauf hinsetzen ──
+  tisch: {
+    name:         'Tisch mit 2 Stühlen',
+    emoji:        '🍽️',
+    beschreibung: 'Kunden setzen sich nach dem Einkauf gern noch kurz hin. Ein voller Stand lockt mehr Leute an! Bis zu 2 Tische.',
+    preis:        20.00,
+    maxAnzahl:    2,
+    wirkung:      ['kunden'],
+    kategorie:    'moebel',
+    sitzplaetze:  2,
+  },
+  bank: {
+    name:         'Holzbank',
+    emoji:        '🪑',
+    beschreibung: 'Eine gemütliche Bank für 2 Leute. Wer sitzt, erzählt es weiter – es kommen mehr Kunden!',
+    preis:        12.00,
+    maxAnzahl:    1,
+    wirkung:      ['kunden'],
+    kategorie:    'moebel',
+    sitzplaetze:  2,
+  },
 };
 
 // Abschnitte im Shop
 const ZUBEHOER_KATEGORIEN = {
   tier:  '🐾 Tiere',
   stand: '🏪 Für deinen Stand',
+  moebel: '🪑 Möbel',
 };
+
+// ── Sitzecke (Möbel) ─────────────────────────────────────────────
+// Wie wahrscheinlich sich ein Kunde nach dem Kauf hinsetzt (wenn ein Platz frei ist)
+const SITZ_CHANCE = 0.6;
+// Wie lange Gäste sitzen bleiben (ms, zufällig dazwischen)
+const SITZ_DAUER_MIN_MS = 12000;
+const SITZ_DAUER_MAX_MS = 25000;
 
 // Markise: bei Regen kommen so viele Kunden wie sonst (statt REGEN_KUNDEN_FAKTOR)
 const REGEN_KUNDEN_FAKTOR_MARKISE = 0.85;

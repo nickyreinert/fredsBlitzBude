@@ -53,6 +53,8 @@ const gameState = {
   level: 1,
   // Zubehör-Shop: { hund: 1 } bedeutet ein Hund gekauft
   zubehoer: {},
+  // Gäste, die gerade in der Sitzecke sitzen (wird nicht gespeichert)
+  gaeste: [],
   // Interne Referenz für Stand-Koordinaten (wird beim Zeichnen gesetzt)
   _stand: null,
 };

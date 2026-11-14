@@ -21,6 +21,8 @@ function animationsSchleife(zeitstempel) {
 
   // Passanten bewegen
   aktualisierePassanten(delta);
+  // Sitzende Gäste: Sitzzeit herunterzählen
+  aktualisiereGaeste(delta);
 
   // Leichte Schaukel-Animation beim aktiven Kunden
   if (gameState.customerVisible && !gameState.customerWalking) {

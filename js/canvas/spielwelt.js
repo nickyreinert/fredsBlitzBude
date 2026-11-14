@@ -29,6 +29,9 @@ function zeichneSpielwelt() {
   // Weitere Tiere: Katze, Papagei, Goldfische
   zeichneTiere(w, h);
 
+  // Sitzecke mit Tischen, Bank und sitzenden Gästen
+  zeichneSitzecke(w, h);
+
   // Passanten auf der Straße
   zeichnePassanten(w, h);
 
