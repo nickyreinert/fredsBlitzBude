@@ -37,4 +37,7 @@ function aktualisiereHUD() {
   gesamtEl.textContent = gameState.bewertungAnzahl > 0
     ? `${gameState.bewertungAnzahl} Bew.`
     : '';
+
+  // Level-Anzeige mit aktualisieren (sonst fehlt sie nach dem Laden eines Spielstands)
+  aktualisiereXpHud();
 }

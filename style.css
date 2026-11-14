@@ -934,10 +934,6 @@ body {
   overflow: hidden;
 }
 
-/* Harte Begrenzung: Im HUD niemals mehr als 5 Blöcke anzeigen */
-#hud > .hud-item:nth-of-type(n+6) {
-  display: none !important;
-}
 
 /* Uhr-Item: Wert (Icon+Zeit) oben, Label (Tag/Saison) unten — identisch mit anderen Zellen */
 .hud-clock-item {
@@ -2193,9 +2189,9 @@ body {
 }
 
 /* ================================================================
-   HUD AUF KLEINEN HANDYS: Symbole statt Wörter (spart Platz)
+   HUD AUF SCHMALEN BILDSCHIRMEN: Symbole statt Wörter (spart Platz)
    ================================================================ */
-@media (max-width: 560px) {
+@media (max-width: 900px) {
   #hud-label-geld,
   #hud-label-kunden,
   #hud-label-bewertung {
@@ -2206,6 +2202,22 @@ body {
   #hud-label-kunden::before    { content: '🛒'; font-size: 1rem; }
   #hud-label-bewertung::before { content: '⭐'; font-size: 1rem; }
 
+  /* Level: nur Symbol statt Wort "Level" */
+  #hud-label-level { display: none; }
+  .hud-xp-bar { width: 36px; }
+
+  /* Feierabend: runder Mond-Knopf statt Text */
+  #btn-feierabend {
+    font-size: 0;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  #btn-feierabend::before { content: '🌙'; font-size: 1.4rem; }
+  #hud-feierabend-item { flex: 0 0 auto; }
+
   /* Bewertung: nur die Zahl, groß */
   .hud-sterne-symbole { display: none; }
   .hud-stars {
@@ -2213,6 +2225,16 @@ body {
     font-weight: 900;
   }
   .hud-stars-count { display: none; }
+}
+
+/* Sehr schmale Handys: Uhr-Bild weglassen, Uhrzeit-Text bleibt */
+@media (max-width: 420px) {
+  #hud-clock { display: none; }
+  /* Breite nach Inhalt: Geld bekommt mehr Platz als z.B. der Kunden-Zähler */
+  #hud .hud-item { flex: 1 1 auto; }
+  #hud { gap: 0.15rem; padding-left: 0.35rem; padding-right: 0.35rem; }
+  #hud .hud-value { font-size: clamp(0.95rem, 4.3vw, 1.15rem); }
+  .hud-season-badge { font-size: 0.7rem; }
 }
 
 /* ================================================================
